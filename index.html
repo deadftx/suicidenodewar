@@ -33,26 +33,71 @@
             gap: 2vh; padding: 2vh; height: 90vh; width: 100vw;
         }
         
+        /* Caixa (Card) Base */
         .card {
             background: #1c1c24; border-radius: 12px; display: flex;
             flex-direction: column; align-items: center; justify-content: flex-start;
             border: 1px solid #333; position: relative; padding: 1.5vh 2vh;
             transition: transform 0.3s, box-shadow 0.3s;
+            overflow: hidden; /* Garante que o vídeo não saia das bordas arredondadas */
         }
+
+        /* Linha colorida de destaque no topo */
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; 
+            z-index: 5; /* Fica acima do vídeo */
+        }
+        
+        .card:nth-child(1)::before { background: #457b9d; } 
+        .card:nth-child(2)::before { background: #e63946; } 
+        .card:nth-child(3)::before { background: #f4a261; } 
+        .card:nth-child(4)::before { background: #9b5de5; } 
+        .card:nth-child(5)::before { background: #00f5d4; } 
+        .card:nth-child(6)::before { background: #fee440; } 
+
+        /* ====== O EFEITO DO VÍDEO ====== */
+        .hover-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: 1; /* Fica atrás de todo o texto */
+            opacity: 0; /* Começa invisível */
+            transition: opacity 0.5s ease-in-out; /* Suavidade ao aparecer */
+            object-fit: cover; /* Faz o vídeo preencher a caixa inteira */
+        }
+
+        /* Efeito ao passar o mouse no Card */
         .card:hover {
             transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); z-index: 10;
         }
-        .card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: #e63946;
+
+        /* Mostra o vídeo com transparência (0.15 = 15% visível) quando passar o mouse */
+        .card:hover .hover-video {
+            opacity: 0.15; 
         }
-        
-        /* Título da Caixa */
+
+        /* Garante que os textos e informações fiquem ACIMA do vídeo (z-index 2) */
+        .card-content-wrapper {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+        }
+
+        /* Textos do Card */
         .card-title {
             font-size: 2.5vh; color: #a8a8b3; text-transform: uppercase; 
             margin-bottom: 1.5vh; font-weight: 600; text-align: center;
         }
 
-        /* Destaque para o Top 1 */
         .top1-container {
             display: flex; flex-direction: column; align-items: center; 
             background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3);
@@ -66,7 +111,6 @@
             font-size: 2.5vh; color: #fff; margin-top: 0.5vh; font-weight: bold;
         }
 
-        /* Lista do 2º ao 5º lugar */
         .ranking-list {
             width: 100%; display: flex; flex-direction: column; gap: 0.8vh; flex-grow: 1;
             justify-content: center;
@@ -76,34 +120,22 @@
             background: rgba(255, 255, 255, 0.05); padding: 0.6vh 1.5vh; border-radius: 6px;
             font-size: 2vh;
         }
-        .rank-pos {
-            color: #a8a8b3; font-weight: bold; width: 10%;
-        }
+        .rank-pos { color: #a8a8b3; font-weight: bold; width: 10%; }
         .rank-name {
             color: #e2e2e2; font-weight: 600; width: 50%; text-align: left;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .rank-value {
-            color: #00f5d4; font-weight: bold; width: 40%; text-align: right;
-        }
+        .rank-value { color: #00f5d4; font-weight: bold; width: 40%; text-align: right; }
 
         #loading {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             font-size: 4vh; color: #ffd700; text-align: center; z-index: 100;
         }
-
-        /* Cores variadas para os 6 Cards */
-        .card:nth-child(1)::before { background: #457b9d; } 
-        .card:nth-child(2)::before { background: #e63946; } 
-        .card:nth-child(3)::before { background: #f4a261; } 
-        .card:nth-child(4)::before { background: #9b5de5; } 
-        .card:nth-child(5)::before { background: #00f5d4; } 
-        .card:nth-child(6)::before { background: #fee440; } 
     </style>
 </head>
 <body>
 
-    <header><h1>🏆 HALL DA FAMA - NODEWAR SUICIDE (TOP 5) 🏆</h1></header>
+    <header><h1>🏆 HALL DA FAMA - NODEWAR SUICIDE 🏆</h1></header>
     <div id="loading">Sincronizando Ranking...</div>
     <div class="grid-container" id="grid"></div>
 
@@ -139,7 +171,6 @@
                 const columns = Object.keys(data[0]);
                 const nameCol = columns[0]; 
                 
-                // Colunas ignoradas
                 const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
 
                 const statsCols = columns.filter(col => {
@@ -153,11 +184,9 @@
                     return !deveIgnorar;
                 });
 
-                // Para cada atributo, calcula o Top 5
                 statsCols.forEach(stat => {
                     let listaJogadores = [];
 
-                    // Extrai e converte todos os dados
                     data.forEach(row => {
                         const playerName = row[nameCol];
                         const valStr = row[stat];
@@ -174,20 +203,21 @@
                         }
                     });
 
-                    // Ordena do maior pro menor
                     listaJogadores.sort((a, b) => b.valorNumerico - a.valorNumerico);
-
-                    // Pega os 5 melhores (ou menos, se não tiver 5 jogadores na lista)
                     const top5 = listaJogadores.slice(0, 5);
 
                     const card = document.createElement('div');
                     card.className = 'card';
                     
-                    // Estrutura HTML do Card
-                    let htmlContent = `<div class="card-title">${stat}</div>`;
+                    // Injetando o Vídeo MP4 Sombrio no Fundo
+                    // Usamos loop, muted e autoplay via JS para garantir que toque silenciosamente.
+                    let htmlContent = `
+                        <video class="hover-video" src="gifsuicide.mp4" loop muted playsinline preload="auto"></video>
+                        <div class="card-content-wrapper">
+                            <div class="card-title">${stat}</div>
+                    `;
 
                     if (top5.length > 0) {
-                        // O TOP 1 tem destaque especial
                         htmlContent += `
                             <div class="top1-container">
                                 <div class="top1-player">🏆 ${top5[0].nome}</div>
@@ -196,9 +226,7 @@
                             <div class="ranking-list">
                         `;
 
-                        // Loop para o 2º, 3º, 4º e 5º lugar
                         for (let i = 1; i < top5.length; i++) {
-                            // Definindo as medalhas/posições (2º prata, 3º bronze, etc)
                             let posIcon = `${i + 1}º`;
                             if (i === 1) posIcon = "🥈 2º";
                             if (i === 2) posIcon = "🥉 3º";
@@ -216,8 +244,21 @@
                         htmlContent += `<div class="top1-player">Sem Dados</div>`;
                     }
 
+                    // Fechando o wrapper de textos
+                    htmlContent += `</div>`;
+
                     card.innerHTML = htmlContent;
                     grid.appendChild(card);
+
+                    // Sistema em JavaScript para dar "Play" no vídeo apenas quando o mouse passar por cima!
+                    // Isso evita sobrecarregar o navegador tocando 6 vídeos ao mesmo tempo.
+                    const videoElement = card.querySelector('.hover-video');
+                    card.addEventListener('mouseenter', () => {
+                        videoElement.play();
+                    });
+                    card.addEventListener('mouseleave', () => {
+                        videoElement.pause();
+                    });
                 });
             },
             error: function(err) {
