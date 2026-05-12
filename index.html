@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nodewar Tops - Ranking Geral (Automático)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: #0f0f13; color: #ffffff; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
+        header { text-align: center; height: 10vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(90deg, #1f1c2c 0%, #928dab 100%); box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase; letter-spacing: 2px; }
+        header h1 { font-size: 3vh; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
+        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 1.5vh; padding: 1.5vh; height: 90vh; width: 100vw; }
+        .card { background: #1c1c24; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border: 1px solid #333; transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden; padding: 1vh; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: #e63946; }
+        .card-title { font-size: 2.2vh; color: #a8a8b3; text-transform: uppercase; margin-bottom: 1.5vh; font-weight: 600; }
+        .card-player { font-size: 4.5vh; font-weight: bold; color: #fff; margin-bottom: 1vh; text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); line-height: 1.1; }
+        .card-value { font-size: 3.5vh; color: #ffd700; font-weight: 700; background: rgba(0,0,0,0.3); padding: 0.5vh 1.5vh; border-radius: 8px; }
+        #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4vh; color: #ffd700; text-align: center; z-index: 100; }
+        
+        /* Iframe invisível para processar os dados */
+        #data-frame { display: none; }
+
+        .card:nth-child(1)::before { background: #457b9d; } .card:nth-child(2)::before { background: #e63946; } .card:nth-child(3)::before { background: #6a040f; } .card:nth-child(4)::before { background: #f4a261; } .card:nth-child(5)::before { background: #d00000; } .card:nth-child(6)::before { background: #e76f51; } .card:nth-child(7)::before { background: #9b5de5; } .card:nth-child(8)::before { background: #00f5d4; } .card:nth-child(9)::before { background: #fee440; } 
+    </style>
+</head>
+<body>
+
+    <header><h1>🏆 HALL DA FAMA - NODEWAR SUICIDE 🏆</h1></header>
+
+    <div id="loading">Lendo dados públicos...</div>
+    <div class="grid-container" id="grid"></div>
+
+    <!-- Usamos o link PUBLHMTL (Página da Web) original -->
+    <iframe id="data-frame" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pubhtml?gid=1115049823&single=true"></iframe>
+
+    <script>
+        function processarPlanilha() {
+            try {
+                const iframe = document.getElementById('data-frame');
+                const doc = iframe.contentDocument || iframe.contentWindow.document;
+                const tabela = doc.querySelector('table');
+
+                // Se a tabela não carregou ainda, tenta de novo
+                if (!tabela) {
+                    setTimeout(processarPlanilha, 500); 
+                    return;
+                }
+
+                document.getElementById('loading').style.display = 'none';
+                const linhas = tabela.querySelectorAll('tr');
+                
+                // Transforma as linhas visuais do HTML em uma matriz de textos
+                let dadosPuros = [];
+                linhas.forEach(tr => {
+                    let colunas = Array.from(tr.querySelectorAll('td')).map(td => td.innerText.trim());
+                    if (colunas.length > 0) dadosPuros.push(colunas);
+                });
+
+                // Acha qual linha é o cabeçalho procurando uma palavra-chave
+                let indiceCabecalho = -1;
+                for (let i = 0; i < dadosPuros.length; i++) {
+                    if (dadosPuros[i].join('').toLowerCase().includes('kills')) {
+                        indiceCabecalho = i;
+                        break;
+                    }
+                }
+
+                if(indiceCabecalho === -1) {
+                    document.getElementById('loading').innerText = "Erro ao encontrar os títulos da planilha.";
+                    document.getElementById('loading').style.display = 'block';
+                    return;
+                }
+
+                const cabecalho = dadosPuros[indiceCabecalho];
+                const linhasJogadores = dadosPuros.slice(indiceCabecalho + 1);
+
+                // O Google insere uma coluna inicial com números de linha (1,2,3).
+                // Então o "Nome" do jogador geralmente é o índice 1. 
+                // Os dados vão do 2 ao 10.
+                let colunaNomeIndex = 1; 
+                const indicesStatus = [2, 3, 4, 5, 6, 7, 8, 9, 10]; 
+
+                const grid = document.getElementById('grid');
+
+                function paraNumero(texto) {
+                    if (!texto || texto === "") return -Infinity;
+                    let limpo = texto.replace(/[^\d.,-]/g, '').replace(/\./g, '').replace(',', '.');
+                    let num = parseFloat(limpo);
+                    return isNaN(num) ? -Infinity : num;
+                }
+
+                indicesStatus.forEach(colIndex => {
+                    if (colIndex >= cabecalho.length) return;
+                    
+                    const titulo = cabecalho[colIndex];
+                    if (!titulo) return;
+
+                    let valorMaximo = -Infinity;
+                    let melhoresNomes = [];
+                    let valorVisual = "";
+
+                    linhasJogadores.forEach(linha => {
+                        if (linha.length <= colIndex) return;
+                        
+                        const nome = linha[colunaNomeIndex];
+                        const valorTexto = linha[colIndex];
+                        
+                        if (nome && valorTexto) {
+                            const numero = paraNumero(valorTexto);
+                            
+                            if (numero > valorMaximo) {
+                                valorMaximo = numero;
+                                melhoresNomes = [nome];
+                                valorVisual = valorTexto;
+                            } else if (numero === valorMaximo && numero !== -Infinity) {
+                                melhoresNomes.push(nome);
+                            }
+                        }
+                    });
+
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    const nomesExibicao = melhoresNomes.join(', ');
+                    let fontTamanho = nomesExibicao.length > 20 ? '2.5vh' : '4.5vh';
+
+                    card.innerHTML = `
+                        <div class="card-title">${titulo}</div>
+                        <div class="card-player" style="font-size: ${fontTamanho}">${nomesExibicao || 'N/A'}</div>
+                        <div class="card-value">${valorVisual || '0'}</div>
+                    `;
+                    grid.appendChild(card);
+                });
+
+            } catch (erro) {
+                console.error(erro);
+                // Se MESMO ASSIM o navegador bloquear a leitura do Iframe localmente, a única saída 
+                // para exibir esse site é hospedá-lo (ex: GitHub Pages). Mas tente rodar!
+                document.getElementById('loading').innerText = "Navegador bloqueou a leitura do Iframe por segurança (CORS). Hospede esse HTML em um site.";
+            }
+        }
+
+        // Dá o gatilho na leitura quando a página da planilha terminar de carregar no fundo
+        document.getElementById('data-frame').addEventListener('load', processarPlanilha);
+    </script>
+</body>
+</html>
