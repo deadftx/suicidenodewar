@@ -10,16 +10,27 @@
         body { background-color: #0f0f13; color: #ffffff; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
         header { text-align: center; height: 8vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(90deg, #1f1c2c 0%, #928dab 100%); box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase; }
         header h1 { font-size: 2.8vh; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
+        
+        /* ====== SEÇÃO DA DEFESA ====== */
         .defesa-container { height: 10vh; width: 100vw; padding: 0 2vh; display: flex; align-items: center; justify-content: center; }
         .defesa-box { background: rgba(45, 45, 60, 0.4); border: 1px solid #457b9d; border-radius: 8px; width: 80%; height: 80%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; }
-        .defesa-homenagem { font-size: 1.8vh; color: #457b9d; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; z-index: 2; }
-        .defesa-nomes { font-size: 2.5vh; color: #fff; font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 10px rgba(69, 123, 157, 0.5); z-index: 2; }
+        .defesa-homenagem { font-size: 1.8vh; color: #457b9d; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; z-index: 2; position: relative; }
+        .defesa-nomes { font-size: 2.5vh; color: #fff; font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 10px rgba(69, 123, 157, 0.5); z-index: 2; position: relative; }
+        
+        /* Vídeo exclusivo da Defesa (Raios) */
+        .video-defesa { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: 1; opacity: 0; transition: opacity 0.5s ease; object-fit: cover; pointer-events: none; }
+        .defesa-box:hover .video-defesa { opacity: 0.3; } /* Opacidade um pouco maior para os raios aparecerem bem */
+
+        /* ====== GRID DO RANKING ====== */
         .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 1.5vh; padding: 1.5vh; height: 82vh; width: 100vw; }
         .card { background: #1c1c24; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; border: 1px solid #333; position: relative; padding: 1vh 2vh; transition: transform 0.3s, box-shadow 0.3s; overflow: hidden; }
         .card:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); z-index: 10; }
         .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; z-index: 5; }
+        
+        /* Vídeo padrão dos Cards (Suicide) */
         .hover-video { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: 1; opacity: 0; transition: opacity 0.5s ease; object-fit: cover; pointer-events: none; }
         .card:hover .hover-video { opacity: 0.15; }
+
         .card-content-wrapper { position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; height: 100%; }
         .card-title { font-size: 2.2vh; color: #a8a8b3; text-transform: uppercase; margin-bottom: 1vh; font-weight: 600; text-align: center; }
         .top1-container { display: flex; flex-direction: column; align-items: center; background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 0.5vh 2vh; width: 100%; margin-bottom: 1vh; }
@@ -40,7 +51,8 @@
 
     <div class="defesa-container">
         <div class="defesa-box">
-            <video class="hover-video" src="gifsuicide.mp4" loop muted playsinline style="opacity: 0.1;"></video>
+            <!-- Vídeo exclusivo da Defesa -->
+            <video class="video-defesa" src="raiosdefesa.mp4" loop muted playsinline preload="auto"></video>
             <div class="defesa-homenagem">🛡️ Sentinelas da Base - Sem vocês não há vitória 🛡️</div>
             <div class="defesa-nomes">ZeXXay • YonaShirai • LinkyShirai</div>
         </div>
@@ -91,10 +103,7 @@
                         const participacao = parseToNumber(row[colNodes]);
                         const valNum = parseToNumber(valStr);
 
-                        // --- REGRAS DE FILTRAGEM ---
                         let passaNoFiltro = (playerName && valNum !== -Infinity && participacao >= 2);
-
-                        // Regra adicional para CURA: Mínimo de 100.000 de média
                         if (stat.toUpperCase().includes("CURA CAUSADA") && valNum < 100000) {
                             passaNoFiltro = false;
                         }
@@ -129,8 +138,11 @@
                     card.addEventListener('mouseleave', () => vid.pause());
                 });
 
-                document.querySelector('.defesa-box').addEventListener('mouseenter', () => document.querySelector('.defesa-box video').play());
-                document.querySelector('.defesa-box').addEventListener('mouseleave', () => document.querySelector('.defesa-box video').pause());
+                // Lógica de Play/Pause para o vídeo de raios na defesa
+                const defBox = document.querySelector('.defesa-box');
+                const defVid = document.querySelector('.video-defesa');
+                defBox.addEventListener('mouseenter', () => defVid.play());
+                defBox.addEventListener('mouseleave', () => defVid.pause());
             }
         });
     </script>
