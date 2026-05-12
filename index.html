@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nodewar Tops - Ranking Geral (Automático)</title>
+    <title>Nodewar Tops - Ranking Geral</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         * {
@@ -24,15 +24,20 @@
         header h1 {
             font-size: 3vh; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
         }
+        
+        /* Grid alterado para 2 linhas e 3 colunas (total de 6 cards) */
         .grid-container {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr); gap: 1.5vh;
-            padding: 1.5vh; height: 90vh; width: 100vw;
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr); 
+            gap: 2vh;
+            padding: 2vh; height: 90vh; width: 100vw;
         }
+        
         .card {
             background: #1c1c24; border-radius: 12px; display: flex;
             flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; border: 1px solid #333; position: relative; padding: 1vh;
+            text-align: center; border: 1px solid #333; position: relative; padding: 1.5vh;
             transition: transform 0.3s, box-shadow 0.3s;
         }
         .card:hover {
@@ -43,30 +48,29 @@
         .card::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: #e63946;
         }
+        /* Aumentei um pouco a fonte do título pois os cards ficaram maiores */
         .card-title {
-            font-size: 2.2vh; color: #a8a8b3; text-transform: uppercase; margin-bottom: 1.5vh; font-weight: 600;
+            font-size: 2.8vh; color: #a8a8b3; text-transform: uppercase; margin-bottom: 2vh; font-weight: 600;
         }
         .card-player {
-            font-size: 4.5vh; font-weight: bold; color: #fff; margin-bottom: 1vh; line-height: 1.1;
+            font-size: 5vh; font-weight: bold; color: #fff; margin-bottom: 1.5vh; line-height: 1.1;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
         .card-value {
-            font-size: 3.5vh; color: #ffd700; font-weight: 700; background: rgba(0,0,0,0.3); padding: 0.5vh 1.5vh; border-radius: 8px;
+            font-size: 4vh; color: #ffd700; font-weight: 700; background: rgba(0,0,0,0.3); padding: 1vh 2vh; border-radius: 8px;
         }
         #loading {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             font-size: 4vh; color: #ffd700; text-align: center; z-index: 100;
         }
 
+        /* Cores variadas para os 6 Cards restantes */
         .card:nth-child(1)::before { background: #457b9d; } 
         .card:nth-child(2)::before { background: #e63946; } 
-        .card:nth-child(3)::before { background: #6a040f; } 
-        .card:nth-child(4)::before { background: #f4a261; } 
-        .card:nth-child(5)::before { background: #d00000; } 
-        .card:nth-child(6)::before { background: #e76f51; } 
-        .card:nth-child(7)::before { background: #9b5de5; } 
-        .card:nth-child(8)::before { background: #00f5d4; } 
-        .card:nth-child(9)::before { background: #fee440; } 
+        .card:nth-child(3)::before { background: #f4a261; } 
+        .card:nth-child(4)::before { background: #9b5de5; } 
+        .card:nth-child(5)::before { background: #00f5d4; } 
+        .card:nth-child(6)::before { background: #fee440; } 
     </style>
 </head>
 <body>
@@ -85,10 +89,7 @@
             return isNaN(num) ? -Infinity : num;
         }
 
-        // 1. O Link da sua planilha CSV gerado no "Publicar na Web"
         const googleCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?gid=1115049823&single=true&output=csv";
-
-        // 2. O CORS PROXY (A Mágica). Ele limpa o bloqueio de segurança do Google.
         const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(googleCsvUrl);
 
         Papa.parse(proxyUrl, {
@@ -101,17 +102,34 @@
                 const loading = document.getElementById('loading');
 
                 if (!data || data.length === 0) {
-                    loading.innerText = "Tabela vazia ou erro na leitura do CSV.";
+                    loading.innerText = "Tabela vazia ou erro na leitura.";
                     return;
                 }
 
                 loading.style.display = 'none';
 
-                // Pega os cabeçalhos
                 const columns = Object.keys(data[0]);
-                const nameCol = columns[0]; // Jogador
-                const statsCols = columns.slice(1, 10); // 9 atributos de combate
+                const nameCol = columns[0]; 
+                
+                // Nomes EXATOS ou parciais das colunas que NÃO queremos exibir
+                const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
 
+                // Filtramos as colunas: removemos a coluna de Nome E removemos as 3 ignoradas
+                const statsCols = columns.filter(col => {
+                    if (col === nameCol) return false;
+                    
+                    // Verifica se o título da coluna atual bate com alguma das ignoradas (ignorando letras maiúsculas/minúsculas)
+                    let deveIgnorar = false;
+                    colunasIgnoradas.forEach(ignorada => {
+                        if (col.toUpperCase().includes(ignorada.toUpperCase())) {
+                            deveIgnorar = true;
+                        }
+                    });
+                    
+                    return !deveIgnorar;
+                });
+
+                // Agora só vão sobrar as 6 colunas de atributos positivos que você pediu
                 statsCols.forEach(stat => {
                     let maxVal = -Infinity;
                     let topPlayers = [];
@@ -127,19 +145,18 @@
                             if (valNum > maxVal) {
                                 maxVal = valNum;
                                 topPlayers = [playerName];
-                                originalStr = valStr; // Ex: 6.650.000,00
+                                originalStr = valStr; 
                             } else if (valNum === maxVal && valNum !== -Infinity) {
                                 topPlayers.push(playerName);
                             }
                         }
                     });
 
-                    // Cria os blocos HTML
                     const card = document.createElement('div');
                     card.className = 'card';
                     
                     const playersDisplay = topPlayers.join(', ');
-                    let fontSize = playersDisplay.length > 20 ? '2.5vh' : '4.5vh';
+                    let fontSize = playersDisplay.length > 20 ? '3vh' : '5vh';
 
                     card.innerHTML = `
                         <div class="card-title">${stat}</div>
@@ -151,7 +168,7 @@
             },
             error: function(err) {
                 console.error("Erro no PapaParse:", err);
-                document.getElementById('loading').innerText = "Falha ao conectar via Proxy. O Google ainda está bloqueando.";
+                document.getElementById('loading').innerText = "Falha ao conectar via Proxy.";
             }
         });
     </script>
