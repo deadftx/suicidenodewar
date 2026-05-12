@@ -25,46 +25,74 @@
             font-size: 3vh; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
         }
         
-        /* Grid alterado para 2 linhas e 3 colunas (total de 6 cards) */
+        /* Grid 2x3 */
         .grid-container {
             display: grid; 
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(2, 1fr); 
-            gap: 2vh;
-            padding: 2vh; height: 90vh; width: 100vw;
+            gap: 2vh; padding: 2vh; height: 90vh; width: 100vw;
         }
         
         .card {
             background: #1c1c24; border-radius: 12px; display: flex;
-            flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; border: 1px solid #333; position: relative; padding: 1.5vh;
+            flex-direction: column; align-items: center; justify-content: flex-start;
+            border: 1px solid #333; position: relative; padding: 1.5vh 2vh;
             transition: transform 0.3s, box-shadow 0.3s;
         }
         .card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-            z-index: 10;
+            transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); z-index: 10;
         }
         .card::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: #e63946;
         }
-        /* Aumentei um pouco a fonte do título pois os cards ficaram maiores */
+        
+        /* Título da Caixa */
         .card-title {
-            font-size: 2.8vh; color: #a8a8b3; text-transform: uppercase; margin-bottom: 2vh; font-weight: 600;
+            font-size: 2.5vh; color: #a8a8b3; text-transform: uppercase; 
+            margin-bottom: 1.5vh; font-weight: 600; text-align: center;
         }
-        .card-player {
-            font-size: 5vh; font-weight: bold; color: #fff; margin-bottom: 1.5vh; line-height: 1.1;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+
+        /* Destaque para o Top 1 */
+        .top1-container {
+            display: flex; flex-direction: column; align-items: center; 
+            background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px; padding: 1vh 2vh; width: 100%; margin-bottom: 1.5vh;
         }
-        .card-value {
-            font-size: 4vh; color: #ffd700; font-weight: 700; background: rgba(0,0,0,0.3); padding: 1vh 2vh; border-radius: 8px;
+        .top1-player {
+            font-size: 3.5vh; font-weight: bold; color: #ffd700; 
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.4); text-align: center;
         }
+        .top1-value {
+            font-size: 2.5vh; color: #fff; margin-top: 0.5vh; font-weight: bold;
+        }
+
+        /* Lista do 2º ao 5º lugar */
+        .ranking-list {
+            width: 100%; display: flex; flex-direction: column; gap: 0.8vh; flex-grow: 1;
+            justify-content: center;
+        }
+        .ranking-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.05); padding: 0.6vh 1.5vh; border-radius: 6px;
+            font-size: 2vh;
+        }
+        .rank-pos {
+            color: #a8a8b3; font-weight: bold; width: 10%;
+        }
+        .rank-name {
+            color: #e2e2e2; font-weight: 600; width: 50%; text-align: left;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .rank-value {
+            color: #00f5d4; font-weight: bold; width: 40%; text-align: right;
+        }
+
         #loading {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             font-size: 4vh; color: #ffd700; text-align: center; z-index: 100;
         }
 
-        /* Cores variadas para os 6 Cards restantes */
+        /* Cores variadas para os 6 Cards */
         .card:nth-child(1)::before { background: #457b9d; } 
         .card:nth-child(2)::before { background: #e63946; } 
         .card:nth-child(3)::before { background: #f4a261; } 
@@ -75,8 +103,8 @@
 </head>
 <body>
 
-    <header><h1>🏆 HALL DA FAMA - NODEWAR SUICIDE 🏆</h1></header>
-    <div id="loading">Sincronizando com a Planilha...</div>
+    <header><h1>🏆 HALL DA FAMA - NODEWAR SUICIDE (TOP 5) 🏆</h1></header>
+    <div id="loading">Sincronizando Ranking...</div>
     <div class="grid-container" id="grid"></div>
 
     <script>
@@ -111,58 +139,84 @@
                 const columns = Object.keys(data[0]);
                 const nameCol = columns[0]; 
                 
-                // Nomes EXATOS ou parciais das colunas que NÃO queremos exibir
+                // Colunas ignoradas
                 const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
 
-                // Filtramos as colunas: removemos a coluna de Nome E removemos as 3 ignoradas
                 const statsCols = columns.filter(col => {
                     if (col === nameCol) return false;
-                    
-                    // Verifica se o título da coluna atual bate com alguma das ignoradas (ignorando letras maiúsculas/minúsculas)
                     let deveIgnorar = false;
                     colunasIgnoradas.forEach(ignorada => {
                         if (col.toUpperCase().includes(ignorada.toUpperCase())) {
                             deveIgnorar = true;
                         }
                     });
-                    
                     return !deveIgnorar;
                 });
 
-                // Agora só vão sobrar as 6 colunas de atributos positivos que você pediu
+                // Para cada atributo, calcula o Top 5
                 statsCols.forEach(stat => {
-                    let maxVal = -Infinity;
-                    let topPlayers = [];
-                    let originalStr = "";
+                    let listaJogadores = [];
 
+                    // Extrai e converte todos os dados
                     data.forEach(row => {
                         const playerName = row[nameCol];
                         const valStr = row[stat];
 
                         if(playerName && valStr) {
                             const valNum = parseToNumber(valStr);
-                            
-                            if (valNum > maxVal) {
-                                maxVal = valNum;
-                                topPlayers = [playerName];
-                                originalStr = valStr; 
-                            } else if (valNum === maxVal && valNum !== -Infinity) {
-                                topPlayers.push(playerName);
+                            if (valNum !== -Infinity) {
+                                listaJogadores.push({
+                                    nome: playerName,
+                                    valorNumerico: valNum,
+                                    valorVisual: valStr
+                                });
                             }
                         }
                     });
 
+                    // Ordena do maior pro menor
+                    listaJogadores.sort((a, b) => b.valorNumerico - a.valorNumerico);
+
+                    // Pega os 5 melhores (ou menos, se não tiver 5 jogadores na lista)
+                    const top5 = listaJogadores.slice(0, 5);
+
                     const card = document.createElement('div');
                     card.className = 'card';
                     
-                    const playersDisplay = topPlayers.join(', ');
-                    let fontSize = playersDisplay.length > 20 ? '3vh' : '5vh';
+                    // Estrutura HTML do Card
+                    let htmlContent = `<div class="card-title">${stat}</div>`;
 
-                    card.innerHTML = `
-                        <div class="card-title">${stat}</div>
-                        <div class="card-player" style="font-size: ${fontSize}">${playersDisplay || 'N/A'}</div>
-                        <div class="card-value">${originalStr || '0'}</div>
-                    `;
+                    if (top5.length > 0) {
+                        // O TOP 1 tem destaque especial
+                        htmlContent += `
+                            <div class="top1-container">
+                                <div class="top1-player">🏆 ${top5[0].nome}</div>
+                                <div class="top1-value">${top5[0].valorVisual}</div>
+                            </div>
+                            <div class="ranking-list">
+                        `;
+
+                        // Loop para o 2º, 3º, 4º e 5º lugar
+                        for (let i = 1; i < top5.length; i++) {
+                            // Definindo as medalhas/posições (2º prata, 3º bronze, etc)
+                            let posIcon = `${i + 1}º`;
+                            if (i === 1) posIcon = "🥈 2º";
+                            if (i === 2) posIcon = "🥉 3º";
+
+                            htmlContent += `
+                                <div class="ranking-item">
+                                    <span class="rank-pos">${posIcon}</span>
+                                    <span class="rank-name">${top5[i].nome}</span>
+                                    <span class="rank-value">${top5[i].valorVisual}</span>
+                                </div>
+                            `;
+                        }
+                        htmlContent += `</div>`;
+                    } else {
+                        htmlContent += `<div class="top1-player">Sem Dados</div>`;
+                    }
+
+                    card.innerHTML = htmlContent;
                     grid.appendChild(card);
                 });
             },
