@@ -6,136 +6,98 @@
     <title>Nodewar Tops - Ranking Geral</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
-        * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: #0f0f13; color: #ffffff;
-            height: 100vh; width: 100vw; overflow: hidden; 
-            display: flex; flex-direction: column;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: #0f0f13; color: #ffffff; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
+        
         header {
-            text-align: center; height: 10vh; display: flex;
-            align-items: center; justify-content: center;
+            text-align: center; height: 8vh; display: flex; align-items: center; justify-content: center;
             background: linear-gradient(90deg, #1f1c2c 0%, #928dab 100%);
             box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase;
         }
-        header h1 {
-            font-size: 3vh; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        header h1 { font-size: 2.8vh; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
+
+        /* ====== SEÇÃO DA DEFESA (QUADRADO MENOR) ====== */
+        .defesa-container {
+            height: 10vh; /* Altura reduzida */
+            width: 100vw;
+            padding: 0 2vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
-        /* Grid 2x3 */
+        .defesa-box {
+            background: rgba(45, 45, 60, 0.4);
+            border: 1px solid #457b9d;
+            border-radius: 8px;
+            width: 80%; /* Centralizado e um pouco menor lateralmente */
+            height: 80%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .defesa-homenagem {
+            font-size: 1.8vh; color: #457b9d; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .defesa-nomes {
+            font-size: 2.5vh; color: #fff; font-weight: 800; letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(69, 123, 157, 0.5);
+        }
+
+        /* ====== GRID DO RANKING (AJUSTADO) ====== */
         .grid-container {
             display: grid; 
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(2, 1fr); 
-            gap: 2vh; padding: 2vh; height: 90vh; width: 100vw;
+            gap: 1.5vh; padding: 1.5vh; 
+            height: 82vh; /* Altura ajustada para caber a defesa acima */
+            width: 100vw;
         }
         
-        /* Caixa (Card) Base */
         .card {
             background: #1c1c24; border-radius: 12px; display: flex;
             flex-direction: column; align-items: center; justify-content: flex-start;
-            border: 1px solid #333; position: relative; padding: 1.5vh 2vh;
-            transition: transform 0.3s, box-shadow 0.3s;
-            overflow: hidden; /* Garante que o vídeo não saia das bordas arredondadas */
+            border: 1px solid #333; position: relative; padding: 1vh 2vh;
+            transition: transform 0.3s, box-shadow 0.3s; overflow: hidden;
         }
-
-        /* Linha colorida de destaque no topo */
-        .card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; 
-            z-index: 5; /* Fica acima do vídeo */
-        }
+        .card:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); z-index: 10; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; z-index: 5; }
         
-        .card:nth-child(1)::before { background: #457b9d; } 
-        .card:nth-child(2)::before { background: #e63946; } 
-        .card:nth-child(3)::before { background: #f4a261; } 
-        .card:nth-child(4)::before { background: #9b5de5; } 
-        .card:nth-child(5)::before { background: #00f5d4; } 
-        .card:nth-child(6)::before { background: #fee440; } 
+        .hover-video { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: 1; opacity: 0; transition: opacity 0.5s ease; object-fit: cover; pointer-events: none; }
+        .card:hover .hover-video { opacity: 0.15; }
+        .card-content-wrapper { position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; height: 100%; }
 
-        /* ====== O EFEITO DO VÍDEO ====== */
-        .hover-video {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
-            z-index: 1; /* Fica atrás de todo o texto */
-            opacity: 0; /* Começa invisível */
-            transition: opacity 0.5s ease-in-out; /* Suavidade ao aparecer */
-            object-fit: cover; /* Faz o vídeo preencher a caixa inteira */
-        }
+        .card-title { font-size: 2.2vh; color: #a8a8b3; text-transform: uppercase; margin-bottom: 1vh; font-weight: 600; text-align: center; }
+        .top1-container { display: flex; flex-direction: column; align-items: center; background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 0.5vh 2vh; width: 100%; margin-bottom: 1vh; }
+        .top1-player { font-size: 3vh; font-weight: bold; color: #ffd700; text-align: center; }
+        .top1-value { font-size: 2vh; color: #fff; font-weight: bold; }
+        .ranking-list { width: 100%; display: flex; flex-direction: column; gap: 0.5vh; flex-grow: 1; justify-content: center; }
+        .ranking-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.4vh 1.2vh; border-radius: 6px; font-size: 1.8vh; }
+        .rank-pos { color: #a8a8b3; font-weight: bold; }
+        .rank-name { color: #e2e2e2; font-weight: 600; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 50%; }
+        .rank-value { color: #00f5d4; font-weight: bold; text-align: right; width: 40%; }
 
-        /* Efeito ao passar o mouse no Card */
-        .card:hover {
-            transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); z-index: 10;
-        }
+        #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4vh; color: #ffd700; z-index: 100; }
 
-        /* Mostra o vídeo com transparência (0.15 = 15% visível) quando passar o mouse */
-        .card:hover .hover-video {
-            opacity: 0.15; 
-        }
-
-        /* Garante que os textos e informações fiquem ACIMA do vídeo (z-index 2) */
-        .card-content-wrapper {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100%;
-        }
-
-        /* Textos do Card */
-        .card-title {
-            font-size: 2.5vh; color: #a8a8b3; text-transform: uppercase; 
-            margin-bottom: 1.5vh; font-weight: 600; text-align: center;
-        }
-
-        .top1-container {
-            display: flex; flex-direction: column; align-items: center; 
-            background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3);
-            border-radius: 8px; padding: 1vh 2vh; width: 100%; margin-bottom: 1.5vh;
-        }
-        .top1-player {
-            font-size: 3.5vh; font-weight: bold; color: #ffd700; 
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.4); text-align: center;
-        }
-        .top1-value {
-            font-size: 2.5vh; color: #fff; margin-top: 0.5vh; font-weight: bold;
-        }
-
-        .ranking-list {
-            width: 100%; display: flex; flex-direction: column; gap: 0.8vh; flex-grow: 1;
-            justify-content: center;
-        }
-        .ranking-item {
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255, 255, 255, 0.05); padding: 0.6vh 1.5vh; border-radius: 6px;
-            font-size: 2vh;
-        }
-        .rank-pos { color: #a8a8b3; font-weight: bold; width: 10%; }
-        .rank-name {
-            color: #e2e2e2; font-weight: 600; width: 50%; text-align: left;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .rank-value { color: #00f5d4; font-weight: bold; width: 40%; text-align: right; }
-
-        #loading {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 4vh; color: #ffd700; text-align: center; z-index: 100;
-        }
+        .card:nth-child(1)::before { background: #457b9d; } .card:nth-child(2)::before { background: #e63946; } .card:nth-child(3)::before { background: #f4a261; } .card:nth-child(4)::before { background: #9b5de5; } .card:nth-child(5)::before { background: #00f5d4; } .card:nth-child(6)::before { background: #fee440; } 
     </style>
 </head>
 <body>
 
     <header><h1>🏆 HALL DA FAMA - NODEWAR SUICIDE 🏆</h1></header>
+
+    <!-- NOVA SEÇÃO DA DEFESA -->
+    <div class="defesa-container">
+        <div class="defesa-box">
+            <video class="hover-video" src="gifsuicide.mp4" loop muted playsinline style="opacity: 0.1;"></video>
+            <div class="defesa-homenagem">🛡️ Sentinelas da Base - Sem vocês não há vitória 🛡️</div>
+            <div class="defesa-nomes">ZeXXay • YonaShirai • LinkyShirai</div>
+        </div>
+    </div>
+
     <div id="loading">Sincronizando Ranking...</div>
     <div class="grid-container" id="grid"></div>
 
@@ -143,8 +105,7 @@
         function parseToNumber(val) {
             if (!val || val.trim() === "") return -Infinity;
             let str = String(val).trim();
-            str = str.replace(/[^\d.,-]/g, ''); 
-            str = str.replace(/\./g, '').replace(',', '.'); 
+            str = str.replace(/[^\d.,-]/g, '').replace(/\./g, '').replace(',', '.'); 
             const num = parseFloat(str);
             return isNaN(num) ? -Infinity : num;
         }
@@ -159,46 +120,33 @@
             complete: function(results) {
                 const data = results.data;
                 const grid = document.getElementById('grid');
-                const loading = document.getElementById('loading');
-
-                if (!data || data.length === 0) {
-                    loading.innerText = "Tabela vazia ou erro na leitura.";
-                    return;
-                }
-
-                loading.style.display = 'none';
+                if (!data || data.length === 0) return;
+                document.getElementById('loading').style.display = 'none';
 
                 const columns = Object.keys(data[0]);
-                const nameCol = columns[0]; 
-                
-                const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
+                const nameCol = columns[0];
+                const colNodes = "NUMERO DE NODES"; // Nome exato da sua coluna de participação
 
+                const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
                 const statsCols = columns.filter(col => {
                     if (col === nameCol) return false;
                     let deveIgnorar = false;
-                    colunasIgnoradas.forEach(ignorada => {
-                        if (col.toUpperCase().includes(ignorada.toUpperCase())) {
-                            deveIgnorar = true;
-                        }
-                    });
+                    colunasIgnoradas.forEach(ignorada => { if (col.toUpperCase().includes(ignorada.toUpperCase())) deveIgnorar = true; });
                     return !deveIgnorar;
                 });
 
                 statsCols.forEach(stat => {
                     let listaJogadores = [];
-
                     data.forEach(row => {
                         const playerName = row[nameCol];
                         const valStr = row[stat];
+                        const participacao = parseToNumber(row[colNodes]);
 
-                        if(playerName && valStr) {
+                        // --- FILTRO: SÓ ENTRA NO RANKING QUEM TEM 2 OU MAIS NODES ---
+                        if(playerName && valStr && participacao >= 2) {
                             const valNum = parseToNumber(valStr);
                             if (valNum !== -Infinity) {
-                                listaJogadores.push({
-                                    nome: playerName,
-                                    valorNumerico: valNum,
-                                    valorVisual: valStr
-                                });
+                                listaJogadores.push({ nome: playerName, valorNumerico: valNum, valorVisual: valStr });
                             }
                         }
                     });
@@ -208,62 +156,29 @@
 
                     const card = document.createElement('div');
                     card.className = 'card';
-                    
-                    // Injetando o Vídeo MP4 Sombrio no Fundo
-                    // Usamos loop, muted e autoplay via JS para garantir que toque silenciosamente.
                     let htmlContent = `
-                        <video class="hover-video" src="gifsuicide.mp4" loop muted playsinline preload="auto"></video>
-                        <div class="card-content-wrapper">
-                            <div class="card-title">${stat}</div>
-                    `;
+                        <video class="hover-video" src="gifsuicide.mp4" loop muted playsinline></video>
+                        <div class="card-content-wrapper"><div class="card-title">${stat}</div>`;
 
                     if (top5.length > 0) {
-                        htmlContent += `
-                            <div class="top1-container">
-                                <div class="top1-player">🏆 ${top5[0].nome}</div>
-                                <div class="top1-value">${top5[0].valorVisual}</div>
-                            </div>
-                            <div class="ranking-list">
-                        `;
-
+                        htmlContent += `<div class="top1-container"><div class="top1-player">🏆 ${top5[0].nome}</div><div class="top1-value">${top5[0].valorVisual}</div></div><div class="ranking-list">`;
                         for (let i = 1; i < top5.length; i++) {
-                            let posIcon = `${i + 1}º`;
-                            if (i === 1) posIcon = "🥈 2º";
-                            if (i === 2) posIcon = "🥉 3º";
-
-                            htmlContent += `
-                                <div class="ranking-item">
-                                    <span class="rank-pos">${posIcon}</span>
-                                    <span class="rank-name">${top5[i].nome}</span>
-                                    <span class="rank-value">${top5[i].valorVisual}</span>
-                                </div>
-                            `;
+                            let posIcon = i === 1 ? "🥈 2º" : (i === 2 ? "🥉 3º" : `${i+1}º`);
+                            htmlContent += `<div class="ranking-item"><span class="rank-pos">${posIcon}</span><span class="rank-name">${top5[i].nome}</span><span class="rank-value">${top5[i].valorVisual}</span></div>`;
                         }
                         htmlContent += `</div>`;
-                    } else {
-                        htmlContent += `<div class="top1-player">Sem Dados</div>`;
-                    }
-
-                    // Fechando o wrapper de textos
+                    } else { htmlContent += `<div class="top1-player">Faltam Dados</div>`; }
                     htmlContent += `</div>`;
-
                     card.innerHTML = htmlContent;
                     grid.appendChild(card);
-
-                    // Sistema em JavaScript para dar "Play" no vídeo apenas quando o mouse passar por cima!
-                    // Isso evita sobrecarregar o navegador tocando 6 vídeos ao mesmo tempo.
-                    const videoElement = card.querySelector('.hover-video');
-                    card.addEventListener('mouseenter', () => {
-                        videoElement.play();
-                    });
-                    card.addEventListener('mouseleave', () => {
-                        videoElement.pause();
-                    });
+                    const vid = card.querySelector('.hover-video');
+                    card.addEventListener('mouseenter', () => vid.play());
+                    card.addEventListener('mouseleave', () => vid.pause());
                 });
-            },
-            error: function(err) {
-                console.error("Erro no PapaParse:", err);
-                document.getElementById('loading').innerText = "Falha ao conectar via Proxy.";
+
+                // Tenta dar play no vídeo da defesa também
+                document.querySelector('.defesa-box').addEventListener('mouseenter', () => document.querySelector('.defesa-box video').play());
+                document.querySelector('.defesa-box').addEventListener('mouseleave', () => document.querySelector('.defesa-box video').pause());
             }
         });
     </script>
