@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nodewar Tops - Sistema de Busca</title>
+    <title>Nodewar Tops - Sistema de Busca e MVP</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
@@ -11,14 +11,15 @@
         header { text-align: center; height: 8vh; min-height: 60px; display: flex; align-items: center; justify-content: center; background: linear-gradient(90deg, #1f1c2c 0%, #928dab 100%); box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase; }
         header h1 { font-size: 2.8vh; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
         
-        .defesa-container { height: 10vh; width: 100vw; padding: 0 2vh; display: flex; align-items: center; justify-content: center; margin-top: 1vh; }
-        .defesa-box { background: rgba(45, 45, 60, 0.4); border: 1px solid #457b9d; border-radius: 8px; width: 85%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; }
-        .defesa-homenagem { font-size: 1.6vh; color: #457b9d; font-weight: bold; text-transform: uppercase; z-index: 2; position: relative; }
-        .defesa-nomes { font-size: 2.2vh; color: #fff; font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 10px rgba(69, 123, 157, 0.5); z-index: 2; position: relative; }
-        .video-defesa { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: 1; opacity: 0.25; object-fit: cover; pointer-events: none; }
+        /* ====== SEÇÃO DE HOMENAGENS (3 CAIXAS NO TOPO) ====== */
+        .homenagem-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vh; height: 11vh; width: 100vw; padding: 0 4vh; margin-top: 2vh; }
+        .homenagem-box { background: rgba(45, 45, 60, 0.4); border: 1px solid #457b9d; border-radius: 8px; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; padding: 1vh; }
+        .homenagem-titulo { font-size: 1.5vh; color: #457b9d; font-weight: bold; text-transform: uppercase; z-index: 2; position: relative; }
+        .homenagem-nomes { font-size: 1.8vh; color: #fff; font-weight: 800; letter-spacing: 1px; text-shadow: 0 0 10px rgba(69, 123, 157, 0.5); z-index: 2; position: relative; margin-top: 0.5vh; }
+        .video-homenagem { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: 1; opacity: 0.25; object-fit: cover; pointer-events: none; }
 
         /* ====== BARRA DE PESQUISA ====== */
-        .search-container { width: 100%; display: flex; justify-content: center; padding: 2vh; }
+        .search-container { width: 100%; display: flex; justify-content: center; padding: 2vh 0; }
         .search-box { width: 50%; display: flex; gap: 10px; }
         .search-input { flex: 1; padding: 12px 20px; border-radius: 30px; border: 1px solid #457b9d; background: #1c1c24; color: white; outline: none; font-size: 1.8vh; }
         .search-input:focus { border-color: #ffd700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
@@ -72,21 +73,39 @@
 
     <header><h1>🏆 HALL DA FAMA - NODEWAR SUICIDE 🏆</h1></header>
 
-    <div class="defesa-container">
-        <div class="defesa-box">
-            <video class="video-defesa" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
-            <div class="defesa-homenagem">🛡️ Sentinelas da Base 🛡️</div>
-            <div class="defesa-nomes">ZeXXay • YonaShirai • LinkyShirai</div>
+    <!-- 3 CAIXAS DE HOMENAGEM -->
+    <div class="homenagem-container">
+        <!-- Esquerda: Bandeira -->
+        <div class="homenagem-box">
+            <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
+            <div class="homenagem-titulo">🚩 Sem sua bandeira a gente não vive 🚩</div>
+            <div class="homenagem-nomes">Apokalypse</div>
+        </div>
+        
+        <!-- Centro: Defesa (Original) -->
+        <div class="homenagem-box">
+            <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
+            <div class="homenagem-titulo">🛡️ Sentinelas da Base 🛡️</div>
+            <div class="homenagem-nomes">ZeXXay • YonaShirai • LinkyShirai</div>
+        </div>
+        
+        <!-- Direita: Shais -->
+        <div class="homenagem-box">
+            <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
+            <div class="homenagem-titulo">🎵 Sem nossas Shais a gente não consegue 🎵</div>
+            <div class="homenagem-nomes">Bandagem • Malia • Amisheart • Iloicca</div>
         </div>
     </div>
 
+    <!-- PESQUISA -->
     <div class="search-container">
         <div class="search-box">
-            <input type="text" id="player-search" class="search-input" placeholder="Digite o nome do jogador...">
+            <input type="text" id="player-search" class="search-input" placeholder="Pesquisar boletim do jogador...">
             <button onclick="buscarPlayer()" class="search-btn">BUSCAR</button>
         </div>
     </div>
 
+    <!-- MVPS -->
     <div class="mvp-container">
         <div class="mvp-card mvp-ataque" id="mvp-ataque-box"></div>
         <div class="mvp-card mvp-suporte" id="mvp-suporte-box"></div>
@@ -95,10 +114,12 @@
     <div id="loading">Sincronizando Rankings...</div>
     <div class="grid-container" id="grid"></div>
 
+    <!-- SOBREPOSIÇÃO DE RESULTADO DA BUSCA -->
     <div id="search-result-overlay">
         <div class="result-card" id="result-card-content">
             <span class="close-result" onclick="fecharBusca()">&times;</span>
-            </div>
+            <!-- Conteúdo inserido via JS -->
+        </div>
     </div>
 
     <script>
@@ -276,7 +297,6 @@
             document.getElementById('search-result-overlay').style.display = 'none';
         }
 
-        // Busca com Enter
         document.getElementById('player-search').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') buscarPlayer();
         });
