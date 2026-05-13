@@ -3,75 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nodewar Tops - Ranking Geral e MVP</title>
+    <title>Nodewar Tops - MVP Suicide</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        
         body { background-color: #0f0f13; color: #ffffff; min-height: 100vh; width: 100vw; overflow-x: hidden; display: flex; flex-direction: column; }
-        
         header { text-align: center; height: 8vh; min-height: 60px; display: flex; align-items: center; justify-content: center; background: linear-gradient(90deg, #1f1c2c 0%, #928dab 100%); box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase; }
         header h1 { font-size: 2.8vh; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
-        
-        /* SEÇÃO DA DEFESA */
         .defesa-container { height: 10vh; width: 100vw; padding: 0 2vh; display: flex; align-items: center; justify-content: center; margin-top: 1vh; }
         .defesa-box { background: rgba(45, 45, 60, 0.4); border: 1px solid #457b9d; border-radius: 8px; width: 85%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; }
         .defesa-homenagem { font-size: 1.6vh; color: #457b9d; font-weight: bold; text-transform: uppercase; z-index: 2; position: relative; }
         .defesa-nomes { font-size: 2.2vh; color: #fff; font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 10px rgba(69, 123, 157, 0.5); z-index: 2; position: relative; }
         .video-defesa { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: 1; opacity: 0.25; object-fit: cover; pointer-events: none; }
-
-        /* SEÇÃO MVP (AGORA COM 2 COLUNAS) */
         .mvp-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2vh; width: 100vw; padding: 2vh 4vh; margin-top: 1vh; }
-        
-        .mvp-card { 
-            border-radius: 12px; padding: 2vh; 
-            position: relative; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        /* Cores Diferentes para cada MVP */
+        .mvp-card { border-radius: 12px; padding: 2vh; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; border: 2px solid rgba(255, 255, 255, 0.1); }
         .mvp-ataque { background: linear-gradient(145deg, #2d0a0a, #4e1414); border-color: #e63946; box-shadow: 0 0 20px rgba(230, 57, 70, 0.2); }
         .mvp-suporte { background: linear-gradient(145deg, #0a2d2d, #144e4e); border-color: #00f5d4; box-shadow: 0 0 20px rgba(0, 245, 212, 0.2); }
-
         .mvp-title { font-size: 2.5vh; text-transform: uppercase; margin-bottom: 1.5vh; font-weight: 900; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); z-index: 2; }
         .mvp-ataque .mvp-title { color: #ff4d4d; }
         .mvp-suporte .mvp-title { color: #00f5d4; }
-
         .mvp-list { width: 100%; display: flex; flex-direction: column; gap: 0.6vh; z-index: 2; }
         .mvp-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.4); padding: 0.7vh 1.5vh; border-radius: 6px; font-size: 1.8vh; }
-        
         .mvp-item.top1 { background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.4); }
         .mvp-item.top1 .rank-pos, .mvp-item.top1 .rank-name, .mvp-item.top1 .rank-score { color: #ffd700; font-weight: 900; }
-
         .rank-pos { color: #a8a8b3; font-weight: bold; width: 15%; }
         .rank-name { color: #e2e2e2; font-weight: 600; width: 55%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .rank-score { font-weight: bold; text-align: right; width: 30%; color: #ffd700; }
-
-        /* GRID DO RANKING (ORIGINAL) */
         .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vh; padding: 2vh 4vh; width: 100vw; margin-bottom: 5vh; }
         .card { background: #1c1c24; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; border: 1px solid #333; position: relative; padding: 1.5vh 2vh; transition: transform 0.3s, box-shadow 0.3s; overflow: hidden; min-height: 240px; }
         .card:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); z-index: 10; }
         .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; z-index: 5; }
-        
         .hover-video { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: 1; opacity: 0; transition: opacity 0.5s ease; object-fit: cover; pointer-events: none; }
         .card:hover .hover-video { opacity: 0.15; }
-
         .card-content-wrapper { position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; height: 100%; }
         .card-title { font-size: 2vh; color: #a8a8b3; text-transform: uppercase; margin-bottom: 1vh; font-weight: 600; text-align: center; }
-        
         .top1-container { display: flex; flex-direction: column; align-items: center; background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 0.8vh 2vh; width: 100%; margin-bottom: 1vh; }
         .top1-player { font-size: 2.8vh; font-weight: bold; color: #ffd700; text-align: center; }
         .top1-value { font-size: 1.8vh; color: #fff; font-weight: bold; }
-        
         .ranking-list { width: 100%; display: flex; flex-direction: column; gap: 0.5vh; flex-grow: 1; justify-content: center; }
         .ranking-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5vh 1.2vh; border-radius: 6px; font-size: 1.6vh; }
         .rank-pos { color: #a8a8b3; font-weight: bold; width: 15%; }
         .rank-name { color: #e2e2e2; font-weight: 600; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 50%; }
         .rank-value { color: #00f5d4; font-weight: bold; text-align: right; width: 35%; }
-        
         #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4vh; color: #ffd700; z-index: 100; }
-        
         .card:nth-child(1)::before { background: #457b9d; } .card:nth-child(2)::before { background: #e63946; } .card:nth-child(3)::before { background: #f4a261; } .card:nth-child(4)::before { background: #9b5de5; } .card:nth-child(5)::before { background: #00f5d4; } .card:nth-child(6)::before { background: #fee440; } 
     </style>
 </head>
@@ -98,8 +72,7 @@
     <script>
         function parseToNumber(val) {
             if (!val || val.trim() === "") return -Infinity;
-            let str = String(val).trim();
-            str = str.replace(/[^\d.,-]/g, '').replace(/\./g, '').replace(',', '.'); 
+            let str = String(val).trim().replace(/[^\d.,-]/g, '').replace(/\./g, '').replace(',', '.'); 
             const num = parseFloat(str);
             return isNaN(num) ? -Infinity : num;
         }
@@ -127,8 +100,6 @@
 
                 const columns = Object.keys(data[0]);
                 const nameCol = columns[0];
-                
-                // Colunas para cálculo
                 const colNodes = columns.find(c => c.toUpperCase().includes("NODE") && c.toUpperCase().includes("NUMERO"));
                 const colKills = columns.find(c => c.toUpperCase().includes("KILL") && c.toUpperCase().includes("MÉDIA"));
                 const colDano = columns.find(c => c.toUpperCase().includes("DANO") && c.toUpperCase().includes("MÉDI"));
@@ -137,7 +108,6 @@
                 const colMortes = columns.find(c => c.toUpperCase().includes("DEATH"));
                 const colCura = columns.find(c => c.toUpperCase().includes("CURA") && c.toUpperCase().includes("MÉDIA"));
 
-                // ==== PROCESSAMENTO DE DADOS ====
                 let players = [];
                 data.forEach(row => {
                     const nodes = parseToNumber(row[colNodes]);
@@ -154,7 +124,6 @@
                     }
                 });
 
-                // Limites para Normalização Global
                 let mins = {k: Infinity, d: Infinity, c: Infinity, e: Infinity, m: Infinity, cura: Infinity};
                 let maxs = {k: -Infinity, d: -Infinity, c: -Infinity, e: -Infinity, m: -Infinity, cura: -Infinity};
 
@@ -167,38 +136,19 @@
                     if(p.cura < mins.cura) mins.cura = p.cura; if(p.cura > maxs.cura) maxs.cura = p.cura;
                 });
 
-                // ==== CÁLCULO MVP ATAQUE (20/20/20/20/20) ====
                 let rankingAtaque = players.map(p => {
-                    let score = (normalize(p.k, mins.k, maxs.k) * 20) +
-                                (normalize(p.d, mins.d, maxs.d) * 20) +
-                                (normalize(p.c, mins.c, maxs.c) * 20) +
-                                (normalize(p.e, mins.e, maxs.e) * 20) +
-                                ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
+                    let score = (normalize(p.k, mins.k, maxs.k) * 20) + (normalize(p.d, mins.d, maxs.d) * 20) + (normalize(p.c, mins.c, maxs.c) * 20) + (normalize(p.e, mins.e, maxs.e) * 20) + ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
                     return { nome: p.nome, score: score.toFixed(1) };
                 }).sort((a,b) => b.score - a.score).slice(0, 10);
 
-                // ==== CÁLCULO MVP SUPORTE (50/50 - Min 100k cura) ====
                 let rankingSuporte = players.filter(p => p.cura >= 100000).map(p => {
-                    let score = (normalize(p.cura, mins.cura, maxs.cura) * 50) +
-                                ((1 - normalize(p.m, mins.m, maxs.m)) * 50);
+                    let score = (normalize(p.cura, mins.cura, maxs.cura) * 50) + ((1 - normalize(p.m, mins.m, maxs.m)) * 50);
                     return { nome: p.nome, score: score.toFixed(1) };
                 }).sort((a,b) => b.score - a.score).slice(0, 10);
 
-                // Renderizar ATAQUE
-                boxAtaque.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video>
-                    <div class="mvp-title">⚔️ TOP 10 - MVP - ATAQUE ⚔️</div>
-                    <div class="mvp-list">` + 
-                    rankingAtaque.map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i===0?'🏆 1º':(i+1)+'º'}</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') + 
-                    `</div>`;
+                boxAtaque.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">⚔️ TOP 10 - MVP - ATAQUE ⚔️</div><div class="mvp-list">` + rankingAtaque.map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i===0?'🏆 1º':(i+1)+'º'}</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') + `</div>`;
+                boxSuporte.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">🚑 TOP 10 - MVP - SUPORTE 🚑</div><div class="mvp-list">` + (rankingSuporte.length > 0 ? rankingSuporte.map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i===0?'🏆 1º':(i+1)+'º'}</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') : '<div style="text-align:center; color:#a8a8b3; margin-top:2vh;">Ninguém atingiu 100k de cura</div>') + `</div>`;
 
-                // Renderizar SUPORTE
-                boxSuporte.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video>
-                    <div class="mvp-title">🚑 TOP 10 - MVP - SUPORTE 🚑</div>
-                    <div class="mvp-list">` + 
-                    (rankingSuporte.length > 0 ? rankingSuporte.map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i===0?'🏆 1º':(i+1)+'º'}</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') : '<div style="text-align:center; color:#a8a8b3; margin-top:2vh;">Ninguém atingiu 100k de cura</div>') + 
-                    `</div>`;
-
-                // ==== GRID DAS 6 CAIXAS ORIGINAIS ====
                 const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
                 const statsCols = columns.filter(col => {
                     if (col === nameCol) return false;
@@ -208,32 +158,28 @@
                 });
 
                 statsCols.forEach(stat => {
-                    let lista = players.map(p => {
-                        let val;
-                        if(stat === colKills) val = p.k;
-                        else if(stat === colDano) val = p.d;
-                        else if(stat === colCC) val = p.c;
-                        else if(stat === colEst) val = p.e;
-                        else if(stat === colCura) val = p.cura;
-                        else val = -Infinity;
-
-                        return { nome: p.nome, val: val, visual: data.find(r => r[nameCol] === p.nome)[stat] };
-                    }).filter(p => {
-                        if (stat.toUpperCase().includes("CURA CAUSADA") && p.val < 100000) return false;
-                        return p.val !== -Infinity;
-                    }).sort((a,b) => b.val - a.val).slice(0, 5);
+                    let lista = data.map(row => {
+                        const playerName = row[nameCol];
+                        const nodes = parseToNumber(row[colNodes]);
+                        const valNum = parseToNumber(row[stat]);
+                        if (playerName && nodes >= 2 && valNum !== -Infinity) {
+                            // Regra especial para Cura
+                            if (stat.toUpperCase().includes("CURA CAUSADA") && valNum < 100000) return null;
+                            return { nome: playerName, val: valNum, visual: row[stat] };
+                        }
+                        return null;
+                    }).filter(p => p !== null).sort((a,b) => b.val - a.val).slice(0, 5);
 
                     const card = document.createElement('div');
                     card.className = 'card';
-                    let html = `<video class="hover-video" src="gifsuicide.mp4" loop muted playsinline></video>
-                        <div class="card-content-wrapper"><div class="card-title">${stat}</div>`;
+                    let html = `<video class="hover-video" src="gifsuicide.mp4" loop muted playsinline></video><div class="card-content-wrapper"><div class="card-title">${stat}</div>`;
                     if (lista.length > 0) {
                         html += `<div class="top1-container"><div class="top1-player">🏆 ${lista[0].nome}</div><div class="top1-value">${lista[0].visual}</div></div><div class="ranking-list">`;
                         for (let i = 1; i < lista.length; i++) {
                             html += `<div class="ranking-item"><span class="rank-pos">${(i+1)}º</span><span class="rank-name">${lista[i].nome}</span><span class="rank-value">${lista[i].visual}</span></div>`;
                         }
                         html += `</div>`;
-                    } else { html += `<div class="top1-player" style="font-size:2vh; margin-top:2vh;">Faltam Dados</div>`; }
+                    } else { html += `<div class="top1-player" style="font-size:2vh; margin-top:2vh;">Dados insuficientes</div>`; }
                     html += `</div>`;
                     card.innerHTML = html;
                     grid.appendChild(card);
