@@ -153,7 +153,7 @@
                     let ne = normalize(p.e, mins.e, maxs.e);
                     let nm = 1 - normalize(p.m, mins.m, maxs.m); // Mortes invertido
 
-                    p.score = (nk * 25) + (nd * 25) + (nc * 20) + (ne * 20) + (nm * 10);
+                    p.score = (nk * 20) + (nd * 20) + (nc * 20) + (ne * 20) + (nm * 20);
                 });
 
                 playersMVP.sort((a, b) => b.score - a.score);
