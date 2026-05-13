@@ -3,26 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nodewar Tops - Ranking Geral</title>
+    <title>Nodewar Tops - Ranking Geral e MVP</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background-color: #0f0f13; color: #ffffff; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
-        header { text-align: center; height: 8vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(90deg, #1f1c2c 0%, #928dab 100%); box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase; }
+        
+        /* Ajustado para permitir rolagem (scroll) já que adicionamos um Top 10 grande */
+        body { background-color: #0f0f13; color: #ffffff; min-height: 100vh; width: 100vw; overflow-x: hidden; display: flex; flex-direction: column; }
+        
+        header { text-align: center; height: 8vh; min-height: 60px; display: flex; align-items: center; justify-content: center; background: linear-gradient(90deg, #1f1c2c 0%, #928dab 100%); box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase; }
         header h1 { font-size: 2.8vh; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
         
         /* ====== SEÇÃO DA DEFESA ====== */
-        .defesa-container { height: 10vh; width: 100vw; padding: 0 2vh; display: flex; align-items: center; justify-content: center; }
-        .defesa-box { background: rgba(45, 45, 60, 0.4); border: 1px solid #457b9d; border-radius: 8px; width: 80%; height: 80%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; }
+        .defesa-container { height: 12vh; min-height: 90px; width: 100vw; padding: 0 2vh; display: flex; align-items: center; justify-content: center; margin-top: 2vh; }
+        .defesa-box { background: rgba(45, 45, 60, 0.4); border: 1px solid #457b9d; border-radius: 8px; width: 80%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; }
         .defesa-homenagem { font-size: 1.8vh; color: #457b9d; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; z-index: 2; position: relative; }
         .defesa-nomes { font-size: 2.5vh; color: #fff; font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 10px rgba(69, 123, 157, 0.5); z-index: 2; position: relative; }
-        
-        /* Vídeo da Defesa (AUTOMÁTICO E FIXO) */
         .video-defesa { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: 1; opacity: 0.25; object-fit: cover; pointer-events: none; }
 
-        /* ====== GRID DO RANKING ====== */
-        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 1.5vh; padding: 1.5vh; height: 82vh; width: 100vw; }
-        .card { background: #1c1c24; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; border: 1px solid #333; position: relative; padding: 1vh 2vh; transition: transform 0.3s, box-shadow 0.3s; overflow: hidden; }
+        /* ====== SEÇÃO MVP GERAL (NOVO) ====== */
+        .mvp-container { display: flex; justify-content: center; width: 100vw; padding: 2vh; margin-top: 1vh; }
+        .mvp-card { 
+            background: linear-gradient(145deg, #1f1235, #3b205e); /* Cores diferentes: Roxo escuro elegante */
+            border: 2px solid #ffd700; border-radius: 12px; width: 60%; padding: 2vh 3vh; 
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.15); position: relative; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .mvp-title { font-size: 3vh; color: #ffd700; text-transform: uppercase; margin-bottom: 2vh; font-weight: 900; text-align: center; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); z-index: 2; }
+        .mvp-list { width: 100%; display: flex; flex-direction: column; gap: 0.8vh; z-index: 2; }
+        .mvp-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.3); padding: 0.8vh 2vh; border-radius: 6px; font-size: 2vh; border-left: 4px solid #9b5de5; }
+        .mvp-item.top1 { background: rgba(255, 215, 0, 0.2); border-left: 4px solid #ffd700; border: 1px solid rgba(255, 215, 0, 0.5); }
+        .mvp-item.top1 .rank-pos, .mvp-item.top1 .rank-name, .mvp-item.top1 .rank-score { color: #ffd700; font-weight: 900; }
+        .mvp-item .rank-score { color: #00f5d4; font-weight: bold; }
+
+        /* ====== GRID DO RANKING (ORIGINAL) ====== */
+        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vh; padding: 2vh; width: 100vw; margin-bottom: 5vh; }
+        .card { background: #1c1c24; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; border: 1px solid #333; position: relative; padding: 1.5vh 2vh; transition: transform 0.3s, box-shadow 0.3s; overflow: hidden; min-height: 250px; }
         .card:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); z-index: 10; }
         .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; z-index: 5; }
         
@@ -31,16 +47,17 @@
         .card:hover .hover-video { opacity: 0.15; }
 
         .card-content-wrapper { position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; height: 100%; }
-        .card-title { font-size: 2.2vh; color: #a8a8b3; text-transform: uppercase; margin-bottom: 1vh; font-weight: 600; text-align: center; }
-        .top1-container { display: flex; flex-direction: column; align-items: center; background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 0.5vh 2vh; width: 100%; margin-bottom: 1vh; }
+        .card-title { font-size: 2.2vh; color: #a8a8b3; text-transform: uppercase; margin-bottom: 1.5vh; font-weight: 600; text-align: center; }
+        .top1-container { display: flex; flex-direction: column; align-items: center; background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 0.8vh 2vh; width: 100%; margin-bottom: 1.5vh; }
         .top1-player { font-size: 3vh; font-weight: bold; color: #ffd700; text-align: center; }
-        .top1-value { font-size: 2vh; color: #fff; font-weight: bold; }
-        .ranking-list { width: 100%; display: flex; flex-direction: column; gap: 0.5vh; flex-grow: 1; justify-content: center; }
-        .ranking-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.4vh 1.2vh; border-radius: 6px; font-size: 1.8vh; }
-        .rank-pos { color: #a8a8b3; font-weight: bold; }
+        .top1-value { font-size: 2vh; color: #fff; font-weight: bold; margin-top: 0.5vh; }
+        .ranking-list { width: 100%; display: flex; flex-direction: column; gap: 0.6vh; flex-grow: 1; justify-content: center; }
+        .ranking-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5vh 1.2vh; border-radius: 6px; font-size: 1.8vh; }
+        .rank-pos { color: #a8a8b3; font-weight: bold; width: 15%; }
         .rank-name { color: #e2e2e2; font-weight: 600; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 50%; }
-        .rank-value { color: #00f5d4; font-weight: bold; text-align: right; width: 40%; }
-        #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4vh; color: #ffd700; z-index: 100; }
+        .rank-value { color: #00f5d4; font-weight: bold; text-align: right; width: 35%; }
+        
+        #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4vh; color: #ffd700; z-index: 100; text-shadow: 0 0 10px #000; }
         
         .card:nth-child(1)::before { background: #457b9d; } .card:nth-child(2)::before { background: #e63946; } .card:nth-child(3)::before { background: #f4a261; } .card:nth-child(4)::before { background: #9b5de5; } .card:nth-child(5)::before { background: #00f5d4; } .card:nth-child(6)::before { background: #fee440; } 
     </style>
@@ -58,6 +75,9 @@
         </div>
     </div>
 
+    <!-- SEÇÃO MVP CENTRALIZADA -->
+    <div class="mvp-container" id="mvp-container"></div>
+
     <div id="loading">Sincronizando Ranking...</div>
     <div class="grid-container" id="grid"></div>
 
@@ -70,6 +90,11 @@
             return isNaN(num) ? -Infinity : num;
         }
 
+        function normalize(val, min, max) {
+            if (max === min) return 0;
+            return (val - min) / (max - min);
+        }
+
         const googleCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?gid=1115049823&single=true&output=csv";
         const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(googleCsvUrl);
 
@@ -80,13 +105,83 @@
             complete: function(results) {
                 const data = results.data;
                 const grid = document.getElementById('grid');
+                const mvpContainer = document.getElementById('mvp-container');
                 if (!data || data.length === 0) return;
                 document.getElementById('loading').style.display = 'none';
 
                 const columns = Object.keys(data[0]);
                 const nameCol = columns[0];
-                const colNodes = "NUMERO DE NODES";
+                
+                // Buscando colunas dinamicamente para o cálculo do MVP
+                const colNodes = columns.find(c => c.toUpperCase().includes("NODE") && c.toUpperCase().includes("NUMERO"));
+                const colKills = columns.find(c => c.toUpperCase().includes("KILL") && c.toUpperCase().includes("MÉDIA"));
+                const colDano = columns.find(c => c.toUpperCase().includes("DANO") && c.toUpperCase().includes("MÉDI"));
+                const colCC = columns.find(c => c.toUpperCase().includes("CC"));
+                const colEst = columns.find(c => c.toUpperCase().includes("ESTRUTURA"));
+                const colMortes = columns.find(c => c.toUpperCase().includes("DEATH"));
 
+                // ==== LÓGICA DO MVP GERAL ====
+                let playersMVP = [];
+                let mins = {k: Infinity, d: Infinity, c: Infinity, e: Infinity, m: Infinity};
+                let maxs = {k: -Infinity, d: -Infinity, c: -Infinity, e: -Infinity, m: -Infinity};
+
+                data.forEach(row => {
+                    const playerName = row[nameCol];
+                    const nodes = parseToNumber(row[colNodes]);
+                    
+                    if (playerName && nodes >= 2) {
+                        let k = parseToNumber(row[colKills]) === -Infinity ? 0 : parseToNumber(row[colKills]);
+                        let d = parseToNumber(row[colDano]) === -Infinity ? 0 : parseToNumber(row[colDano]);
+                        let c = parseToNumber(row[colCC]) === -Infinity ? 0 : parseToNumber(row[colCC]);
+                        let e = parseToNumber(row[colEst]) === -Infinity ? 0 : parseToNumber(row[colEst]);
+                        let m = parseToNumber(row[colMortes]) === -Infinity ? 0 : parseToNumber(row[colMortes]);
+
+                        playersMVP.push({nome: playerName, k, d, c, e, m});
+
+                        if(k < mins.k) mins.k = k; if(k > maxs.k) maxs.k = k;
+                        if(d < mins.d) mins.d = d; if(d > maxs.d) maxs.d = d;
+                        if(c < mins.c) mins.c = c; if(c > maxs.c) maxs.c = c;
+                        if(e < mins.e) mins.e = e; if(e > maxs.e) maxs.e = e;
+                        if(m < mins.m) mins.m = m; if(m > maxs.m) maxs.m = m;
+                    }
+                });
+
+                playersMVP.forEach(p => {
+                    let nk = normalize(p.k, mins.k, maxs.k);
+                    let nd = normalize(p.d, mins.d, maxs.d);
+                    let nc = normalize(p.c, mins.c, maxs.c);
+                    let ne = normalize(p.e, mins.e, maxs.e);
+                    let nm = 1 - normalize(p.m, mins.m, maxs.m); // Mortes invertido
+
+                    p.score = (nk * 25) + (nd * 25) + (nc * 20) + (ne * 20) + (nm * 10);
+                });
+
+                playersMVP.sort((a, b) => b.score - a.score);
+                const top10MVP = playersMVP.slice(0, 10);
+
+                // Renderizar o MVP Card
+                let mvpHtml = `
+                    <div class="mvp-card">
+                        <video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1; pointer-events: none;"></video>
+                        <div class="mvp-title">👑 TOP 10 - MVP GERAL DA GUILDA 👑</div>
+                        <div class="mvp-list">
+                `;
+                top10MVP.forEach((p, i) => {
+                    let posIcon = i === 0 ? "🏆 1º" : (i === 1 ? "🥈 2º" : (i === 2 ? "🥉 3º" : `${i+1}º`));
+                    let cssClass = i === 0 ? "mvp-item top1" : "mvp-item";
+                    mvpHtml += `
+                        <div class="${cssClass}">
+                            <span class="rank-pos">${posIcon}</span>
+                            <span class="rank-name">${p.nome}</span>
+                            <span class="rank-score">${(p.score).toFixed(1)} pts</span>
+                        </div>
+                    `;
+                });
+                mvpHtml += `</div></div>`;
+                mvpContainer.innerHTML = mvpHtml;
+
+
+                // ==== LÓGICA DAS 6 CAIXAS (ORIGINAL INTACTA) ====
                 const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
                 const statsCols = columns.filter(col => {
                     if (col === nameCol) return false;
@@ -127,12 +222,12 @@
                             htmlContent += `<div class="ranking-item"><span class="rank-pos">${posIcon}</span><span class="rank-name">${top5[i].nome}</span><span class="rank-value">${top5[i].valorVisual}</span></div>`;
                         }
                         htmlContent += `</div>`;
-                    } else { htmlContent += `<div class="top1-player" style="font-size:2vh; margin-top:2vh;">Dados insuficientes (Min. 100k)</div>`; }
+                    } else { htmlContent += `<div class="top1-player" style="font-size:2vh; margin-top:2vh;">Dados insuficientes</div>`; }
                     htmlContent += `</div>`;
                     card.innerHTML = htmlContent;
                     grid.appendChild(card);
 
-                    // Reativando a lógica de Hover para os Rankings
+                    // Hover dos Rankings normais
                     const vid = card.querySelector('.hover-video');
                     card.addEventListener('mouseenter', () => vid.play());
                     card.addEventListener('mouseleave', () => vid.pause());
