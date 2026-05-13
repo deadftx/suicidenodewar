@@ -8,56 +8,69 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
         
-        /* Ajustado para permitir rolagem (scroll) já que adicionamos um Top 10 grande */
         body { background-color: #0f0f13; color: #ffffff; min-height: 100vh; width: 100vw; overflow-x: hidden; display: flex; flex-direction: column; }
         
         header { text-align: center; height: 8vh; min-height: 60px; display: flex; align-items: center; justify-content: center; background: linear-gradient(90deg, #1f1c2c 0%, #928dab 100%); box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase; }
         header h1 { font-size: 2.8vh; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
         
-        /* ====== SEÇÃO DA DEFESA ====== */
-        .defesa-container { height: 12vh; min-height: 90px; width: 100vw; padding: 0 2vh; display: flex; align-items: center; justify-content: center; margin-top: 2vh; }
-        .defesa-box { background: rgba(45, 45, 60, 0.4); border: 1px solid #457b9d; border-radius: 8px; width: 80%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; }
-        .defesa-homenagem { font-size: 1.8vh; color: #457b9d; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; z-index: 2; position: relative; }
-        .defesa-nomes { font-size: 2.5vh; color: #fff; font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 10px rgba(69, 123, 157, 0.5); z-index: 2; position: relative; }
+        /* SEÇÃO DA DEFESA */
+        .defesa-container { height: 10vh; width: 100vw; padding: 0 2vh; display: flex; align-items: center; justify-content: center; margin-top: 1vh; }
+        .defesa-box { background: rgba(45, 45, 60, 0.4); border: 1px solid #457b9d; border-radius: 8px; width: 85%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; }
+        .defesa-homenagem { font-size: 1.6vh; color: #457b9d; font-weight: bold; text-transform: uppercase; z-index: 2; position: relative; }
+        .defesa-nomes { font-size: 2.2vh; color: #fff; font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 10px rgba(69, 123, 157, 0.5); z-index: 2; position: relative; }
         .video-defesa { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: 1; opacity: 0.25; object-fit: cover; pointer-events: none; }
 
-        /* ====== SEÇÃO MVP GERAL (NOVO) ====== */
-        .mvp-container { display: flex; justify-content: center; width: 100vw; padding: 2vh; margin-top: 1vh; }
+        /* SEÇÃO MVP (AGORA COM 2 COLUNAS) */
+        .mvp-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2vh; width: 100vw; padding: 2vh 4vh; margin-top: 1vh; }
+        
         .mvp-card { 
-            background: linear-gradient(145deg, #1f1235, #3b205e); /* Cores diferentes: Roxo escuro elegante */
-            border: 2px solid #ffd700; border-radius: 12px; width: 60%; padding: 2vh 3vh; 
-            box-shadow: 0 0 25px rgba(255, 215, 0, 0.15); position: relative; overflow: hidden;
+            border-radius: 12px; padding: 2vh; 
+            position: relative; overflow: hidden;
             display: flex; flex-direction: column; align-items: center;
+            border: 2px solid rgba(255, 255, 255, 0.1);
         }
-        .mvp-title { font-size: 3vh; color: #ffd700; text-transform: uppercase; margin-bottom: 2vh; font-weight: 900; text-align: center; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); z-index: 2; }
-        .mvp-list { width: 100%; display: flex; flex-direction: column; gap: 0.8vh; z-index: 2; }
-        .mvp-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.3); padding: 0.8vh 2vh; border-radius: 6px; font-size: 2vh; border-left: 4px solid #9b5de5; }
-        .mvp-item.top1 { background: rgba(255, 215, 0, 0.2); border-left: 4px solid #ffd700; border: 1px solid rgba(255, 215, 0, 0.5); }
-        .mvp-item.top1 .rank-pos, .mvp-item.top1 .rank-name, .mvp-item.top1 .rank-score { color: #ffd700; font-weight: 900; }
-        .mvp-item .rank-score { color: #00f5d4; font-weight: bold; }
+        
+        /* Cores Diferentes para cada MVP */
+        .mvp-ataque { background: linear-gradient(145deg, #2d0a0a, #4e1414); border-color: #e63946; box-shadow: 0 0 20px rgba(230, 57, 70, 0.2); }
+        .mvp-suporte { background: linear-gradient(145deg, #0a2d2d, #144e4e); border-color: #00f5d4; box-shadow: 0 0 20px rgba(0, 245, 212, 0.2); }
 
-        /* ====== GRID DO RANKING (ORIGINAL) ====== */
-        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vh; padding: 2vh; width: 100vw; margin-bottom: 5vh; }
-        .card { background: #1c1c24; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; border: 1px solid #333; position: relative; padding: 1.5vh 2vh; transition: transform 0.3s, box-shadow 0.3s; overflow: hidden; min-height: 250px; }
+        .mvp-title { font-size: 2.5vh; text-transform: uppercase; margin-bottom: 1.5vh; font-weight: 900; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); z-index: 2; }
+        .mvp-ataque .mvp-title { color: #ff4d4d; }
+        .mvp-suporte .mvp-title { color: #00f5d4; }
+
+        .mvp-list { width: 100%; display: flex; flex-direction: column; gap: 0.6vh; z-index: 2; }
+        .mvp-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.4); padding: 0.7vh 1.5vh; border-radius: 6px; font-size: 1.8vh; }
+        
+        .mvp-item.top1 { background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.4); }
+        .mvp-item.top1 .rank-pos, .mvp-item.top1 .rank-name, .mvp-item.top1 .rank-score { color: #ffd700; font-weight: 900; }
+
+        .rank-pos { color: #a8a8b3; font-weight: bold; width: 15%; }
+        .rank-name { color: #e2e2e2; font-weight: 600; width: 55%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .rank-score { font-weight: bold; text-align: right; width: 30%; color: #ffd700; }
+
+        /* GRID DO RANKING (ORIGINAL) */
+        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vh; padding: 2vh 4vh; width: 100vw; margin-bottom: 5vh; }
+        .card { background: #1c1c24; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; border: 1px solid #333; position: relative; padding: 1.5vh 2vh; transition: transform 0.3s, box-shadow 0.3s; overflow: hidden; min-height: 240px; }
         .card:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); z-index: 10; }
         .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; z-index: 5; }
         
-        /* Vídeos dos Cards (SOMENTE NO HOVER) */
         .hover-video { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: 1; opacity: 0; transition: opacity 0.5s ease; object-fit: cover; pointer-events: none; }
         .card:hover .hover-video { opacity: 0.15; }
 
         .card-content-wrapper { position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; height: 100%; }
-        .card-title { font-size: 2.2vh; color: #a8a8b3; text-transform: uppercase; margin-bottom: 1.5vh; font-weight: 600; text-align: center; }
-        .top1-container { display: flex; flex-direction: column; align-items: center; background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 0.8vh 2vh; width: 100%; margin-bottom: 1.5vh; }
-        .top1-player { font-size: 3vh; font-weight: bold; color: #ffd700; text-align: center; }
-        .top1-value { font-size: 2vh; color: #fff; font-weight: bold; margin-top: 0.5vh; }
-        .ranking-list { width: 100%; display: flex; flex-direction: column; gap: 0.6vh; flex-grow: 1; justify-content: center; }
-        .ranking-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5vh 1.2vh; border-radius: 6px; font-size: 1.8vh; }
+        .card-title { font-size: 2vh; color: #a8a8b3; text-transform: uppercase; margin-bottom: 1vh; font-weight: 600; text-align: center; }
+        
+        .top1-container { display: flex; flex-direction: column; align-items: center; background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 0.8vh 2vh; width: 100%; margin-bottom: 1vh; }
+        .top1-player { font-size: 2.8vh; font-weight: bold; color: #ffd700; text-align: center; }
+        .top1-value { font-size: 1.8vh; color: #fff; font-weight: bold; }
+        
+        .ranking-list { width: 100%; display: flex; flex-direction: column; gap: 0.5vh; flex-grow: 1; justify-content: center; }
+        .ranking-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5vh 1.2vh; border-radius: 6px; font-size: 1.6vh; }
         .rank-pos { color: #a8a8b3; font-weight: bold; width: 15%; }
         .rank-name { color: #e2e2e2; font-weight: 600; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 50%; }
         .rank-value { color: #00f5d4; font-weight: bold; text-align: right; width: 35%; }
         
-        #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4vh; color: #ffd700; z-index: 100; text-shadow: 0 0 10px #000; }
+        #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4vh; color: #ffd700; z-index: 100; }
         
         .card:nth-child(1)::before { background: #457b9d; } .card:nth-child(2)::before { background: #e63946; } .card:nth-child(3)::before { background: #f4a261; } .card:nth-child(4)::before { background: #9b5de5; } .card:nth-child(5)::before { background: #00f5d4; } .card:nth-child(6)::before { background: #fee440; } 
     </style>
@@ -68,17 +81,18 @@
 
     <div class="defesa-container">
         <div class="defesa-box">
-            <!-- Defesa é Autoplay -->
             <video class="video-defesa" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
             <div class="defesa-homenagem">🛡️ Sentinelas da Base - Sem vocês não há vitória 🛡️</div>
             <div class="defesa-nomes">ZeXXay • YonaShirai • LinkyShirai</div>
         </div>
     </div>
 
-    <!-- SEÇÃO MVP CENTRALIZADA -->
-    <div class="mvp-container" id="mvp-container"></div>
+    <div class="mvp-container">
+        <div class="mvp-card mvp-ataque" id="mvp-ataque-box"></div>
+        <div class="mvp-card mvp-suporte" id="mvp-suporte-box"></div>
+    </div>
 
-    <div id="loading">Sincronizando Ranking...</div>
+    <div id="loading">Sincronizando Rankings...</div>
     <div class="grid-container" id="grid"></div>
 
     <script>
@@ -105,83 +119,86 @@
             complete: function(results) {
                 const data = results.data;
                 const grid = document.getElementById('grid');
-                const mvpContainer = document.getElementById('mvp-container');
+                const boxAtaque = document.getElementById('mvp-ataque-box');
+                const boxSuporte = document.getElementById('mvp-suporte-box');
+                
                 if (!data || data.length === 0) return;
                 document.getElementById('loading').style.display = 'none';
 
                 const columns = Object.keys(data[0]);
                 const nameCol = columns[0];
                 
-                // Buscando colunas dinamicamente para o cálculo do MVP
+                // Colunas para cálculo
                 const colNodes = columns.find(c => c.toUpperCase().includes("NODE") && c.toUpperCase().includes("NUMERO"));
                 const colKills = columns.find(c => c.toUpperCase().includes("KILL") && c.toUpperCase().includes("MÉDIA"));
                 const colDano = columns.find(c => c.toUpperCase().includes("DANO") && c.toUpperCase().includes("MÉDI"));
                 const colCC = columns.find(c => c.toUpperCase().includes("CC"));
                 const colEst = columns.find(c => c.toUpperCase().includes("ESTRUTURA"));
                 const colMortes = columns.find(c => c.toUpperCase().includes("DEATH"));
+                const colCura = columns.find(c => c.toUpperCase().includes("CURA") && c.toUpperCase().includes("MÉDIA"));
 
-                // ==== LÓGICA DO MVP GERAL ====
-                let playersMVP = [];
-                let mins = {k: Infinity, d: Infinity, c: Infinity, e: Infinity, m: Infinity};
-                let maxs = {k: -Infinity, d: -Infinity, c: -Infinity, e: -Infinity, m: -Infinity};
-
+                // ==== PROCESSAMENTO DE DADOS ====
+                let players = [];
                 data.forEach(row => {
-                    const playerName = row[nameCol];
                     const nodes = parseToNumber(row[colNodes]);
-                    
-                    if (playerName && nodes >= 2) {
-                        let k = parseToNumber(row[colKills]) === -Infinity ? 0 : parseToNumber(row[colKills]);
-                        let d = parseToNumber(row[colDano]) === -Infinity ? 0 : parseToNumber(row[colDano]);
-                        let c = parseToNumber(row[colCC]) === -Infinity ? 0 : parseToNumber(row[colCC]);
-                        let e = parseToNumber(row[colEst]) === -Infinity ? 0 : parseToNumber(row[colEst]);
-                        let m = parseToNumber(row[colMortes]) === -Infinity ? 0 : parseToNumber(row[colMortes]);
-
-                        playersMVP.push({nome: playerName, k, d, c, e, m});
-
-                        if(k < mins.k) mins.k = k; if(k > maxs.k) maxs.k = k;
-                        if(d < mins.d) mins.d = d; if(d > maxs.d) maxs.d = d;
-                        if(c < mins.c) mins.c = c; if(c > maxs.c) maxs.c = c;
-                        if(e < mins.e) mins.e = e; if(e > maxs.e) maxs.e = e;
-                        if(m < mins.m) mins.m = m; if(m > maxs.m) maxs.m = m;
+                    if (row[nameCol] && nodes >= 2) {
+                        players.push({
+                            nome: row[nameCol],
+                            k: parseToNumber(row[colKills]) === -Infinity ? 0 : parseToNumber(row[colKills]),
+                            d: parseToNumber(row[colDano]) === -Infinity ? 0 : parseToNumber(row[colDano]),
+                            c: parseToNumber(row[colCC]) === -Infinity ? 0 : parseToNumber(row[colCC]),
+                            e: parseToNumber(row[colEst]) === -Infinity ? 0 : parseToNumber(row[colEst]),
+                            m: parseToNumber(row[colMortes]) === -Infinity ? 0 : parseToNumber(row[colMortes]),
+                            cura: parseToNumber(row[colCura]) === -Infinity ? 0 : parseToNumber(row[colCura])
+                        });
                     }
                 });
 
-                playersMVP.forEach(p => {
-                    let nk = normalize(p.k, mins.k, maxs.k);
-                    let nd = normalize(p.d, mins.d, maxs.d);
-                    let nc = normalize(p.c, mins.c, maxs.c);
-                    let ne = normalize(p.e, mins.e, maxs.e);
-                    let nm = 1 - normalize(p.m, mins.m, maxs.m); // Mortes invertido
+                // Limites para Normalização Global
+                let mins = {k: Infinity, d: Infinity, c: Infinity, e: Infinity, m: Infinity, cura: Infinity};
+                let maxs = {k: -Infinity, d: -Infinity, c: -Infinity, e: -Infinity, m: -Infinity, cura: -Infinity};
 
-                    p.score = (nk * 20) + (nd * 20) + (nc * 20) + (ne * 20) + (nm * 20);
+                players.forEach(p => {
+                    if(p.k < mins.k) mins.k = p.k; if(p.k > maxs.k) maxs.k = p.k;
+                    if(p.d < mins.d) mins.d = p.d; if(p.d > maxs.d) maxs.d = p.d;
+                    if(p.c < mins.c) mins.c = p.c; if(p.c > maxs.c) maxs.c = p.c;
+                    if(p.e < mins.e) mins.e = p.e; if(p.e > maxs.e) maxs.e = p.e;
+                    if(p.m < mins.m) mins.m = p.m; if(p.m > maxs.m) maxs.m = p.m;
+                    if(p.cura < mins.cura) mins.cura = p.cura; if(p.cura > maxs.cura) maxs.cura = p.cura;
                 });
 
-                playersMVP.sort((a, b) => b.score - a.score);
-                const top10MVP = playersMVP.slice(0, 10);
+                // ==== CÁLCULO MVP ATAQUE (20/20/20/20/20) ====
+                let rankingAtaque = players.map(p => {
+                    let score = (normalize(p.k, mins.k, maxs.k) * 20) +
+                                (normalize(p.d, mins.d, maxs.d) * 20) +
+                                (normalize(p.c, mins.c, maxs.c) * 20) +
+                                (normalize(p.e, mins.e, maxs.e) * 20) +
+                                ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
+                    return { nome: p.nome, score: score.toFixed(1) };
+                }).sort((a,b) => b.score - a.score).slice(0, 10);
 
-                // Renderizar o MVP Card
-                let mvpHtml = `
-                    <div class="mvp-card">
-                        <video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1; pointer-events: none;"></video>
-                        <div class="mvp-title">👑 TOP 10 - MVP GERAL DA GUILDA 👑</div>
-                        <div class="mvp-list">
-                `;
-                top10MVP.forEach((p, i) => {
-                    let posIcon = i === 0 ? "🏆 1º" : (i === 1 ? "🥈 2º" : (i === 2 ? "🥉 3º" : `${i+1}º`));
-                    let cssClass = i === 0 ? "mvp-item top1" : "mvp-item";
-                    mvpHtml += `
-                        <div class="${cssClass}">
-                            <span class="rank-pos">${posIcon}</span>
-                            <span class="rank-name">${p.nome}</span>
-                            <span class="rank-score">${(p.score).toFixed(1)} pts</span>
-                        </div>
-                    `;
-                });
-                mvpHtml += `</div></div>`;
-                mvpContainer.innerHTML = mvpHtml;
+                // ==== CÁLCULO MVP SUPORTE (50/50 - Min 100k cura) ====
+                let rankingSuporte = players.filter(p => p.cura >= 100000).map(p => {
+                    let score = (normalize(p.cura, mins.cura, maxs.cura) * 50) +
+                                ((1 - normalize(p.m, mins.m, maxs.m)) * 50);
+                    return { nome: p.nome, score: score.toFixed(1) };
+                }).sort((a,b) => b.score - a.score).slice(0, 10);
 
+                // Renderizar ATAQUE
+                boxAtaque.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video>
+                    <div class="mvp-title">⚔️ TOP 10 - MVP - ATAQUE ⚔️</div>
+                    <div class="mvp-list">` + 
+                    rankingAtaque.map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i===0?'🏆 1º':(i+1)+'º'}</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') + 
+                    `</div>`;
 
-                // ==== LÓGICA DAS 6 CAIXAS (ORIGINAL INTACTA) ====
+                // Renderizar SUPORTE
+                boxSuporte.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video>
+                    <div class="mvp-title">🚑 TOP 10 - MVP - SUPORTE 🚑</div>
+                    <div class="mvp-list">` + 
+                    (rankingSuporte.length > 0 ? rankingSuporte.map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i===0?'🏆 1º':(i+1)+'º'}</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') : '<div style="text-align:center; color:#a8a8b3; margin-top:2vh;">Ninguém atingiu 100k de cura</div>') + 
+                    `</div>`;
+
+                // ==== GRID DAS 6 CAIXAS ORIGINAIS ====
                 const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
                 const statsCols = columns.filter(col => {
                     if (col === nameCol) return false;
@@ -191,46 +208,38 @@
                 });
 
                 statsCols.forEach(stat => {
-                    let listaJogadores = [];
-                    data.forEach(row => {
-                        const playerName = row[nameCol];
-                        const valStr = row[stat];
-                        const participacao = parseToNumber(row[colNodes]);
-                        const valNum = parseToNumber(valStr);
+                    let lista = players.map(p => {
+                        let val;
+                        if(stat === colKills) val = p.k;
+                        else if(stat === colDano) val = p.d;
+                        else if(stat === colCC) val = p.c;
+                        else if(stat === colEst) val = p.e;
+                        else if(stat === colCura) val = p.cura;
+                        else val = -Infinity;
 
-                        let passaNoFiltro = (playerName && valNum !== -Infinity && participacao >= 2);
-                        if (stat.toUpperCase().includes("CURA CAUSADA") && valNum < 100000) passaNoFiltro = false;
-
-                        if(passaNoFiltro) {
-                            listaJogadores.push({ nome: playerName, valorNumerico: valNum, valorVisual: valStr });
-                        }
-                    });
-
-                    listaJogadores.sort((a, b) => b.valorNumerico - a.valorNumerico);
-                    const top5 = listaJogadores.slice(0, 5);
+                        return { nome: p.nome, val: val, visual: data.find(r => r[nameCol] === p.nome)[stat] };
+                    }).filter(p => {
+                        if (stat.toUpperCase().includes("CURA CAUSADA") && p.val < 100000) return false;
+                        return p.val !== -Infinity;
+                    }).sort((a,b) => b.val - a.val).slice(0, 5);
 
                     const card = document.createElement('div');
                     card.className = 'card';
-                    let htmlContent = `
-                        <video class="hover-video" src="gifsuicide.mp4" loop muted playsinline></video>
+                    let html = `<video class="hover-video" src="gifsuicide.mp4" loop muted playsinline></video>
                         <div class="card-content-wrapper"><div class="card-title">${stat}</div>`;
-
-                    if (top5.length > 0) {
-                        htmlContent += `<div class="top1-container"><div class="top1-player">🏆 ${top5[0].nome}</div><div class="top1-value">${top5[0].valorVisual}</div></div><div class="ranking-list">`;
-                        for (let i = 1; i < top5.length; i++) {
-                            let posIcon = i === 1 ? "🥈 2º" : (i === 2 ? "🥉 3º" : `${i+1}º`);
-                            htmlContent += `<div class="ranking-item"><span class="rank-pos">${posIcon}</span><span class="rank-name">${top5[i].nome}</span><span class="rank-value">${top5[i].valorVisual}</span></div>`;
+                    if (lista.length > 0) {
+                        html += `<div class="top1-container"><div class="top1-player">🏆 ${lista[0].nome}</div><div class="top1-value">${lista[0].visual}</div></div><div class="ranking-list">`;
+                        for (let i = 1; i < lista.length; i++) {
+                            html += `<div class="ranking-item"><span class="rank-pos">${(i+1)}º</span><span class="rank-name">${lista[i].nome}</span><span class="rank-value">${lista[i].visual}</span></div>`;
                         }
-                        htmlContent += `</div>`;
-                    } else { htmlContent += `<div class="top1-player" style="font-size:2vh; margin-top:2vh;">Dados insuficientes</div>`; }
-                    htmlContent += `</div>`;
-                    card.innerHTML = htmlContent;
+                        html += `</div>`;
+                    } else { html += `<div class="top1-player" style="font-size:2vh; margin-top:2vh;">Faltam Dados</div>`; }
+                    html += `</div>`;
+                    card.innerHTML = html;
                     grid.appendChild(card);
-
-                    // Hover dos Rankings normais
-                    const vid = card.querySelector('.hover-video');
-                    card.addEventListener('mouseenter', () => vid.play());
-                    card.addEventListener('mouseleave', () => vid.pause());
+                    const v = card.querySelector('.hover-video');
+                    card.onmouseenter = () => v.play();
+                    card.onmouseleave = () => v.pause();
                 });
             }
         });
