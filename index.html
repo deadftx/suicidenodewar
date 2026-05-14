@@ -248,15 +248,7 @@
                 renderCardHtml(grid, stat, lista);
             });
 
-            // Card 7: Eficiência Bruta (Usando dados da aba principal)
-            let listaEficiencia = players.map(p => {
-                let mortesSeguras = p.m > 0 ? p.m : 1; 
-                let eficiencia = p.d / mortesSeguras;
-                return { nome: p.nome, val: eficiencia, visual: Math.round(eficiencia).toLocaleString('pt-BR') };
-            }).sort((a,b) => b.val - a.val);
-            renderCardHtml(grid, "ÍNDICE DE EFICIÊNCIA (DANO/MORTE)", listaEficiencia);
-
-            // Cards 8 e 9: Esperam o Histórico carregar
+            // Cards 8 e 9: Esperam o Histórico carregar (Evolução e Consistência)
             renderCardHtml(grid, "📈 EVOLUÇÃO DE DESEMPENHO", [], "card-evolucao");
             renderCardHtml(grid, "🏅 CONSISTÊNCIA (TOP 5 MVP)", [], "card-consistencia");
 
@@ -420,11 +412,6 @@
                 let val = player.row[stat] || "0";
                 statsHtml += `<div class="result-item"><span class="result-label">${stat}</span><div><span class="result-value">${val}</span><span class="result-rank">${pos > 0 ? pos + 'º' : 'N/A'}</span></div></div>`;
             });
-
-            let efList = players.map(p => ({ nome: p.nome, val: p.d / (p.m > 0 ? p.m : 1) })).sort((a,b) => b.val - a.val);
-            let efPos = efList.findIndex(f => f.nome === player.nome) + 1;
-            let efVal = Math.round(efList.find(f => f.nome === player.nome).val).toLocaleString('pt-BR');
-            statsHtml += `<div class="result-item"><span class="result-label">EFICIÊNCIA BRUTA</span><div><span class="result-value">${efVal}</span><span class="result-rank">${efPos > 0 ? efPos + 'º' : 'N/A'}</span></div></div>`;
 
             content.innerHTML = `
                 <span class="close-result" onclick="fecharBusca()">&times;</span>
