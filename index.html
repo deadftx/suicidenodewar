@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nodewar Tops - Sistema de Busca e MVP</title>
+    <title>Nodewar Tops - Sistema de Busca, MVP e Histórico</title>
+    <!-- PapaParse para o CSV principal -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- SheetJS para ler o histórico completo (várias abas) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { background-color: #0f0f13; color: #ffffff; min-height: 100vh; width: 100vw; overflow-x: hidden; display: flex; flex-direction: column; }
@@ -38,7 +41,7 @@
         .result-value { color: #fff; font-weight: 900; font-size: 2.2vh; }
         .result-rank { color: #ffd700; background: rgba(255, 215, 0, 0.1); padding: 4px 10px; border-radius: 5px; margin-left: 10px; }
 
-        /* ====== MVPS E GRID ORIGINAIS ====== */
+        /* ====== MVPS E GRID ====== */
         .mvp-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2vh; width: 100vw; padding: 1vh 4vh; }
         .mvp-card { border-radius: 12px; padding: 2vh; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; border: 2px solid rgba(255, 255, 255, 0.1); }
         .mvp-ataque { background: linear-gradient(145deg, #2d0a0a, #4e1414); border-color: #e63946; }
@@ -66,7 +69,8 @@
         .rank-value { color: #00f5d4; font-weight: bold; text-align: right; width: 35%; }
 
         #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4vh; color: #ffd700; z-index: 100; }
-        .card:nth-child(1)::before { background: #457b9d; } .card:nth-child(2)::before { background: #e63946; } .card:nth-child(3)::before { background: #f4a261; } .card:nth-child(4)::before { background: #9b5de5; } .card:nth-child(5)::before { background: #00f5d4; } .card:nth-child(6)::before { background: #fee440; } 
+        .card:nth-child(1)::before { background: #457b9d; } .card:nth-child(2)::before { background: #e63946; } .card:nth-child(3)::before { background: #f4a261; } .card:nth-child(4)::before { background: #9b5de5; } .card:nth-child(5)::before { background: #00f5d4; } .card:nth-child(6)::before { background: #fee440; }
+        .card:nth-child(7)::before { background: #ff5400; } .card:nth-child(8)::before { background: #39ff14; } .card:nth-child(9)::before { background: #ff00ff; }
     </style>
 </head>
 <body>
@@ -152,6 +156,27 @@
             }
         });
 
+        // Função utilitária para renderizar Cards no Grid
+        function renderCardHtml(container, title, lista, id = null) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            if(id) card.id = id;
+            let html = `<video class="hover-video" src="gifsuicide.mp4" loop muted playsinline></video><div class="card-content-wrapper"><div class="card-title">${title}</div>`;
+            if (lista && lista.length > 0) {
+                html += `<div class="top1-container"><div class="top1-player">🏆 ${lista[0].nome}</div><div class="top1-value">${lista[0].visual}</div></div><div class="ranking-list">`;
+                lista.slice(1, 5).forEach((p, i) => { html += `<div class="ranking-item"><span class="rank-pos">${i+2}º</span><span class="rank-name">${p.nome}</span><span class="rank-value">${p.visual}</span></div>`; });
+                html += `</div>`;
+            } else {
+                html += `<div class="top1-player" style="font-size:2vh; margin-top:2vh;">Dados insuficientes / Carregando</div>`;
+            }
+            html += `</div>`;
+            card.innerHTML = html;
+            container.appendChild(card);
+            const v = card.querySelector('video');
+            card.onmouseenter = () => v && v.play();
+            card.onmouseleave = () => v && v.pause();
+        }
+
         function processarRankings() {
             const data = globalData;
             const grid = document.getElementById('grid');
@@ -198,7 +223,7 @@
                 if(p.cura < mins.cura) mins.cura = p.cura; if(p.cura > maxs.cura) maxs.cura = p.cura;
             });
 
-            // MVPs
+            // 1. MVPs
             let rankAtaque = players.map(p => {
                 let s = (normalize(p.k, mins.k, maxs.k) * 20) + (normalize(p.d, mins.d, maxs.d) * 20) + (normalize(p.c, mins.c, maxs.c) * 20) + (normalize(p.e, mins.e, maxs.e) * 20) + ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
                 return { nome: p.nome, score: parseFloat(s.toFixed(1)) };
@@ -212,7 +237,7 @@
             boxAtaque.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">⚔️ MVP ATAQUE ⚔️</div><div class="mvp-list">` + rankAtaque.slice(0, 10).map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i+1}º</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') + `</div>`;
             boxSuporte.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">🚑 MVP SUPORTE 🚑</div><div class="mvp-list">` + (rankSuporte.length > 0 ? rankSuporte.slice(0, 10).map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i+1}º</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') : '<div style="color:#aaa; text-align:center;">Dados insuficientes</div>') + `</div>`;
 
-            // 6 Cards
+            // 2. Os 6 Cards Originais
             const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
             const statsCols = columns.filter(col => {
                 if (col === nameCol) return false;
@@ -225,26 +250,128 @@
                 let lista = players.map(p => ({ nome: p.nome, val: parseToNumber(p.row[stat]), visual: p.row[stat] }))
                     .filter(p => !(stat.toUpperCase().includes("CURA") && p.val < 100000))
                     .sort((a,b) => b.val - a.val);
-
-                const card = document.createElement('div');
-                card.className = 'card';
-                let html = `<video class="hover-video" src="gifsuicide.mp4" loop muted playsinline></video><div class="card-content-wrapper"><div class="card-title">${stat}</div>`;
-                if (lista.length > 0) {
-                    html += `<div class="top1-container"><div class="top1-player">🏆 ${lista[0].nome}</div><div class="top1-value">${lista[0].visual}</div></div><div class="ranking-list">`;
-                    lista.slice(1, 5).forEach((p, i) => { html += `<div class="ranking-item"><span class="rank-pos">${i+2}º</span><span class="rank-name">${p.nome}</span><span class="rank-value">${p.visual}</span></div>`; });
-                    html += `</div>`;
-                }
-                html += `</div>`;
-                card.innerHTML = html;
-                grid.appendChild(card);
-                const v = card.querySelector('video');
-                card.onmouseenter = () => v.play();
-                card.onmouseleave = () => v.pause();
+                renderCardHtml(grid, stat, lista);
             });
 
+            // 3. Card 7: Eficiência Bruta (Dano por Morte)
+            let listaEficiencia = players.map(p => {
+                let mortesSeguras = p.m > 0 ? p.m : 1; // Evita divisão por zero
+                let eficiencia = p.d / mortesSeguras;
+                return { nome: p.nome, val: eficiencia, visual: Math.round(eficiencia).toLocaleString('pt-BR') };
+            }).sort((a,b) => b.val - a.val);
+            renderCardHtml(grid, "ÍNDICE DE EFICIÊNCIA (DANO/MORTE)", listaEficiencia);
+
+            // 4. Cards 8 e 9: Evolução e Consistência (Deixamos os shells prontos para o histórico preencher)
+            renderCardHtml(grid, "📈 EVOLUÇÃO DE DESEMPENHO", [], "card-evolucao");
+            renderCardHtml(grid, "🏅 CONSISTÊNCIA (TOP 5 MVP)", [], "card-consistencia");
+
             window.cacheRankings = { rankAtaque, rankSuporte, players, statsCols };
+            
+            // Chama a função assíncrona que lê as outras abas do Excel
+            processarHistoricoXLSX();
         }
 
+        // Função que baixa o arquivo original completo com as abas e calcula Evolução e Consistência
+        function processarHistoricoXLSX() {
+            const xlsxUrl = "https://docs.google.com/spreadsheets/d/1SlZsV1gc-tCiMuJfGnzdS-S12Mll8ZgoMtKpYPKgODw/export?format=xlsx";
+            const proxyXlsx = "https://corsproxy.io/?" + encodeURIComponent(xlsxUrl);
+
+            fetch(proxyXlsx)
+                .then(res => res.arrayBuffer())
+                .then(ab => {
+                    const wb = XLSX.read(ab, {type: 'array'});
+                    // Filtra para pegar apenas as abas de dias específicos (Ignora a Geral)
+                    const sheets = wb.SheetNames.filter(n => !n.toUpperCase().includes("GERAL") && !n.toUpperCase().includes("RANKING"));
+                    
+                    let consistenciaMap = {};
+                    let evolucaoMap = {}; 
+
+                    sheets.forEach(sheetName => {
+                        const sData = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {defval: ""});
+                        if(sData.length === 0) return;
+                        
+                        const cols = Object.keys(sData[0]);
+                        const nameCol = cols[0]; 
+                        const colK = cols.find(c => c.toUpperCase().includes("KILL"));
+                        const colD = cols.find(c => c.toUpperCase().includes("DANO") && !c.toUpperCase().includes("ESTRUTURA"));
+                        const colC = cols.find(c => c.toUpperCase().includes("CC"));
+                        const colE = cols.find(c => c.toUpperCase().includes("ESTRUTURA"));
+                        const colM = cols.find(c => c.toUpperCase().includes("DEATH"));
+                        
+                        if(!nameCol || !colK || !colD) return; 
+
+                        let sPlayers = [];
+                        sData.forEach(r => {
+                            if(r[nameCol]) {
+                                sPlayers.push({
+                                    nome: r[nameCol],
+                                    k: parseToNumber(r[colK]),
+                                    d: parseToNumber(r[colD]),
+                                    c: colC ? parseToNumber(r[colC]) : 0,
+                                    e: colE ? parseToNumber(r[colE]) : 0,
+                                    m: colM ? parseToNumber(r[colM]) : 0
+                                });
+                            }
+                        });
+
+                        let mins = {k: Infinity, d: Infinity, c: Infinity, e: Infinity, m: Infinity};
+                        let maxs = {k: -Infinity, d: -Infinity, c: -Infinity, e: -Infinity, m: -Infinity};
+                        sPlayers.forEach(p => {
+                            if(p.k < mins.k) mins.k = p.k; if(p.k > maxs.k) maxs.k = p.k;
+                            if(p.d < mins.d) mins.d = p.d; if(p.d > maxs.d) maxs.d = p.d;
+                            if(p.c < mins.c) mins.c = p.c; if(p.c > maxs.c) maxs.c = p.c;
+                            if(p.e < mins.e) mins.e = p.e; if(p.e > maxs.e) maxs.e = p.e;
+                            if(p.m < mins.m) mins.m = p.m; if(p.m > maxs.m) maxs.m = p.m;
+                        });
+
+                        sPlayers.forEach(p => {
+                            let score = (normalize(p.k, mins.k, maxs.k) * 20) + 
+                                        (normalize(p.d, mins.d, maxs.d) * 20) + 
+                                        (normalize(p.c, mins.c, maxs.c) * 20) + 
+                                        (normalize(p.e, mins.e, maxs.e) * 20) + 
+                                        ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
+                            p.score = score;
+                            if(!evolucaoMap[p.nome]) evolucaoMap[p.nome] = [];
+                            evolucaoMap[p.nome].push(score);
+                        });
+
+                        sPlayers.sort((a,b) => b.score - a.score);
+                        
+                        // Troféu de Consistência (Top 5 daquele node específico)
+                        sPlayers.slice(0, 5).forEach(p => {
+                            consistenciaMap[p.nome] = (consistenciaMap[p.nome] || 0) + 1;
+                        });
+                    });
+
+                    // Monta lista de Consistência
+                    let listaConsistencia = Object.keys(consistenciaMap).map(n => ({
+                        nome: n, val: consistenciaMap[n], visual: consistenciaMap[n] + " Troféus"
+                    })).sort((a,b) => b.val - a.val);
+
+                    // Monta lista de Evolução (Compara a nota mais recente com a mais antiga do jogador)
+                    let listaEvolucao = Object.keys(evolucaoMap).map(n => {
+                        let scores = evolucaoMap[n];
+                        if(scores.length < 2) return null; // Precisa de pelo menos 2 nodes de histórico
+                        let ev = scores[0] - scores[scores.length - 1]; // Assume que as abas mais novas estão primeiro à esquerda
+                        return { nome: n, val: ev, visual: (ev > 0 ? "+" : "") + ev.toFixed(1) + " pts" };
+                    }).filter(p => p && p.val > 0).sort((a,b) => b.val - a.val);
+
+                    // Atualiza o DOM injetando as listas nos shells que criamos
+                    const divEvolucao = document.getElementById('card-evolucao');
+                    const divConsistencia = document.getElementById('card-consistencia');
+                    
+                    divEvolucao.innerHTML = ""; divConsistencia.innerHTML = ""; // Limpa os "Carregando"
+                    renderCardHtml(divEvolucao, "📈 EVOLUÇÃO DE DESEMPENHO", listaEvolucao);
+                    renderCardHtml(divConsistencia, "🏅 CONSISTÊNCIA (TOP 5 MVP)", listaConsistencia);
+                    
+                    // Ajuste de classes no HTML renderizado para reaproveitar css
+                    divEvolucao.innerHTML = divEvolucao.firstChild.innerHTML;
+                    divConsistencia.innerHTML = divConsistencia.firstChild.innerHTML;
+
+                }).catch(err => console.log("Erro ao processar histórico: ", err));
+        }
+
+        // LÓGICA DA BUSCA (PERMANECE INTACTA)
         function buscarPlayer() {
             const query = document.getElementById('player-search').value.toLowerCase().trim();
             if (!query) return;
@@ -277,6 +404,12 @@
                 let val = player.row[stat] || "0";
                 statsHtml += `<div class="result-item"><span class="result-label">${stat}</span><div><span class="result-value">${val}</span><span class="result-rank">${pos > 0 ? pos + 'º' : 'N/A'}</span></div></div>`;
             });
+
+            // Adiciona eficiência na busca também
+            let efList = players.map(p => ({ nome: p.nome, val: p.d / (p.m > 0 ? p.m : 1) })).sort((a,b) => b.val - a.val);
+            let efPos = efList.findIndex(f => f.nome === player.nome) + 1;
+            let efVal = Math.round(efList.find(f => f.nome === player.nome).val).toLocaleString('pt-BR');
+            statsHtml += `<div class="result-item"><span class="result-label">EFICIÊNCIA BRUTA</span><div><span class="result-value">${efVal}</span><span class="result-rank">${efPos > 0 ? efPos + 'º' : 'N/A'}</span></div></div>`;
 
             content.innerHTML = `
                 <span class="close-result" onclick="fecharBusca()">&times;</span>
