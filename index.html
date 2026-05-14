@@ -255,32 +255,36 @@
 
             // 3. Card 7: Eficiência Bruta (Dano por Morte)
             let listaEficiencia = players.map(p => {
-                let mortesSeguras = p.m > 0 ? p.m : 1; // Evita divisão por zero
+                let mortesSeguras = p.m > 0 ? p.m : 1; 
                 let eficiencia = p.d / mortesSeguras;
                 return { nome: p.nome, val: eficiencia, visual: Math.round(eficiencia).toLocaleString('pt-BR') };
             }).sort((a,b) => b.val - a.val);
             renderCardHtml(grid, "ÍNDICE DE EFICIÊNCIA (DANO/MORTE)", listaEficiencia);
 
-            // 4. Cards 8 e 9: Evolução e Consistência (Deixamos os shells prontos para o histórico preencher)
+            // 4. Cards 8 e 9: Evolução e Consistência (Deixamos os shells prontos)
             renderCardHtml(grid, "📈 EVOLUÇÃO DE DESEMPENHO", [], "card-evolucao");
             renderCardHtml(grid, "🏅 CONSISTÊNCIA (TOP 5 MVP)", [], "card-consistencia");
 
             window.cacheRankings = { rankAtaque, rankSuporte, players, statsCols };
             
-            // Chama a função assíncrona que lê as outras abas do Excel
+            // Inicia o processamento histórico usando o link PÚBLICO do Excel
             processarHistoricoXLSX();
         }
 
-        // Função que baixa o arquivo original completo com as abas e calcula Evolução e Consistência
+        // Função que baixa o arquivo completo e calcula Evolução e Consistência
         function processarHistoricoXLSX() {
-            const xlsxUrl = "https://docs.google.com/spreadsheets/d/1SlZsV1gc-tCiMuJfGnzdS-S12Mll8ZgoMtKpYPKgODw/export?format=xlsx";
+            // ATENÇÃO: Link alterado para /pub?output=xlsx para burlar o login do Google!
+            const xlsxUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?output=xlsx";
             const proxyXlsx = "https://corsproxy.io/?" + encodeURIComponent(xlsxUrl);
 
             fetch(proxyXlsx)
-                .then(res => res.arrayBuffer())
+                .then(res => {
+                    if (!res.ok) throw new Error("Acesso negado ou link inválido");
+                    return res.arrayBuffer();
+                })
                 .then(ab => {
                     const wb = XLSX.read(ab, {type: 'array'});
-                    // Filtra para pegar apenas as abas de dias específicos (Ignora a Geral)
+                    
                     const sheets = wb.SheetNames.filter(n => !n.toUpperCase().includes("GERAL") && !n.toUpperCase().includes("RANKING"));
                     
                     let consistenciaMap = {};
@@ -337,38 +341,40 @@
 
                         sPlayers.sort((a,b) => b.score - a.score);
                         
-                        // Troféu de Consistência (Top 5 daquele node específico)
                         sPlayers.slice(0, 5).forEach(p => {
                             consistenciaMap[p.nome] = (consistenciaMap[p.nome] || 0) + 1;
                         });
                     });
 
-                    // Monta lista de Consistência
                     let listaConsistencia = Object.keys(consistenciaMap).map(n => ({
                         nome: n, val: consistenciaMap[n], visual: consistenciaMap[n] + " Troféus"
                     })).sort((a,b) => b.val - a.val);
 
-                    // Monta lista de Evolução (Compara a nota mais recente com a mais antiga do jogador)
+                    // Importante: A aba da esquerda no Excel é a [0]. Geralmente a mais nova. 
+                    // Se você cria as abas mais recentes na esquerda, score[0] é o atual, score[ultimo] é o antigo.
                     let listaEvolucao = Object.keys(evolucaoMap).map(n => {
                         let scores = evolucaoMap[n];
-                        if(scores.length < 2) return null; // Precisa de pelo menos 2 nodes de histórico
-                        let ev = scores[0] - scores[scores.length - 1]; // Assume que as abas mais novas estão primeiro à esquerda
+                        if(scores.length < 2) return null; 
+                        let ev = scores[0] - scores[scores.length - 1]; 
                         return { nome: n, val: ev, visual: (ev > 0 ? "+" : "") + ev.toFixed(1) + " pts" };
                     }).filter(p => p && p.val > 0).sort((a,b) => b.val - a.val);
 
-                    // Atualiza o DOM injetando as listas nos shells que criamos
                     const divEvolucao = document.getElementById('card-evolucao');
                     const divConsistencia = document.getElementById('card-consistencia');
                     
-                    divEvolucao.innerHTML = ""; divConsistencia.innerHTML = ""; // Limpa os "Carregando"
+                    divEvolucao.innerHTML = ""; divConsistencia.innerHTML = ""; 
                     renderCardHtml(divEvolucao, "📈 EVOLUÇÃO DE DESEMPENHO", listaEvolucao);
                     renderCardHtml(divConsistencia, "🏅 CONSISTÊNCIA (TOP 5 MVP)", listaConsistencia);
                     
-                    // Ajuste de classes no HTML renderizado para reaproveitar css
                     divEvolucao.innerHTML = divEvolucao.firstChild.innerHTML;
                     divConsistencia.innerHTML = divConsistencia.firstChild.innerHTML;
 
-                }).catch(err => console.log("Erro ao processar histórico: ", err));
+                }).catch(err => {
+                    console.log("Erro ao processar histórico: ", err);
+                    // Mensagem de erro caso o link do Google falhe por algum motivo
+                    document.getElementById('card-evolucao').innerHTML = `<div class="card-title">📈 EVOLUÇÃO</div><div style="margin-top:4vh; color:#e63946; text-align:center; padding: 0 2vh;">Falha ao carregar abas.<br>Planilha publicada?</div>`;
+                    document.getElementById('card-consistencia').innerHTML = `<div class="card-title">🏅 CONSISTÊNCIA</div><div style="margin-top:4vh; color:#e63946; text-align:center; padding: 0 2vh;">Falha ao carregar abas.<br>Planilha publicada?</div>`;
+                });
         }
 
         // LÓGICA DA BUSCA (PERMANECE INTACTA)
@@ -405,7 +411,6 @@
                 statsHtml += `<div class="result-item"><span class="result-label">${stat}</span><div><span class="result-value">${val}</span><span class="result-rank">${pos > 0 ? pos + 'º' : 'N/A'}</span></div></div>`;
             });
 
-            // Adiciona eficiência na busca também
             let efList = players.map(p => ({ nome: p.nome, val: p.d / (p.m > 0 ? p.m : 1) })).sort((a,b) => b.val - a.val);
             let efPos = efList.findIndex(f => f.nome === player.nome) + 1;
             let efVal = Math.round(efList.find(f => f.nome === player.nome).val).toLocaleString('pt-BR');
