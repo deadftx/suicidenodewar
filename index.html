@@ -79,21 +79,18 @@
 
     <!-- 3 CAIXAS DE HOMENAGEM -->
     <div class="homenagem-container">
-        <!-- Esquerda: Bandeira -->
         <div class="homenagem-box">
             <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
             <div class="homenagem-titulo">🚩 Sem sua bandeira a gente não vive 🚩</div>
             <div class="homenagem-nomes">Apokalypse</div>
         </div>
         
-        <!-- Centro: Defesa (Original) -->
         <div class="homenagem-box">
             <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
             <div class="homenagem-titulo">🛡️ Sentinelas da Base 🛡️</div>
             <div class="homenagem-nomes">ZeXXay • YonaShirai • LinkyShirai</div>
         </div>
         
-        <!-- Direita: Shais -->
         <div class="homenagem-box">
             <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
             <div class="homenagem-titulo">🎵 Sem nossas Shais a gente não consegue 🎵</div>
@@ -122,7 +119,6 @@
     <div id="search-result-overlay">
         <div class="result-card" id="result-card-content">
             <span class="close-result" onclick="fecharBusca()">&times;</span>
-            <!-- Conteúdo inserido via JS -->
         </div>
     </div>
 
@@ -156,7 +152,6 @@
             }
         });
 
-        // Função utilitária para renderizar Cards no Grid
         function renderCardHtml(container, title, lista, id = null) {
             const card = document.createElement('div');
             card.className = 'card';
@@ -267,14 +262,13 @@
 
             window.cacheRankings = { rankAtaque, rankSuporte, players, statsCols };
             
-            // Inicia o processamento histórico usando o link PÚBLICO do Excel
+            // Inicia o processamento histórico
             processarHistoricoXLSX();
         }
 
-        // Função que baixa o arquivo completo e calcula Evolução e Consistência
+        // Função que baixa o arquivo completo via ID real e calcula Evolução e Consistência
         function processarHistoricoXLSX() {
-            // ATENÇÃO: Link alterado para /pub?output=xlsx para burlar o login do Google!
-            const xlsxUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?output=xlsx";
+            const xlsxUrl = "https://docs.google.com/spreadsheets/d/1SlZsV1gc-tCiMuJfGnzdS-S12Mll8ZgoMtKpYPKgODw/export?format=xlsx";
             const proxyXlsx = "https://corsproxy.io/?" + encodeURIComponent(xlsxUrl);
 
             fetch(proxyXlsx)
@@ -350,8 +344,6 @@
                         nome: n, val: consistenciaMap[n], visual: consistenciaMap[n] + " Troféus"
                     })).sort((a,b) => b.val - a.val);
 
-                    // Importante: A aba da esquerda no Excel é a [0]. Geralmente a mais nova. 
-                    // Se você cria as abas mais recentes na esquerda, score[0] é o atual, score[ultimo] é o antigo.
                     let listaEvolucao = Object.keys(evolucaoMap).map(n => {
                         let scores = evolucaoMap[n];
                         if(scores.length < 2) return null; 
@@ -371,13 +363,12 @@
 
                 }).catch(err => {
                     console.log("Erro ao processar histórico: ", err);
-                    // Mensagem de erro caso o link do Google falhe por algum motivo
-                    document.getElementById('card-evolucao').innerHTML = `<div class="card-title">📈 EVOLUÇÃO</div><div style="margin-top:4vh; color:#e63946; text-align:center; padding: 0 2vh;">Falha ao carregar abas.<br>Planilha publicada?</div>`;
-                    document.getElementById('card-consistencia').innerHTML = `<div class="card-title">🏅 CONSISTÊNCIA</div><div style="margin-top:4vh; color:#e63946; text-align:center; padding: 0 2vh;">Falha ao carregar abas.<br>Planilha publicada?</div>`;
+                    document.getElementById('card-evolucao').innerHTML = `<div class="card-title">📈 EVOLUÇÃO</div><div style="margin-top:4vh; color:#e63946; text-align:center; padding: 0 2vh; font-weight:bold;">Acesso Negado.<br>A planilha está como 'Qualquer pessoa com o link'?</div>`;
+                    document.getElementById('card-consistencia').innerHTML = `<div class="card-title">🏅 CONSISTÊNCIA</div><div style="margin-top:4vh; color:#e63946; text-align:center; padding: 0 2vh; font-weight:bold;">Acesso Negado.<br>A planilha está como 'Qualquer pessoa com o link'?</div>`;
                 });
         }
 
-        // LÓGICA DA BUSCA (PERMANECE INTACTA)
+        // LÓGICA DA BUSCA 
         function buscarPlayer() {
             const query = document.getElementById('player-search').value.toLowerCase().trim();
             if (!query) return;
