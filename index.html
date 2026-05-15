@@ -246,7 +246,6 @@
                 renderCardHtml(grid, stat, lista);
             });
 
-            // Deixando o Grid com 8 Cards perfeitos (6 Originais + 2 Novos)
             renderCardHtml(grid, "📈 EVOLUÇÃO (QUEBRAS DE MÉDIA)", [], "card-evolucao");
             renderCardHtml(grid, "🏅 CONSISTÊNCIA (TOP 5 MVP)", [], "card-consistencia");
 
@@ -355,43 +354,40 @@
                     })).sort((a,b) => b.val - a.val);
 
                     // ==========================================
-                    // NOVO CÁLCULO DE EVOLUÇÃO (MÉDIA MÓVEL)
+                    // NOVO CÁLCULO DE EVOLUÇÃO (DIFERENÇA PARA A MÉDIA MÓVEL)
                     // ==========================================
                     let listaEvolucao = [];
                     Object.keys(historicoNotasMap).forEach(n => {
                         let notas = historicoNotasMap[n];
-                        // O jogador precisa de pelo menos 2 nodes no histórico
+                        
                         if(contagemNodesPorPlayer[n] >= 2 && notas.length >= 2) {
-                            let progressoes = 0;
-                            let somaNotasParaMedia = notas[0]; // O Dia 1 cria a régua
+                            let pontuacaoQuebra = 0;
+                            let somaNotasParaMedia = notas[0]; 
                             let quantidadeParaMedia = 1;
 
-                            // Começa a analisar do Dia 2 em diante
                             for(let i = 1; i < notas.length; i++) {
                                 let mediaAtual = somaNotasParaMedia / quantidadeParaMedia;
                                 let notaDoDia = notas[i];
 
-                                // Se a nota de hoje superou a média do passado, ganha 1 ponto
+                                // Agora ele soma os NÚMEROS QUEBRADOS (a diferença exata que superou a régua)
                                 if (notaDoDia > mediaAtual) {
-                                    progressoes += 1;
+                                    pontuacaoQuebra += (notaDoDia - mediaAtual);
                                 }
 
-                                // Incorpora a nota de hoje na média para amanhã
                                 somaNotasParaMedia += notaDoDia;
                                 quantidadeParaMedia += 1;
                             }
 
-                            if (progressoes > 0) {
+                            if (pontuacaoQuebra > 0) {
                                 listaEvolucao.push({
                                     nome: n, 
-                                    val: progressoes, 
-                                    visual: progressoes + (progressoes === 1 ? " Progressão" : " Progressões")
+                                    val: pontuacaoQuebra, 
+                                    visual: "+" + pontuacaoQuebra.toFixed(1) + " pts"
                                 });
                             }
                         }
                     });
 
-                    // Ordena do maior pro menor
                     listaEvolucao.sort((a,b) => b.val - a.val);
 
                     window.cacheRankings.listaEvolucao = listaEvolucao;
@@ -448,12 +444,12 @@
             });
 
             let objEv = listaEvolucao.find(f => f.nome === player.nome);
-            let valEv = objEv ? objEv.visual : "0";
+            let valEv = objEv ? objEv.visual : "0 pts";
             let posEv = objEv ? listaEvolucao.findIndex(f => f.nome === player.nome) + 1 : "N/A";
             statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">📈 EVOLUÇÃO</span><div><span class="result-value" style="color:#ffd700;">${valEv}</span><span class="result-rank">${posEv !== "N/A" ? posEv + 'º' : 'N/A'}</span></div></div>`;
 
             let objCon = listaConsistencia.find(f => f.nome === player.nome);
-            let valCon = objCon ? objCon.visual : "0";
+            let valCon = objCon ? objCon.visual : "0 Troféus";
             let posCon = objCon ? listaConsistencia.findIndex(f => f.nome === player.nome) + 1 : "N/A";
             statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">🏅 CONSISTÊNCIA</span><div><span class="result-value" style="color:#ffd700;">${valCon}</span><span class="result-rank">${posCon !== "N/A" ? posCon + 'º' : 'N/A'}</span></div></div>`;
 
