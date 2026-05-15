@@ -67,7 +67,7 @@
 
         #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4vh; color: #ffd700; z-index: 100; }
         .card:nth-child(1)::before { background: #457b9d; } .card:nth-child(2)::before { background: #e63946; } .card:nth-child(3)::before { background: #f4a261; } .card:nth-child(4)::before { background: #9b5de5; } .card:nth-child(5)::before { background: #00f5d4; } .card:nth-child(6)::before { background: #fee440; }
-        .card:nth-child(7)::before { background: #ff5400; } .card:nth-child(8)::before { background: #39ff14; } .card:nth-child(9)::before { background: #ff00ff; }
+        .card:nth-child(7)::before { background: #ff5400; } .card:nth-child(8)::before { background: #39ff14; }
     </style>
 </head>
 <body>
@@ -120,16 +120,14 @@
         let colunasCalculadas = {};
 
         // === LINKS DAS PLANILHAS CSV ===
-        // 1. Aba Principal
         const csvUrlGeral = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?gid=1115049823&single=true&output=csv";
-        // 2. A Sua Nova Aba de Histórico (ID 343036287)
         const csvUrlHistorico = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?gid=343036287&single=true&output=csv";
         
         const proxyGeral = "https://corsproxy.io/?" + encodeURIComponent(csvUrlGeral);
         const proxyHist = "https://corsproxy.io/?" + encodeURIComponent(csvUrlHistorico);
 
         function parseToNumber(val) {
-            if (!val || val.trim() === "") return -Infinity;
+            if (!val || String(val).trim() === "") return -Infinity;
             let str = String(val).trim().replace(/[^\d.,-]/g, '').replace(/\./g, '').replace(',', '.'); 
             const num = parseFloat(str);
             return isNaN(num) ? -Infinity : num;
@@ -179,7 +177,9 @@
             
             const columns = Object.keys(data[0]);
             const nameCol = columns[0];
-            const colNodes = columns.find(c => c.toUpperCase().includes("NODE") && c.toUpperCase().includes("NUMERO"));
+            
+            // Tratamento robusto para achar as colunas independente de nome exato
+            const colNodes = columns.find(c => c.toUpperCase().includes("NODE") || c.toUpperCase().includes("PARTICIPA")) || columns[1];
             const colKills = columns.find(c => c.toUpperCase().includes("KILL") && c.toUpperCase().includes("MÉDIA"));
             const colDano = columns.find(c => c.toUpperCase().includes("DANO") && c.toUpperCase().includes("MÉDI"));
             const colCC = columns.find(c => c.toUpperCase().includes("CC"));
@@ -192,9 +192,12 @@
             let players = [];
             data.forEach(row => {
                 const nodes = parseToNumber(row[colNodes]);
-                if (row[nameCol] && nodes >= 2) {
+                // Adicionamos o TRIM no nome logo aqui para blindar o banco de dados
+                let playerName = row[nameCol] ? String(row[nameCol]).trim() : null;
+
+                if (playerName && nodes >= 2) {
                     players.push({
-                        nome: row[nameCol],
+                        nome: playerName,
                         k: parseToNumber(row[colKills]) === -Infinity ? 0 : parseToNumber(row[colKills]),
                         d: parseToNumber(row[colDano]) === -Infinity ? 0 : parseToNumber(row[colDano]),
                         c: parseToNumber(row[colCC]) === -Infinity ? 0 : parseToNumber(row[colCC]),
@@ -217,7 +220,6 @@
                 if(p.cura < mins.cura) mins.cura = p.cura; if(p.cura > maxs.cura) maxs.cura = p.cura;
             });
 
-            // MVPs
             let rankAtaque = players.map(p => {
                 let s = (normalize(p.k, mins.k, maxs.k) * 20) + (normalize(p.d, mins.d, maxs.d) * 20) + (normalize(p.c, mins.c, maxs.c) * 20) + (normalize(p.e, mins.e, maxs.e) * 20) + ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
                 return { nome: p.nome, score: parseFloat(s.toFixed(1)) };
@@ -231,7 +233,6 @@
             boxAtaque.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">⚔️ MVP ATAQUE ⚔️</div><div class="mvp-list">` + rankAtaque.slice(0, 10).map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i+1}º</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') + `</div>`;
             boxSuporte.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">🚑 MVP SUPORTE 🚑</div><div class="mvp-list">` + (rankSuporte.length > 0 ? rankSuporte.slice(0, 10).map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i+1}º</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') : '<div style="color:#aaa; text-align:center; padding: 2vh;">Dados insuficientes</div>') + `</div>`;
 
-            // 6 Cards Originais
             const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
             const statsCols = columns.filter(col => {
                 if (col === nameCol) return false;
@@ -247,13 +248,12 @@
                 renderCardHtml(grid, stat, lista);
             });
 
-            // Cards 8 e 9: Esperam o Histórico carregar (Evolução e Consistência)
             renderCardHtml(grid, "📈 EVOLUÇÃO DE DESEMPENHO", [], "card-evolucao");
             renderCardHtml(grid, "🏅 CONSISTÊNCIA (TOP 5 MVP)", [], "card-consistencia");
 
-            window.cacheRankings = { rankAtaque, rankSuporte, players, statsCols };
+            // Guarda tudo no cache, criando espaço pro histórico também
+            window.cacheRankings = { rankAtaque, rankSuporte, players, statsCols, listaEvolucao: [], listaConsistencia: [] };
             
-            // Inicia o processamento da ABA SECUNDÁRIA (Histórico)
             processarNovaAbaHistorico();
         }
 
@@ -267,10 +267,8 @@
                     if(hData.length === 0) return;
 
                     const cols = Object.keys(hData[0]);
-                    const nameCol = cols[0]; // Jogador
-                    
+                    const nameCol = cols[0]; 
                     const colData = cols.find(c => c.toUpperCase().includes("DATA") || c.toUpperCase().includes("DIA") || c.toUpperCase().includes("NODE") || c.toUpperCase().includes("GUERRA"));
-                    
                     const colK = cols.find(c => c.toUpperCase().includes("KILL"));
                     const colD = cols.find(c => c.toUpperCase().includes("DANO") && !c.toUpperCase().includes("ESTRUTURA"));
                     const colC = cols.find(c => c.toUpperCase().includes("CC"));
@@ -279,20 +277,17 @@
                     const colCura = cols.find(c => c.toUpperCase().includes("CURA"));
 
                     if(!nameCol || !colData || !colK) {
-                        document.getElementById('card-evolucao').innerHTML = `<div class="card-title" style="color:#e63946;">📈 EVOLUÇÃO</div><div style="margin-top:4vh; text-align:center; font-weight:bold;">Erro: Falta a coluna 'DATA' ou 'NODE' no histórico.</div>`;
+                        document.getElementById('card-evolucao').innerHTML = `<div class="card-title" style="color:#e63946;">📈 EVOLUÇÃO</div><div style="margin-top:4vh; text-align:center; font-weight:bold;">Erro: Falta coluna de Data.</div>`;
                         return;
                     }
 
-                    // Agrupa todos os registros por "Data" ou "Nome do Node"
                     let nodesAgrupados = {};
                     let ordensNodes = []; 
-                    
-                    // Conta quantos nodes o cara participou no geral, para filtrar quem tem < 2
                     let contagemNodesPorPlayer = {};
                     
                     hData.forEach(row => {
                         let dataValor = row[colData];
-                        let playerNome = row[nameCol];
+                        let playerNome = row[nameCol] ? String(row[nameCol]).trim() : null;
                         
                         if (dataValor && playerNome) {
                             if(!nodesAgrupados[dataValor]) {
@@ -300,7 +295,6 @@
                                 ordensNodes.push(dataValor);
                             }
                             nodesAgrupados[dataValor].push(row);
-                            
                             contagemNodesPorPlayer[playerNome] = (contagemNodesPorPlayer[playerNome] || 0) + 1;
                         }
                     });
@@ -308,17 +302,17 @@
                     let consistenciaMap = {};
                     let evolucaoMap = {};
 
-                    // Analisa cada dia de guerra separadamente
                     ordensNodes.forEach(dataKey => {
                         let sData = nodesAgrupados[dataKey];
                         let sPlayers = [];
 
                         sData.forEach(r => {
+                            let pNome = String(r[nameCol]).trim();
                             let curaVal = colCura ? parseToNumber(r[colCura]) : 0;
-                            // Ignora curandeiros com +100k
+                            
                             if(curaVal < 100000) {
                                 sPlayers.push({
-                                    nome: r[nameCol],
+                                    nome: pNome,
                                     k: parseToNumber(r[colK]),
                                     d: parseToNumber(r[colD]),
                                     c: colC ? parseToNumber(r[colC]) : 0,
@@ -351,7 +345,6 @@
 
                         sPlayers.sort((a,b) => b.score - a.score);
                         
-                        // Quem ficou no Top 5 ganha 1 Troféu (só contabiliza pra quem tem 2+ nodes no total)
                         sPlayers.slice(0, 5).forEach(p => {
                             if(contagemNodesPorPlayer[p.nome] >= 2) {
                                 consistenciaMap[p.nome] = (consistenciaMap[p.nome] || 0) + 1;
@@ -359,15 +352,12 @@
                         });
                     });
 
-                    // Lista Final de Consistência
                     let listaConsistencia = Object.keys(consistenciaMap).map(n => ({
                         nome: n, val: consistenciaMap[n], visual: consistenciaMap[n] + " Troféus"
                     })).sort((a,b) => b.val - a.val);
 
-                    // Lista Final de Evolução (Nota Mais Recente - Nota Mais Antiga)
                     let listaEvolucao = Object.keys(evolucaoMap).map(n => {
                         let scores = evolucaoMap[n];
-                        // Só calcula a evolução se o cara tem histórico de no mínimo 2 dias
                         if(contagemNodesPorPlayer[n] >= 2 && scores.length >= 2) {
                             let ev = scores[scores.length - 1] - scores[0]; 
                             return { nome: n, val: ev, visual: (ev > 0 ? "+" : "") + ev.toFixed(1) + " pts" };
@@ -375,7 +365,10 @@
                         return null;
                     }).filter(p => p && p.val > 0).sort((a,b) => b.val - a.val);
 
-                    // Pinta as listas na tela
+                    // Salva no cache para a busca usar!
+                    window.cacheRankings.listaEvolucao = listaEvolucao;
+                    window.cacheRankings.listaConsistencia = listaConsistencia;
+
                     const divEvolucao = document.getElementById('card-evolucao');
                     const divConsistencia = document.getElementById('card-consistencia');
                     
@@ -385,21 +378,20 @@
                     
                     divEvolucao.innerHTML = divEvolucao.firstChild.innerHTML;
                     divConsistencia.innerHTML = divConsistencia.firstChild.innerHTML;
-                },
-                error: function(err) {
-                    document.getElementById('card-evolucao').innerHTML = `<div class="card-title" style="color:#e63946;">📈 EVOLUÇÃO</div><div style="margin-top:4vh; text-align:center;">Falha ao carregar Histórico.</div>`;
-                    document.getElementById('card-consistencia').innerHTML = `<div class="card-title" style="color:#e63946;">🏅 CONSISTÊNCIA</div><div style="margin-top:4vh; text-align:center;">Falha ao carregar Histórico.</div>`;
                 }
             });
         }
 
-        // LÓGICA DA BUSCA GERAL
+        // ====== LÓGICA DA BUSCA 100% BLINDADA ======
         function buscarPlayer() {
             const query = document.getElementById('player-search').value.toLowerCase().trim();
             if (!query) return;
 
-            const { rankAtaque, rankSuporte, players, statsCols } = window.cacheRankings;
-            const player = players.find(p => p.nome.toLowerCase().includes(query));
+            const { rankAtaque, rankSuporte, players, statsCols, listaEvolucao, listaConsistencia } = window.cacheRankings;
+            
+            // Procura exata primeiro, depois parcial
+            let player = players.find(p => p.nome.toLowerCase() === query);
+            if (!player) player = players.find(p => p.nome.toLowerCase().includes(query));
 
             const overlay = document.getElementById('search-result-overlay');
             const content = document.getElementById('result-card-content');
@@ -410,11 +402,14 @@
                 return;
             }
 
-            const posAtaque = rankAtaque.findIndex(r => r.nome === player.nome) + 1;
-            const scoreAtaque = rankAtaque.find(r => r.nome === player.nome).score;
-            const itemSuporte = rankSuporte.find(r => r.nome === player.nome);
-            const posSuporte = itemSuporte ? rankSuporte.findIndex(r => r.nome === player.nome) + 1 : "N/A";
-            const scoreSuporte = itemSuporte ? itemSuporte.score : "N/A";
+            // Buscas Seguras (Evita crash se o jogador não estiver numa lista)
+            const objAtaque = rankAtaque.find(r => r.nome === player.nome);
+            const posAtaque = objAtaque ? rankAtaque.findIndex(r => r.nome === player.nome) + 1 : "N/A";
+            const scoreAtaque = objAtaque ? objAtaque.score : "N/A";
+
+            const objSuporte = rankSuporte.find(r => r.nome === player.nome);
+            const posSuporte = objSuporte ? rankSuporte.findIndex(r => r.nome === player.nome) + 1 : "N/A";
+            const scoreSuporte = objSuporte ? objSuporte.score : "N/A";
 
             let statsHtml = "";
             statsCols.forEach(stat => {
@@ -427,15 +422,26 @@
                 statsHtml += `<div class="result-item"><span class="result-label">${stat}</span><div><span class="result-value">${val}</span><span class="result-rank">${pos > 0 ? pos + 'º' : 'N/A'}</span></div></div>`;
             });
 
+            // Adiciona Evolução e Consistência no Boletim do Jogador
+            let objEv = listaEvolucao.find(f => f.nome === player.nome);
+            let valEv = objEv ? objEv.visual : "0 pts";
+            let posEv = objEv ? listaEvolucao.findIndex(f => f.nome === player.nome) + 1 : "N/A";
+            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">📈 EVOLUÇÃO</span><div><span class="result-value" style="color:#ffd700;">${valEv}</span><span class="result-rank">${posEv !== "N/A" ? posEv + 'º' : 'N/A'}</span></div></div>`;
+
+            let objCon = listaConsistencia.find(f => f.nome === player.nome);
+            let valCon = objCon ? objCon.visual : "0";
+            let posCon = objCon ? listaConsistencia.findIndex(f => f.nome === player.nome) + 1 : "N/A";
+            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">🏅 CONSISTÊNCIA</span><div><span class="result-value" style="color:#ffd700;">${valCon}</span><span class="result-rank">${posCon !== "N/A" ? posCon + 'º' : 'N/A'}</span></div></div>`;
+
             content.innerHTML = `
                 <span class="close-result" onclick="fecharBusca()">&times;</span>
                 <div class="result-header">
                     <div class="result-name">${player.nome}</div>
-                    <div style="color: #ffd700; font-weight: bold; margin-top: 10px;">DADOS GERAIS DO JOGADOR</div>
+                    <div style="color: #ffd700; font-weight: bold; margin-top: 10px;">BOLETIM GERAL DE DESEMPENHO</div>
                 </div>
                 <div class="result-grid">
-                    <div class="result-item" style="background: rgba(230, 57, 70, 0.2);"><span class="result-label">MVP ATAQUE</span><div><span class="result-value">${scoreAtaque} pts</span><span class="result-rank">${posAtaque}º</span></div></div>
-                    <div class="result-item" style="background: rgba(0, 245, 212, 0.2);"><span class="result-label">MVP SUPORTE</span><div><span class="result-value">${scoreSuporte} ${scoreSuporte !== 'N/A' ? 'pts' : ''}</span><span class="result-rank">${posSuporte !== 'N/A' ? posSuporte + 'º' : 'N/A'}</span></div></div>
+                    <div class="result-item" style="background: rgba(230, 57, 70, 0.2);"><span class="result-label">MVP ATAQUE</span><div><span class="result-value">${scoreAtaque} pts</span><span class="result-rank">${posAtaque !== "N/A" ? posAtaque + 'º' : 'N/A'}</span></div></div>
+                    <div class="result-item" style="background: rgba(0, 245, 212, 0.2);"><span class="result-label">MVP SUPORTE</span><div><span class="result-value">${scoreSuporte} ${scoreSuporte !== 'N/A' ? 'pts' : ''}</span><span class="result-rank">${posSuporte !== "N/A" ? posSuporte + 'º' : 'N/A'}</span></div></div>
                     ${statsHtml}
                 </div>
             `;
