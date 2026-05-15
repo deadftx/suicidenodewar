@@ -246,7 +246,7 @@
                 renderCardHtml(grid, stat, lista);
             });
 
-            renderCardHtml(grid, "📈 EVOLUÇÃO (QUEBRAS DE MÉDIA)", [], "card-evolucao");
+            renderCardHtml(grid, "📈 EVOLUÇÃO (FLUTUAÇÃO POSITIVA)", [], "card-evolucao");
             renderCardHtml(grid, "🏅 CONSISTÊNCIA (TOP 5 MVP)", [], "card-consistencia");
 
             window.cacheRankings = { rankAtaque, rankSuporte, players, statsCols, listaEvolucao: [], listaConsistencia: [] };
@@ -354,35 +354,28 @@
                     })).sort((a,b) => b.val - a.val);
 
                     // ==========================================
-                    // NOVO CÁLCULO DE EVOLUÇÃO (DIFERENÇA PARA A MÉDIA MÓVEL)
+                    // NOVO CÁLCULO: FLUTUAÇÃO DA MÉDIA POSITIVA
                     // ==========================================
                     let listaEvolucao = [];
                     Object.keys(historicoNotasMap).forEach(n => {
                         let notas = historicoNotasMap[n];
                         
                         if(contagemNodesPorPlayer[n] >= 2 && notas.length >= 2) {
-                            let pontuacaoQuebra = 0;
-                            let somaNotasParaMedia = notas[0]; 
-                            let quantidadeParaMedia = 1;
+                            // 1. Calcula a Média Histórica Geral do jogador
+                            let somaTotal = notas.reduce((acc, val) => acc + val, 0);
+                            let mediaGeral = somaTotal / notas.length;
+                            
+                            // 2. Pega o Desempenho Atual (Última nota)
+                            let notaAtual = notas[notas.length - 1];
+                            
+                            // 3. Flutuação (O quanto ele jogou ACIMA da própria média)
+                            let flutuacao = notaAtual - mediaGeral;
 
-                            for(let i = 1; i < notas.length; i++) {
-                                let mediaAtual = somaNotasParaMedia / quantidadeParaMedia;
-                                let notaDoDia = notas[i];
-
-                                // Agora ele soma os NÚMEROS QUEBRADOS (a diferença exata que superou a régua)
-                                if (notaDoDia > mediaAtual) {
-                                    pontuacaoQuebra += (notaDoDia - mediaAtual);
-                                }
-
-                                somaNotasParaMedia += notaDoDia;
-                                quantidadeParaMedia += 1;
-                            }
-
-                            if (pontuacaoQuebra > 0) {
+                            if (flutuacao > 0) {
                                 listaEvolucao.push({
                                     nome: n, 
-                                    val: pontuacaoQuebra, 
-                                    visual: "+" + pontuacaoQuebra.toFixed(1) + " pts"
+                                    val: flutuacao, 
+                                    visual: "+" + flutuacao.toFixed(1) + " pts"
                                 });
                             }
                         }
@@ -397,7 +390,7 @@
                     const divConsistencia = document.getElementById('card-consistencia');
                     
                     divEvolucao.innerHTML = ""; divConsistencia.innerHTML = ""; 
-                    renderCardHtml(divEvolucao, "📈 EVOLUÇÃO (QUEBRAS DE MÉDIA)", listaEvolucao);
+                    renderCardHtml(divEvolucao, "📈 EVOLUÇÃO (FLUTUAÇÃO POSITIVA)", listaEvolucao);
                     renderCardHtml(divConsistencia, "🏅 CONSISTÊNCIA (TOP 5 MVP)", listaConsistencia);
                     
                     divEvolucao.innerHTML = divEvolucao.firstChild.innerHTML;
