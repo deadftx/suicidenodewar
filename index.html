@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nodewar Tops - Sistema de Busca, MVP e Histórico</title>
-    <!-- Apenas PapaParse (super rápido e à prova de bloqueios) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
@@ -270,7 +269,6 @@
                     const cols = Object.keys(hData[0]);
                     const nameCol = cols[0]; // Jogador
                     
-                    // Identifica a coluna que separa os dias (Node, Data, Dia)
                     const colData = cols.find(c => c.toUpperCase().includes("DATA") || c.toUpperCase().includes("DIA") || c.toUpperCase().includes("NODE") || c.toUpperCase().includes("GUERRA"));
                     
                     const colK = cols.find(c => c.toUpperCase().includes("KILL"));
@@ -278,6 +276,7 @@
                     const colC = cols.find(c => c.toUpperCase().includes("CC"));
                     const colE = cols.find(c => c.toUpperCase().includes("ESTRUTURA"));
                     const colM = cols.find(c => c.toUpperCase().includes("DEATH"));
+                    const colCura = cols.find(c => c.toUpperCase().includes("CURA"));
 
                     if(!nameCol || !colData || !colK) {
                         document.getElementById('card-evolucao').innerHTML = `<div class="card-title" style="color:#e63946;">📈 EVOLUÇÃO</div><div style="margin-top:4vh; text-align:center; font-weight:bold;">Erro: Falta a coluna 'DATA' ou 'NODE' no histórico.</div>`;
@@ -288,14 +287,21 @@
                     let nodesAgrupados = {};
                     let ordensNodes = []; 
                     
+                    // Conta quantos nodes o cara participou no geral, para filtrar quem tem < 2
+                    let contagemNodesPorPlayer = {};
+                    
                     hData.forEach(row => {
                         let dataValor = row[colData];
-                        if (dataValor && row[nameCol]) {
+                        let playerNome = row[nameCol];
+                        
+                        if (dataValor && playerNome) {
                             if(!nodesAgrupados[dataValor]) {
                                 nodesAgrupados[dataValor] = [];
                                 ordensNodes.push(dataValor);
                             }
                             nodesAgrupados[dataValor].push(row);
+                            
+                            contagemNodesPorPlayer[playerNome] = (contagemNodesPorPlayer[playerNome] || 0) + 1;
                         }
                     });
 
@@ -308,14 +314,18 @@
                         let sPlayers = [];
 
                         sData.forEach(r => {
-                            sPlayers.push({
-                                nome: r[nameCol],
-                                k: parseToNumber(r[colK]),
-                                d: parseToNumber(r[colD]),
-                                c: colC ? parseToNumber(r[colC]) : 0,
-                                e: colE ? parseToNumber(r[colE]) : 0,
-                                m: colM ? parseToNumber(r[colM]) : 0
-                            });
+                            let curaVal = colCura ? parseToNumber(r[colCura]) : 0;
+                            // Ignora curandeiros com +100k
+                            if(curaVal < 100000) {
+                                sPlayers.push({
+                                    nome: r[nameCol],
+                                    k: parseToNumber(r[colK]),
+                                    d: parseToNumber(r[colD]),
+                                    c: colC ? parseToNumber(r[colC]) : 0,
+                                    e: colE ? parseToNumber(r[colE]) : 0,
+                                    m: colM ? parseToNumber(r[colM]) : 0
+                                });
+                            }
                         });
 
                         let mins = {k: Infinity, d: Infinity, c: Infinity, e: Infinity, m: Infinity};
@@ -341,9 +351,11 @@
 
                         sPlayers.sort((a,b) => b.score - a.score);
                         
-                        // Quem ficou no Top 5 ganha 1 Troféu
+                        // Quem ficou no Top 5 ganha 1 Troféu (só contabiliza pra quem tem 2+ nodes no total)
                         sPlayers.slice(0, 5).forEach(p => {
-                            consistenciaMap[p.nome] = (consistenciaMap[p.nome] || 0) + 1;
+                            if(contagemNodesPorPlayer[p.nome] >= 2) {
+                                consistenciaMap[p.nome] = (consistenciaMap[p.nome] || 0) + 1;
+                            }
                         });
                     });
 
@@ -355,10 +367,12 @@
                     // Lista Final de Evolução (Nota Mais Recente - Nota Mais Antiga)
                     let listaEvolucao = Object.keys(evolucaoMap).map(n => {
                         let scores = evolucaoMap[n];
-                        if(scores.length < 2) return null; 
-                        
-                        let ev = scores[scores.length - 1] - scores[0]; 
-                        return { nome: n, val: ev, visual: (ev > 0 ? "+" : "") + ev.toFixed(1) + " pts" };
+                        // Só calcula a evolução se o cara tem histórico de no mínimo 2 dias
+                        if(contagemNodesPorPlayer[n] >= 2 && scores.length >= 2) {
+                            let ev = scores[scores.length - 1] - scores[0]; 
+                            return { nome: n, val: ev, visual: (ev > 0 ? "+" : "") + ev.toFixed(1) + " pts" };
+                        }
+                        return null;
                     }).filter(p => p && p.val > 0).sort((a,b) => b.val - a.val);
 
                     // Pinta as listas na tela
