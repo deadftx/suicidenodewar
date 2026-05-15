@@ -178,7 +178,6 @@
             const columns = Object.keys(data[0]);
             const nameCol = columns[0];
             
-            // Tratamento robusto para achar as colunas independente de nome exato
             const colNodes = columns.find(c => c.toUpperCase().includes("NODE") || c.toUpperCase().includes("PARTICIPA")) || columns[1];
             const colKills = columns.find(c => c.toUpperCase().includes("KILL") && c.toUpperCase().includes("MÉDIA"));
             const colDano = columns.find(c => c.toUpperCase().includes("DANO") && c.toUpperCase().includes("MÉDI"));
@@ -192,7 +191,6 @@
             let players = [];
             data.forEach(row => {
                 const nodes = parseToNumber(row[colNodes]);
-                // Adicionamos o TRIM no nome logo aqui para blindar o banco de dados
                 let playerName = row[nameCol] ? String(row[nameCol]).trim() : null;
 
                 if (playerName && nodes >= 2) {
@@ -248,10 +246,10 @@
                 renderCardHtml(grid, stat, lista);
             });
 
-            renderCardHtml(grid, "📈 EVOLUÇÃO DE DESEMPENHO", [], "card-evolucao");
+            // Deixando o Grid com 8 Cards perfeitos (6 Originais + 2 Novos)
+            renderCardHtml(grid, "📈 EVOLUÇÃO (QUEBRAS DE MÉDIA)", [], "card-evolucao");
             renderCardHtml(grid, "🏅 CONSISTÊNCIA (TOP 5 MVP)", [], "card-consistencia");
 
-            // Guarda tudo no cache, criando espaço pro histórico também
             window.cacheRankings = { rankAtaque, rankSuporte, players, statsCols, listaEvolucao: [], listaConsistencia: [] };
             
             processarNovaAbaHistorico();
@@ -300,7 +298,7 @@
                     });
 
                     let consistenciaMap = {};
-                    let evolucaoMap = {};
+                    let historicoNotasMap = {}; 
 
                     ordensNodes.forEach(dataKey => {
                         let sData = nodesAgrupados[dataKey];
@@ -339,8 +337,8 @@
                                         (normalize(p.e, mins.e, maxs.e) * 20) + 
                                         ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
                             p.score = score;
-                            if(!evolucaoMap[p.nome]) evolucaoMap[p.nome] = [];
-                            evolucaoMap[p.nome].push(score);
+                            if(!historicoNotasMap[p.nome]) historicoNotasMap[p.nome] = [];
+                            historicoNotasMap[p.nome].push(score);
                         });
 
                         sPlayers.sort((a,b) => b.score - a.score);
@@ -356,16 +354,46 @@
                         nome: n, val: consistenciaMap[n], visual: consistenciaMap[n] + " Troféus"
                     })).sort((a,b) => b.val - a.val);
 
-                    let listaEvolucao = Object.keys(evolucaoMap).map(n => {
-                        let scores = evolucaoMap[n];
-                        if(contagemNodesPorPlayer[n] >= 2 && scores.length >= 2) {
-                            let ev = scores[scores.length - 1] - scores[0]; 
-                            return { nome: n, val: ev, visual: (ev > 0 ? "+" : "") + ev.toFixed(1) + " pts" };
-                        }
-                        return null;
-                    }).filter(p => p && p.val > 0).sort((a,b) => b.val - a.val);
+                    // ==========================================
+                    // NOVO CÁLCULO DE EVOLUÇÃO (MÉDIA MÓVEL)
+                    // ==========================================
+                    let listaEvolucao = [];
+                    Object.keys(historicoNotasMap).forEach(n => {
+                        let notas = historicoNotasMap[n];
+                        // O jogador precisa de pelo menos 2 nodes no histórico
+                        if(contagemNodesPorPlayer[n] >= 2 && notas.length >= 2) {
+                            let progressoes = 0;
+                            let somaNotasParaMedia = notas[0]; // O Dia 1 cria a régua
+                            let quantidadeParaMedia = 1;
 
-                    // Salva no cache para a busca usar!
+                            // Começa a analisar do Dia 2 em diante
+                            for(let i = 1; i < notas.length; i++) {
+                                let mediaAtual = somaNotasParaMedia / quantidadeParaMedia;
+                                let notaDoDia = notas[i];
+
+                                // Se a nota de hoje superou a média do passado, ganha 1 ponto
+                                if (notaDoDia > mediaAtual) {
+                                    progressoes += 1;
+                                }
+
+                                // Incorpora a nota de hoje na média para amanhã
+                                somaNotasParaMedia += notaDoDia;
+                                quantidadeParaMedia += 1;
+                            }
+
+                            if (progressoes > 0) {
+                                listaEvolucao.push({
+                                    nome: n, 
+                                    val: progressoes, 
+                                    visual: progressoes + (progressoes === 1 ? " Progressão" : " Progressões")
+                                });
+                            }
+                        }
+                    });
+
+                    // Ordena do maior pro menor
+                    listaEvolucao.sort((a,b) => b.val - a.val);
+
                     window.cacheRankings.listaEvolucao = listaEvolucao;
                     window.cacheRankings.listaConsistencia = listaConsistencia;
 
@@ -373,7 +401,7 @@
                     const divConsistencia = document.getElementById('card-consistencia');
                     
                     divEvolucao.innerHTML = ""; divConsistencia.innerHTML = ""; 
-                    renderCardHtml(divEvolucao, "📈 EVOLUÇÃO DE DESEMPENHO", listaEvolucao);
+                    renderCardHtml(divEvolucao, "📈 EVOLUÇÃO (QUEBRAS DE MÉDIA)", listaEvolucao);
                     renderCardHtml(divConsistencia, "🏅 CONSISTÊNCIA (TOP 5 MVP)", listaConsistencia);
                     
                     divEvolucao.innerHTML = divEvolucao.firstChild.innerHTML;
@@ -382,14 +410,12 @@
             });
         }
 
-        // ====== LÓGICA DA BUSCA 100% BLINDADA ======
         function buscarPlayer() {
             const query = document.getElementById('player-search').value.toLowerCase().trim();
             if (!query) return;
 
             const { rankAtaque, rankSuporte, players, statsCols, listaEvolucao, listaConsistencia } = window.cacheRankings;
             
-            // Procura exata primeiro, depois parcial
             let player = players.find(p => p.nome.toLowerCase() === query);
             if (!player) player = players.find(p => p.nome.toLowerCase().includes(query));
 
@@ -402,7 +428,6 @@
                 return;
             }
 
-            // Buscas Seguras (Evita crash se o jogador não estiver numa lista)
             const objAtaque = rankAtaque.find(r => r.nome === player.nome);
             const posAtaque = objAtaque ? rankAtaque.findIndex(r => r.nome === player.nome) + 1 : "N/A";
             const scoreAtaque = objAtaque ? objAtaque.score : "N/A";
@@ -422,9 +447,8 @@
                 statsHtml += `<div class="result-item"><span class="result-label">${stat}</span><div><span class="result-value">${val}</span><span class="result-rank">${pos > 0 ? pos + 'º' : 'N/A'}</span></div></div>`;
             });
 
-            // Adiciona Evolução e Consistência no Boletim do Jogador
             let objEv = listaEvolucao.find(f => f.nome === player.nome);
-            let valEv = objEv ? objEv.visual : "0 pts";
+            let valEv = objEv ? objEv.visual : "0";
             let posEv = objEv ? listaEvolucao.findIndex(f => f.nome === player.nome) + 1 : "N/A";
             statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">📈 EVOLUÇÃO</span><div><span class="result-value" style="color:#ffd700;">${valEv}</span><span class="result-rank">${posEv !== "N/A" ? posEv + 'º' : 'N/A'}</span></div></div>`;
 
