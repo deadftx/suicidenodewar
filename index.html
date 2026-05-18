@@ -188,19 +188,17 @@
 
             colunasCalculadas = { nameCol, colNodes, colKills, colDano, colCC, colEst, colMortes, colCura };
 
-            // CÁLCULO CEGO PARA DESCOBRIR QUANTOS NODES A GUILDA FEZ
             let maxNodesGeral = 0;
             data.forEach(row => {
                 let n = parseInt(row[colNodes], 10);
-                // Limite de segurança < 200 pra ignorar lixos de formatação
                 if (!isNaN(n) && n > maxNodesGeral && n < 200) {
                     maxNodesGeral = n;
                 }
             });
             
-            let minNodesReqGeral = Math.max(2, Math.floor(maxNodesGeral * 0.30));
+            // AGORA É 25% (Assim, 14 * 0.25 = 3.5 -> Arredonda pra 3)
+            let minNodesReqGeral = Math.max(2, Math.floor(maxNodesGeral * 0.25));
             
-            // FEEDBACK VISUAL NA LUPA
             document.getElementById('player-search').placeholder = `Pesquisar (Corte: min. ${minNodesReqGeral} de ${maxNodesGeral} guerras)...`;
 
             let players = [];
@@ -293,7 +291,6 @@
                     let contagemNodesPorPlayer = {};
                     
                     hData.forEach(row => {
-                        // Limpando bem a data pra não contar lixo fantasma como dia de guerra
                         let dataValor = row[colData] ? String(row[colData]).trim() : null;
                         let playerNome = row[nameCol] ? String(row[nameCol]).trim() : null;
                         
@@ -308,7 +305,8 @@
                     });
 
                     let totalDeGuerras = ordensNodes.length;
-                    let minNodesReqHist = Math.max(2, Math.floor(totalDeGuerras * 0.30));
+                    // AGORA É 25% NO HISTÓRICO TAMBÉM
+                    let minNodesReqHist = Math.max(2, Math.floor(totalDeGuerras * 0.25));
 
                     let consistenciaMap = {};
                     let historicoNotasMap = {}; 
@@ -419,7 +417,7 @@
             const content = document.getElementById('result-card-content');
 
             if (!player) {
-                content.innerHTML = `<span class="close-result" onclick="fecharBusca()">&times;</span><div class="result-header"><div class="result-name">JOGADOR NÃO ENCONTRADO</div></div>`;
+                content.innerHTML = `<span class="close-result" onclick="fecharBusca()">&times;</span><div class="result-header"><div class="result-name">JOGADOR NÃO ENCONTRADO (OU ABAIXO DA RÉGUA)</div></div>`;
                 overlay.style.display = 'flex';
                 return;
             }
