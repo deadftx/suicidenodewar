@@ -285,7 +285,8 @@
             renderCardHtml(grid, "📈 EVOLUÇÃO (FLUTUAÇÃO POSITIVA)", [], "card-evolucao");
             renderCardHtml(grid, "🏅 CONSISTÊNCIA (TOP 5 MVP)", [], "card-consistencia");
 
-            window.cacheRankings = { rankAtaque, rankSuporte, players, statsCols, listaEvolucao: [], listaConsistencia: [] };
+            // Cache atualizado armazenando as TODAS as colunas para o modal
+            window.cacheRankings = { rankAtaque, rankSuporte, players, allColumns: columns, nameCol: nameCol, listaEvolucao: [], listaConsistencia: [] };
             
             processarNovaAbaHistorico();
         }
@@ -329,7 +330,7 @@
 
                     let totalDeGuerras = ordensNodes.length;
                     let dataInicial = ordensNodes[0] || "03/05";
-                    document.getElementById('estatisticas-guilda').innerHTML = `🚩 ${totalDeGuerras} GUERRAS REGISTRADAS (DESDE 03/05) 🚩`;
+                    document.getElementById('estatisticas-guilda').innerHTML = `🚩 ${totalDeGuerras} GUERRAS REGISTRADAS (DESDE ${dataInicial}) 🚩`;
 
                     let minNodesReqHist = Math.max(2, Math.floor(totalDeGuerras * 0.25));
 
@@ -429,11 +430,14 @@
             });
         }
 
+        // =====================================
+        // NOVA LUPA: MOSTRANDO TUDO DO JOGADOR
+        // =====================================
         function buscarPlayer() {
             const query = document.getElementById('player-search').value.toLowerCase().trim();
             if (!query) return;
 
-            const { rankAtaque, rankSuporte, players, statsCols, listaEvolucao, listaConsistencia } = window.cacheRankings;
+            const { rankAtaque, rankSuporte, players, allColumns, nameCol, listaEvolucao, listaConsistencia } = window.cacheRankings;
             
             let player = players.find(p => p.nome.toLowerCase() === query);
             if (!player) player = players.find(p => p.nome.toLowerCase().includes(query));
@@ -456,13 +460,26 @@
             const scoreSuporte = objSuporte ? objSuporte.score : "N/A";
 
             let statsHtml = "";
-            statsCols.forEach(stat => {
+            
+            // FILTRA APENAS A COLUNA DO NOME, MOSTRANDO O RESTO
+            const colunasInfo = allColumns.filter(c => c !== nameCol);
+            
+            colunasInfo.forEach(stat => {
+                let isDeath = stat.toUpperCase().includes("DEATH") || stat.toUpperCase().includes("MORTE");
+                
                 let fullRank = players.map(p => ({ nome: p.nome, val: parseToNumber(p.row[stat]), visual: p.row[stat] }))
-                    .filter(p => !(stat.toUpperCase().includes("CURA") && p.val < 100000))
-                    .sort((a,b) => b.val - a.val);
+                    .filter(p => !(stat.toUpperCase().includes("CURA") && p.val < 100000));
+                
+                // Se for morte, quem tem menos mortes fica com o Rank 1. O resto é padrão (quem tem mais ganha).
+                if (isDeath) {
+                    fullRank.sort((a,b) => a.val - b.val);
+                } else {
+                    fullRank.sort((a,b) => b.val - a.val);
+                }
                 
                 let pos = fullRank.findIndex(f => f.nome === player.nome) + 1;
                 let val = player.row[stat] || "0";
+                
                 statsHtml += `<div class="result-item"><span class="result-label">${stat}</span><div><span class="result-value">${val}</span><span class="result-rank">${pos > 0 ? pos + 'º' : 'N/A'}</span></div></div>`;
             });
 
