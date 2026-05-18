@@ -96,7 +96,7 @@
 
     <div class="search-container">
         <div class="search-box">
-            <input type="text" id="player-search" class="search-input" placeholder="Pesquisar boletim do jogador...">
+            <input type="text" id="player-search" class="search-input" placeholder="Pesquisando requisito de corte...">
             <button onclick="buscarPlayer()" class="search-btn">BUSCAR</button>
         </div>
     </div>
@@ -188,26 +188,26 @@
 
             colunasCalculadas = { nameCol, colNodes, colKills, colDano, colCC, colEst, colMortes, colCura };
 
-            // ==========================================
-            // 1. CÁLCULO EXATO DOS 30% PARA A ABA GERAL
-            // ==========================================
+            // CÁLCULO CEGO PARA DESCOBRIR QUANTOS NODES A GUILDA FEZ
             let maxNodesGeral = 0;
             data.forEach(row => {
-                let n = parseToNumber(row[colNodes]);
-                if (n > maxNodesGeral && n < 1000) maxNodesGeral = n; // Limite de sanidade
+                let n = parseInt(row[colNodes], 10);
+                // Limite de segurança < 200 pra ignorar lixos de formatação
+                if (!isNaN(n) && n > maxNodesGeral && n < 200) {
+                    maxNodesGeral = n;
+                }
             });
             
-            // Math.floor garante que 3.9 vira 3. 
-            // Math.max garante que o sistema nunca vá pedir menos de 2 nodes, senão não tem evolução
             let minNodesReqGeral = Math.max(2, Math.floor(maxNodesGeral * 0.30));
-            console.log(`[Ranking Geral] Total de Guerras: ${maxNodesGeral} | Régua de Corte (30%): ${minNodesReqGeral} nodes.`);
+            
+            // FEEDBACK VISUAL NA LUPA
+            document.getElementById('player-search').placeholder = `Pesquisar (Corte: min. ${minNodesReqGeral} de ${maxNodesGeral} guerras)...`;
 
             let players = [];
             data.forEach(row => {
                 const nodes = parseToNumber(row[colNodes]);
                 let playerName = row[nameCol] ? String(row[nameCol]).trim() : null;
 
-                // Agora só passa quem bateu a régua exata arredondada para baixo
                 if (playerName && nodes >= minNodesReqGeral) {
                     players.push({
                         nome: playerName,
@@ -288,20 +288,16 @@
                     const colM = cols.find(c => c.toUpperCase().includes("DEATH"));
                     const colCura = cols.find(c => c.toUpperCase().includes("CURA"));
 
-                    if(!nameCol || !colData || !colK) {
-                        document.getElementById('card-evolucao').innerHTML = `<div class="card-title" style="color:#e63946;">📈 EVOLUÇÃO</div><div style="margin-top:4vh; text-align:center; font-weight:bold;">Erro: Falta coluna de Data.</div>`;
-                        return;
-                    }
-
                     let nodesAgrupados = {};
                     let ordensNodes = []; 
                     let contagemNodesPorPlayer = {};
                     
                     hData.forEach(row => {
-                        let dataValor = row[colData];
+                        // Limpando bem a data pra não contar lixo fantasma como dia de guerra
+                        let dataValor = row[colData] ? String(row[colData]).trim() : null;
                         let playerNome = row[nameCol] ? String(row[nameCol]).trim() : null;
                         
-                        if (dataValor && playerNome) {
+                        if (dataValor && dataValor.length > 2 && playerNome) {
                             if(!nodesAgrupados[dataValor]) {
                                 nodesAgrupados[dataValor] = [];
                                 ordensNodes.push(dataValor);
@@ -311,12 +307,8 @@
                         }
                     });
 
-                    // ==========================================
-                    // 2. CÁLCULO EXATO DOS 30% PARA O HISTÓRICO
-                    // ==========================================
                     let totalDeGuerras = ordensNodes.length;
                     let minNodesReqHist = Math.max(2, Math.floor(totalDeGuerras * 0.30));
-                    console.log(`[Histórico] Total de Guerras: ${totalDeGuerras} | Régua de Corte (30%): ${minNodesReqHist} nodes.`);
 
                     let consistenciaMap = {};
                     let historicoNotasMap = {}; 
@@ -365,7 +357,6 @@
                         sPlayers.sort((a,b) => b.score - a.score);
                         
                         sPlayers.slice(0, 5).forEach(p => {
-                            // SÓ PASSA SE TIVER BATIDO A RÉGUA DE 30%
                             if(contagemNodesPorPlayer[p.nome] >= minNodesReqHist) {
                                 consistenciaMap[p.nome] = (consistenciaMap[p.nome] || 0) + 1;
                             }
@@ -380,7 +371,6 @@
                     Object.keys(historicoNotasMap).forEach(n => {
                         let notas = historicoNotasMap[n];
                         
-                        // SÓ PASSA SE TIVER BATIDO A RÉGUA DE 30% E TIVER 2 NOTAS
                         if(contagemNodesPorPlayer[n] >= minNodesReqHist && notas.length >= 2) {
                             let somaTotal = notas.reduce((acc, val) => acc + val, 0);
                             let mediaGeral = somaTotal / notas.length;
@@ -454,9 +444,9 @@
             });
 
             let objEv = listaEvolucao.find(f => f.nome === player.nome);
-            let valEv = objEv ? objEv.visual : "0 pts";
+            let valEv = objEv ? objEv.visual : "0 pts (Não Superou a Média)";
             let posEv = objEv ? listaEvolucao.findIndex(f => f.nome === player.nome) + 1 : "N/A";
-            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">📈 EVOLUÇÃO</span><div><span class="result-value" style="color:#ffd700;">${valEv}</span><span class="result-rank">${posEv !== "N/A" ? posEv + 'º' : 'N/A'}</span></div></div>`;
+            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">📈 EVOLUÇÃO</span><div><span class="result-value" style="color:#ffd700; font-size: 1.6vh;">${valEv}</span><span class="result-rank">${posEv !== "N/A" ? posEv + 'º' : 'N/A'}</span></div></div>`;
 
             let objCon = listaConsistencia.find(f => f.nome === player.nome);
             let valCon = objCon ? objCon.visual : "0 Troféus";
