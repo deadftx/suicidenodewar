@@ -58,12 +58,10 @@
         .card-content-wrapper { position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; height: 100%; }
         .card-title { font-size: 2vh; color: #a8a8b3; text-transform: uppercase; margin-bottom: 1vh; font-weight: 600; text-align: center; }
         
-        /* Ajuste do TOP 1 para suportar múltiplos nomes sem cortar */
         .top1-container { display: flex; flex-direction: column; align-items: center; background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 0.8vh 2vh; width: 100%; margin-bottom: 1vh; }
         .top1-player { font-size: 1.8vh; font-weight: bold; color: #ffd700; text-align: center; word-wrap: break-word; max-width: 100%; line-height: 1.4; padding: 0.5vh 0; }
         .top1-value { font-size: 1.6vh; color: #fff; font-weight: bold; margin-top: 0.5vh; }
         
-        /* Ajuste da lista para não cortar os nomes */
         .ranking-list { width: 100%; display: flex; flex-direction: column; gap: 0.5vh; }
         .ranking-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5vh 1.2vh; border-radius: 6px; font-size: 1.6vh; }
         .rank-pos { color: #a8a8b3; font-weight: bold; width: 10%; }
@@ -72,8 +70,21 @@
 
         #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4vh; color: #ffd700; z-index: 100; }
         
-        /* Cores dos 9 Cards no Grid */
-        .card:nth-child(1)::before { background: #457b9d; } .card:nth-child(2)::before { background: #e63946; } .card:nth-child(3)::before { background: #f4a261; } .card:nth-child(4)::before { background: #9b5de5; } .card:nth-child(5)::before { background: #00f5d4; } .card:nth-child(6)::before { background: #fee440; } .card:nth-child(7)::before { background: #ff5400; } .card:nth-child(8)::before { background: #39ff14; } .card:nth-child(9)::before { background: #ff00ff; }
+        /* Cores estendidas para suportar mais de 9 Cards */
+        .card:nth-child(1)::before { background: #457b9d; } 
+        .card:nth-child(2)::before { background: #e63946; } 
+        .card:nth-child(3)::before { background: #f4a261; } 
+        .card:nth-child(4)::before { background: #9b5de5; } 
+        .card:nth-child(5)::before { background: #00f5d4; } 
+        .card:nth-child(6)::before { background: #fee440; } 
+        .card:nth-child(7)::before { background: #ff5400; } 
+        .card:nth-child(8)::before { background: #39ff14; } 
+        .card:nth-child(9)::before { background: #ff00ff; }
+        .card:nth-child(10)::before { background: #00bbf9; }
+        .card:nth-child(11)::before { background: #f15bb5; }
+        .card:nth-child(12)::before { background: #8338ec; }
+        .card:nth-child(13)::before { background: #3a86ff; }
+        .card:nth-child(14)::before { background: #fb5607; }
     </style>
 </head>
 <body>
@@ -190,10 +201,14 @@
             const colDano = columns.find(c => c.toUpperCase().includes("DANO") && c.toUpperCase().includes("MÉDI"));
             const colCC = columns.find(c => c.toUpperCase().includes("CC"));
             const colEst = columns.find(c => c.toUpperCase().includes("ESTRUTURA"));
-            const colMortes = columns.find(c => c.toUpperCase().includes("DEATH"));
+            const colMortes = columns.find(c => c.toUpperCase().includes("DEATH") && c.toUpperCase().includes("MÉDIA"));
             const colCura = columns.find(c => c.toUpperCase().includes("CURA") && c.toUpperCase().includes("MÉDIA"));
+            
+            // Colunas Totais para o KDR
+            const colTotalKills = columns.find(c => c.toUpperCase().includes("TOTAL KILL"));
+            const colTotalDeaths = columns.find(c => c.toUpperCase().includes("TOTAL DEATH"));
 
-            colunasCalculadas = { nameCol, colNodes, colKills, colDano, colCC, colEst, colMortes, colCura };
+            colunasCalculadas = { nameCol, colNodes, colKills, colDano, colCC, colEst, colMortes, colCura, colTotalKills, colTotalDeaths };
 
             let maxNodesGeral = 0;
             let presencasMap = {}; 
@@ -245,6 +260,7 @@
                 if(p.cura < mins.cura) mins.cura = p.cura; if(p.cura > maxs.cura) maxs.cura = p.cura;
             });
 
+            // MVP
             let rankAtaque = players.map(p => {
                 let s = (normalize(p.k, mins.k, maxs.k) * 20) + (normalize(p.d, mins.d, maxs.d) * 20) + (normalize(p.c, mins.c, maxs.c) * 20) + (normalize(p.e, mins.e, maxs.e) * 20) + ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
                 return { nome: p.nome, score: parseFloat(s.toFixed(1)) };
@@ -258,6 +274,7 @@
             boxAtaque.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">⚔️ MVP ATAQUE ⚔️</div><div class="mvp-list">` + rankAtaque.slice(0, 10).map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i+1}º</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') + `</div>`;
             boxSuporte.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">🚑 MVP SUPORTE 🚑</div><div class="mvp-list">` + (rankSuporte.length > 0 ? rankSuporte.slice(0, 10).map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i+1}º</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') : '<div style="color:#aaa; text-align:center; padding: 2vh;">Dados insuficientes</div>') + `</div>`;
 
+            // ======= OS CARDS ORIGINAIS ======
             const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
             const statsCols = columns.filter(col => {
                 if (col === nameCol) return false;
@@ -272,7 +289,30 @@
                     .sort((a,b) => b.val - a.val);
                 renderCardHtml(grid, stat, lista);
             });
+            
+            // ====== NOVOS CARDS DE KDR ======
+            let listaKdrTotal = players.map(p => {
+                let tk = parseToNumber(p.row[colTotalKills]);
+                let td = parseToNumber(p.row[colTotalDeaths]);
+                if(tk === -Infinity) tk = 0;
+                if(td === -Infinity || td === 0) td = 1; // Previne divisão por zero
+                let kdr = tk / td;
+                return { nome: p.nome, val: kdr, visual: kdr.toFixed(2) };
+            }).sort((a,b) => b.val - a.val);
 
+            let listaKdrMedio = players.map(p => {
+                let mk = parseToNumber(p.row[colKills]);
+                let md = parseToNumber(p.row[colMortes]);
+                if(mk === -Infinity) mk = 0;
+                if(md === -Infinity || md === 0) md = 1; // Previne divisão por zero
+                let kdr = mk / md;
+                return { nome: p.nome, val: kdr, visual: kdr.toFixed(2) };
+            }).sort((a,b) => b.val - a.val);
+
+            renderCardHtml(grid, "☠️ KDR TOTAL", listaKdrTotal);
+            renderCardHtml(grid, "⚖️ KDR MÉDIO POR NODE", listaKdrMedio);
+
+            // ====== CARD VETERANOS ======
             let listaVeteranos = Object.keys(presencasMap).map(numNodes => {
                 return {
                     nome: presencasMap[numNodes].join(" • "), 
@@ -282,11 +322,12 @@
             }).sort((a,b) => b.val - a.val);
             renderCardHtml(grid, "🛡️ VETERANOS (MAIS PRESENÇAS)", listaVeteranos);
 
+            // ====== CARDS DE HISTÓRICO ======
             renderCardHtml(grid, "📈 EVOLUÇÃO (FLUTUAÇÃO POSITIVA)", [], "card-evolucao");
             renderCardHtml(grid, "🏅 CONSISTÊNCIA (TOP 5 MVP)", [], "card-consistencia");
 
-            // Cache atualizado armazenando as TODAS as colunas para o modal
-            window.cacheRankings = { rankAtaque, rankSuporte, players, allColumns: columns, nameCol: nameCol, listaEvolucao: [], listaConsistencia: [] };
+            // Cache atualizado armazenando as listas novas e TODAS as colunas para a lupa
+            window.cacheRankings = { rankAtaque, rankSuporte, players, allColumns: columns, nameCol, colNodes, listaEvolucao: [], listaConsistencia: [], listaKdrTotal, listaKdrMedio, listaVeteranos };
             
             processarNovaAbaHistorico();
         }
@@ -329,8 +370,9 @@
                     });
 
                     let totalDeGuerras = ordensNodes.length;
-                    let dataInicial = ordensNodes[0] || "03/05";
-                    document.getElementById('estatisticas-guilda').innerHTML = `🚩 ${totalDeGuerras} GUERRAS REGISTRADAS (DESDE ${dataInicial}) 🚩`;
+                    
+                    // DATA FIXADA MANUALMENTE CONFORME PEDIDO
+                    document.getElementById('estatisticas-guilda').innerHTML = `🚩 ${totalDeGuerras} GUERRAS REGISTRADAS (DESDE 03/05) 🚩`;
 
                     let minNodesReqHist = Math.max(2, Math.floor(totalDeGuerras * 0.25));
 
@@ -430,14 +472,11 @@
             });
         }
 
-        // =====================================
-        // NOVA LUPA: MOSTRANDO TUDO DO JOGADOR
-        // =====================================
         function buscarPlayer() {
             const query = document.getElementById('player-search').value.toLowerCase().trim();
             if (!query) return;
 
-            const { rankAtaque, rankSuporte, players, allColumns, nameCol, listaEvolucao, listaConsistencia } = window.cacheRankings;
+            const { rankAtaque, rankSuporte, players, allColumns, nameCol, colNodes, listaEvolucao, listaConsistencia, listaKdrTotal, listaKdrMedio, listaVeteranos } = window.cacheRankings;
             
             let player = players.find(p => p.nome.toLowerCase() === query);
             if (!player) player = players.find(p => p.nome.toLowerCase().includes(query));
@@ -461,7 +500,7 @@
 
             let statsHtml = "";
             
-            // FILTRA APENAS A COLUNA DO NOME, MOSTRANDO O RESTO
+            // Loop cego pegando TODAS as colunas que vieram do Google Sheets (Dano, Kill, Mortes, etc)
             const colunasInfo = allColumns.filter(c => c !== nameCol);
             
             colunasInfo.forEach(stat => {
@@ -470,7 +509,7 @@
                 let fullRank = players.map(p => ({ nome: p.nome, val: parseToNumber(p.row[stat]), visual: p.row[stat] }))
                     .filter(p => !(stat.toUpperCase().includes("CURA") && p.val < 100000));
                 
-                // Se for morte, quem tem menos mortes fica com o Rank 1. O resto é padrão (quem tem mais ganha).
+                // Se for atributo de morte, quem morre menos é o Rank 1
                 if (isDeath) {
                     fullRank.sort((a,b) => a.val - b.val);
                 } else {
@@ -482,6 +521,18 @@
                 
                 statsHtml += `<div class="result-item"><span class="result-label">${stat}</span><div><span class="result-value">${val}</span><span class="result-rank">${pos > 0 ? pos + 'º' : 'N/A'}</span></div></div>`;
             });
+
+            // ====== ADICIONA AS INFOS MANUAIS ======
+            
+            let objKdrTot = listaKdrTotal.find(f => f.nome === player.nome);
+            let valKdrTot = objKdrTot ? objKdrTot.visual : "0";
+            let posKdrTot = objKdrTot ? listaKdrTotal.findIndex(f => f.nome === player.nome) + 1 : "N/A";
+            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">☠️ KDR TOTAL</span><div><span class="result-value" style="color:#ffd700;">${valKdrTot}</span><span class="result-rank">${posKdrTot !== "N/A" ? posKdrTot + 'º' : 'N/A'}</span></div></div>`;
+
+            let objKdrMed = listaKdrMedio.find(f => f.nome === player.nome);
+            let valKdrMed = objKdrMed ? objKdrMed.visual : "0";
+            let posKdrMed = objKdrMed ? listaKdrMedio.findIndex(f => f.nome === player.nome) + 1 : "N/A";
+            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">⚖️ KDR MÉDIO</span><div><span class="result-value" style="color:#ffd700;">${valKdrMed}</span><span class="result-rank">${posKdrMed !== "N/A" ? posKdrMed + 'º' : 'N/A'}</span></div></div>`;
 
             let objEv = listaEvolucao.find(f => f.nome === player.nome);
             let valEv = objEv ? objEv.visual : "0 pts (Não Superou a Média)";
