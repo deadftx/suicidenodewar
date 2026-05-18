@@ -1,20 +1,19 @@
 name: Enviar Ranking para o Discord
 
-# Configura o gatilho: roda todo dia a cada 12 horas
 on:
   schedule:
     - cron: '0 */12 * * *' 
-  workflow_dispatch: # Permite que você clique num botão pra rodar manualmente
+  workflow_dispatch: 
 
 jobs:
   print_e_envio:
     runs-on: ubuntu-latest
     steps:
       - name: Baixar o código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # <-- Atualizado aqui
 
       - name: Configurar Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5 # <-- Atualizado aqui
         with:
           python-version: '3.10'
 
