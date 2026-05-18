@@ -188,21 +188,26 @@
 
             colunasCalculadas = { nameCol, colNodes, colKills, colDano, colCC, colEst, colMortes, colCura };
 
-            // 1. Descobrir qual foi o número MÁXIMO de nodes que alguém já fez (Total de Guerras)
+            // ==========================================
+            // 1. CÁLCULO EXATO DOS 30% PARA A ABA GERAL
+            // ==========================================
             let maxNodesGeral = 0;
             data.forEach(row => {
                 let n = parseToNumber(row[colNodes]);
-                if (n > maxNodesGeral) maxNodesGeral = n;
+                if (n > maxNodesGeral && n < 1000) maxNodesGeral = n; // Limite de sanidade
             });
             
-            // 2. A Regra dos 30% (mínimo exigido para aparecer nos Rankings Principais)
+            // Math.floor garante que 3.9 vira 3. 
+            // Math.max garante que o sistema nunca vá pedir menos de 2 nodes, senão não tem evolução
             let minNodesReqGeral = Math.max(2, Math.floor(maxNodesGeral * 0.30));
+            console.log(`[Ranking Geral] Total de Guerras: ${maxNodesGeral} | Régua de Corte (30%): ${minNodesReqGeral} nodes.`);
 
             let players = [];
             data.forEach(row => {
                 const nodes = parseToNumber(row[colNodes]);
                 let playerName = row[nameCol] ? String(row[nameCol]).trim() : null;
 
+                // Agora só passa quem bateu a régua exata arredondada para baixo
                 if (playerName && nodes >= minNodesReqGeral) {
                     players.push({
                         nome: playerName,
@@ -306,9 +311,12 @@
                         }
                     });
 
-                    // Descobre a regra de 30% para a aba de histórico baseada nas datas únicas
+                    // ==========================================
+                    // 2. CÁLCULO EXATO DOS 30% PARA O HISTÓRICO
+                    // ==========================================
                     let totalDeGuerras = ordensNodes.length;
                     let minNodesReqHist = Math.max(2, Math.floor(totalDeGuerras * 0.30));
+                    console.log(`[Histórico] Total de Guerras: ${totalDeGuerras} | Régua de Corte (30%): ${minNodesReqHist} nodes.`);
 
                     let consistenciaMap = {};
                     let historicoNotasMap = {}; 
@@ -357,7 +365,7 @@
                         sPlayers.sort((a,b) => b.score - a.score);
                         
                         sPlayers.slice(0, 5).forEach(p => {
-                            // Só conta consistência de quem tem 30% das guerras participadas
+                            // SÓ PASSA SE TIVER BATIDO A RÉGUA DE 30%
                             if(contagemNodesPorPlayer[p.nome] >= minNodesReqHist) {
                                 consistenciaMap[p.nome] = (consistenciaMap[p.nome] || 0) + 1;
                             }
@@ -368,14 +376,11 @@
                         nome: n, val: consistenciaMap[n], visual: consistenciaMap[n] + " Troféus"
                     })).sort((a,b) => b.val - a.val);
 
-                    // ==========================================
-                    // CÁLCULO DE FLUTUAÇÃO DA MÉDIA POSITIVA
-                    // ==========================================
                     let listaEvolucao = [];
                     Object.keys(historicoNotasMap).forEach(n => {
                         let notas = historicoNotasMap[n];
                         
-                        // O jogador passa pelo filtro de 30% das guerras?
+                        // SÓ PASSA SE TIVER BATIDO A RÉGUA DE 30% E TIVER 2 NOTAS
                         if(contagemNodesPorPlayer[n] >= minNodesReqHist && notas.length >= 2) {
                             let somaTotal = notas.reduce((acc, val) => acc + val, 0);
                             let mediaGeral = somaTotal / notas.length;
