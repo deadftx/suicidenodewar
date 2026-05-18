@@ -188,12 +188,22 @@
 
             colunasCalculadas = { nameCol, colNodes, colKills, colDano, colCC, colEst, colMortes, colCura };
 
+            // 1. Descobrir qual foi o número MÁXIMO de nodes que alguém já fez (Total de Guerras)
+            let maxNodesGeral = 0;
+            data.forEach(row => {
+                let n = parseToNumber(row[colNodes]);
+                if (n > maxNodesGeral) maxNodesGeral = n;
+            });
+            
+            // 2. A Regra dos 30% (mínimo exigido para aparecer nos Rankings Principais)
+            let minNodesReqGeral = Math.max(2, Math.floor(maxNodesGeral * 0.30));
+
             let players = [];
             data.forEach(row => {
                 const nodes = parseToNumber(row[colNodes]);
                 let playerName = row[nameCol] ? String(row[nameCol]).trim() : null;
 
-                if (playerName && nodes >= 2) {
+                if (playerName && nodes >= minNodesReqGeral) {
                     players.push({
                         nome: playerName,
                         k: parseToNumber(row[colKills]) === -Infinity ? 0 : parseToNumber(row[colKills]),
@@ -296,6 +306,10 @@
                         }
                     });
 
+                    // Descobre a regra de 30% para a aba de histórico baseada nas datas únicas
+                    let totalDeGuerras = ordensNodes.length;
+                    let minNodesReqHist = Math.max(2, Math.floor(totalDeGuerras * 0.30));
+
                     let consistenciaMap = {};
                     let historicoNotasMap = {}; 
 
@@ -343,7 +357,8 @@
                         sPlayers.sort((a,b) => b.score - a.score);
                         
                         sPlayers.slice(0, 5).forEach(p => {
-                            if(contagemNodesPorPlayer[p.nome] >= 2) {
+                            // Só conta consistência de quem tem 30% das guerras participadas
+                            if(contagemNodesPorPlayer[p.nome] >= minNodesReqHist) {
                                 consistenciaMap[p.nome] = (consistenciaMap[p.nome] || 0) + 1;
                             }
                         });
@@ -354,21 +369,18 @@
                     })).sort((a,b) => b.val - a.val);
 
                     // ==========================================
-                    // NOVO CÁLCULO: FLUTUAÇÃO DA MÉDIA POSITIVA
+                    // CÁLCULO DE FLUTUAÇÃO DA MÉDIA POSITIVA
                     // ==========================================
                     let listaEvolucao = [];
                     Object.keys(historicoNotasMap).forEach(n => {
                         let notas = historicoNotasMap[n];
                         
-                        if(contagemNodesPorPlayer[n] >= 2 && notas.length >= 2) {
-                            // 1. Calcula a Média Histórica Geral do jogador
+                        // O jogador passa pelo filtro de 30% das guerras?
+                        if(contagemNodesPorPlayer[n] >= minNodesReqHist && notas.length >= 2) {
                             let somaTotal = notas.reduce((acc, val) => acc + val, 0);
                             let mediaGeral = somaTotal / notas.length;
                             
-                            // 2. Pega o Desempenho Atual (Última nota)
                             let notaAtual = notas[notas.length - 1];
-                            
-                            // 3. Flutuação (O quanto ele jogou ACIMA da própria média)
                             let flutuacao = notaAtual - mediaGeral;
 
                             if (flutuacao > 0) {
