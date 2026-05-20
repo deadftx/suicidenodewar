@@ -334,9 +334,10 @@
             font-weight: bold;
         }
 
+        /* Grid da Staff - Alterado para forçar 4 itens por linha (4 em cima, 4 em baixo) */
         .staff-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             justify-content: center;
         }
@@ -418,6 +419,18 @@
             }
             .radio-wrapper { gap: 15px; flex-wrap: wrap; justify-content: center; }
             body { padding-top: 110px; }
+            
+            /* Ajusta a staff para 2 colunas no celular/tablet */
+            .staff-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Ajusta a staff para 1 coluna em telas muito pequenas */
+            .staff-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -496,6 +509,7 @@
         </div>
 
         <h2 class="section-title fade-in"><span>†</span> STAFF / RECRUTAMENTO <span>†</span></h2>
+        
         <div class="staff-grid">
             <a href="discord://-/users/COLOQUE_O_ID_AQUI" class="staff-member fade-in">Amisheart</a>
             <a href="discord://-/users/COLOQUE_O_ID_AQUI" class="staff-member fade-in">GabyMarmitas</a>
@@ -504,6 +518,7 @@
             <a href="discord://-/users/COLOQUE_O_ID_AQUI" class="staff-member fade-in">ZeXXay</a>
             <a href="discord://-/users/COLOQUE_O_ID_AQUI" class="staff-member fade-in">GreenvQv</a>
             <a href="discord://-/users/COLOQUE_O_ID_AQUI" class="staff-member fade-in">Apokalypse</a>
+            <a href="discord://-/users/COLOQUE_O_ID_AQUI" class="staff-member fade-in">Poly</a>
         </div>
     </main>
 
