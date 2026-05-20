@@ -42,6 +42,7 @@
         .radio-title { font-family: 'Cinzel', serif; color: var(--accent-red); font-size: 1.1rem; display: flex; align-items: center; gap: 10px; letter-spacing: 2px; }
         .radio-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 5px 15px; font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; font-weight: 600; border-radius: 4px; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
         .radio-btn:hover { border-color: var(--accent-red); background: rgba(138, 3, 3, 0.1); }
+        #track-status { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; min-width: 150px; }
         .top-action-btn { background: rgba(138, 3, 3, 0.1); border: 1px solid var(--accent-red); color: #fff; padding: 6px 20px; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; text-decoration: none; border-radius: 4px; transition: 0.3s; }
         .top-action-btn:hover { background: var(--accent-red); }
 
@@ -96,6 +97,7 @@
         <div class="radio-wrapper">
             <div class="radio-title"><span>📻</span> RÁDIO SUICIDE</div>
             <button id="play-pause-btn" class="radio-btn">▶ SINTONIZAR</button>
+            <div id="track-status">Pausado</div>
         </div>
         <a href="https://deadftx.github.io/suicidenodewar/" target="_blank" class="top-action-btn">🏆 Ranking</a>
     </div>
@@ -169,17 +171,88 @@
         <div id="discord-online-count">🟢 45 Membros Online Agora</div>
         <div>G59 TILL THE GRAVE. † $UICIDEBOY$ † Black Desert Online.</div>
     </footer>
+
     <script>
-        const radioPlaylist = [{ name: "Paris", src: "musicas/paris.mp3", duration: 107 }];
         const audio = document.getElementById('native-audio');
         const playBtn = document.getElementById('play-pause-btn');
+        const statusText = document.getElementById('track-status');
+        
         let isPlaying = false;
+        let radioPlaylist = [];
+        let totalDuration = 0;
+        let syncInterval;
+
+        // Puxa a lista inteligente do PHP
+        async function carregarRadio() {
+            try {
+                if(statusText) statusText.innerHTML = 'Conectando Rádio...';
+                
+                const response = await fetch('radio.php');
+                radioPlaylist = await response.json();
+                
+                if(radioPlaylist.length === 0) {
+                    if(statusText) statusText.innerHTML = 'Nenhuma música na pasta';
+                    return;
+                }
+
+                totalDuration = radioPlaylist.reduce((acc, t) => acc + t.duration, 0);
+                if(statusText) statusText.innerHTML = 'Pronto para Sintonizar';
+
+            } catch (error) {
+                if(statusText) statusText.innerHTML = 'Erro no servidor';
+                console.error("Erro ao carregar radio.php:", error);
+            }
+        }
+
+        // Lógica de Sincronia de Tempo Global
+        function syncRadio() {
+            if (radioPlaylist.length === 0) return;
+
+            const nowSeconds = Math.floor(Date.now() / 1000); 
+            let offset = nowSeconds % totalDuration;
+            
+            let trackIdx = 0;
+            for (let i = 0; i < radioPlaylist.length; i++) {
+                if (offset < radioPlaylist[i].duration) { trackIdx = i; break; }
+                offset -= radioPlaylist[i].duration;
+            }
+            
+            const track = radioPlaylist[trackIdx];
+            
+            if (audio.src.indexOf(encodeURI(track.src)) === -1) {
+                audio.src = track.src;
+                if(statusText) statusText.innerHTML = `🎵 ${track.name}`;
+                if (isPlaying) { 
+                    audio.currentTime = offset; 
+                    audio.play().catch(()=>{}); 
+                }
+            } else {
+                if (isPlaying && Math.abs(audio.currentTime - offset) > 3) {
+                    audio.currentTime = offset;
+                }
+            }
+        }
+
         playBtn.addEventListener('click', () => {
-            if(!isPlaying) { audio.play(); isPlaying = true; playBtn.innerHTML = '⏹ DESCONECTAR'; }
-            else { audio.pause(); isPlaying = false; playBtn.innerHTML = '▶ SINTONIZAR'; }
+            if(!isPlaying && radioPlaylist.length > 0) { 
+                isPlaying = true; 
+                playBtn.innerHTML = '⏹ DESCONECTAR';
+                syncRadio(); 
+                audio.play().catch(()=>{}); 
+                syncInterval = setInterval(syncRadio, 2000);
+            } else { 
+                isPlaying = false; 
+                playBtn.innerHTML = '▶ SINTONIZAR';
+                audio.pause(); 
+                if(statusText) statusText.innerHTML = 'Pausado';
+                clearInterval(syncInterval);
+            }
         });
-        window.onload = () => { audio.play().catch(()=>{}); };
+
+        // Carrega o PHP logo ao abrir a página
+        window.onload = () => { 
+            carregarRadio();
+        };
     </script>
 </body>
 </html>
-X
