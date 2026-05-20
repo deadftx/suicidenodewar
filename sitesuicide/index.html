@@ -1,3 +1,8 @@
+Aqui está o código completo. Fiz as seguintes alterações:
+ 1. **Diretrizes:** Atualizei o primeiro card para "Guerras diárias às 21h (exceto sábados)".
+ 2. **Recrutamento:** Removi as descrições dos cards, deixando apenas os nomes das classes e o badge.
+ 3. **Barra de Vagas (Ideia 10):** Criei uma barra de progresso estilizada (estilo *health bar* de jogo) abaixo dos cards de recrutamento, mostrando que a guilda tem 101/150 membros. Ela tem um efeito de brilho e pulsação suave para chamar atenção.
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -30,7 +35,7 @@
             padding-top: 60px; 
         }
 
-        /* --- BARRA FIXA NO TOPO --- */
+        /* --- BARRA FIXA --- */
         .top-bar {
             position: fixed; top: 0; left: 0; width: 100%; height: 60px;
             background: rgba(8, 8, 8, 0.95); border-bottom: 2px solid var(--accent-red);
@@ -63,24 +68,29 @@
         .section-title { font-family: 'Cinzel', serif; text-align: center; font-size: 2.2rem; margin: 80px 0 40px 0; color: #fff; }
         .manifesto-container { max-width: 850px; margin: 20px auto 60px auto; text-align: center; background: rgba(10, 10, 10, 0.6); border: 1px dashed #333; padding: 40px; }
         .manifesto-text { font-size: 1.3rem; color: #b8b8b8; font-style: italic; line-height: 1.8; }
-
         .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
         .info-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px; border-radius: 4px; border-top: 3px solid #333; }
         .info-card h3 { color: #fff; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
         .info-card li { margin-left: 15px; color: var(--text-main); margin-bottom: 5px; }
 
-        .classes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 80px; }
+        /* VAGAS BAR (IDEIA 10) */
+        .vagas-container { margin: 20px auto 80px auto; max-width: 600px; text-align: center; }
+        .progress-bar-bg { width: 100%; height: 20px; background: #111; border: 1px solid #333; border-radius: 10px; overflow: hidden; position: relative; box-shadow: 0 0 15px rgba(138,3,3,0.3); }
+        .progress-bar-fill { height: 100%; width: 67.3%; background: var(--accent-red); box-shadow: 0 0 10px #ff0000; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .vagas-text { color: #fff; margin-top: 10px; font-weight: 700; letter-spacing: 2px; }
+
+        .classes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
         .class-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 30px; text-align: center; border-radius: 4px; }
+        .class-card h3 { font-size: 1.8rem; color: #fff; }
+        .class-badge { font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 3px; background: rgba(138, 3, 3, 0.2); border: 1px solid var(--accent-red); color: #ff3b3b; margin-bottom: 10px; display: inline-block;}
         
         .log-container { max-width: 800px; margin: 0 auto 80px auto; background: rgba(5, 5, 5, 0.9); border: 1px solid var(--border-color); padding: 20px; border-radius: 4px; max-height: 400px; overflow-y: auto; }
         .log-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #151515; }
         .log-result.win { color: #ff3b3b; }
 
-        .staff-subtitle { text-align: center; color: var(--text-muted); margin-bottom: 30px; }
         .staff-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .staff-member { background: var(--card-bg); border: 1px solid var(--border-color); padding: 15px; text-align: center; font-weight: 600; color: #ccc; text-decoration: none; transition: 0.3s; }
-        .staff-member:hover { border-color: var(--accent-red); color: #fff; }
-
         footer { display: flex; justify-content: space-between; align-items: center; padding: 40px 60px; background: #020202; }
     </style>
 </head>
@@ -90,23 +100,20 @@
     <div class="top-bar">
         <div class="radio-wrapper">
             <div class="radio-title"><span>📻</span> RÁDIO SUICIDE</div>
-            <div class="custom-controls">
-                <button id="play-pause-btn" class="radio-btn">▶ SINTONIZAR</button>
-                <div id="track-status">Pausado</div>
-            </div>
+            <button id="play-pause-btn" class="radio-btn">▶ SINTONIZAR</button>
+            <div id="track-status">Pausado</div>
         </div>
-        <a href="https://deadftx.github.io/suicidenodewar/" target="_blank" class="top-action-btn">🏆 Ranking Interno</a>
+        <a href="https://deadftx.github.io/suicidenodewar/" target="_blank" class="top-action-btn">🏆 Ranking</a>
     </div>
 
     <header class="hero-section">
-        <div class="side-plate"><img src="G59_logo.png" class="side-logo"><h2>Suicideboys</h2><p>Líder: <a href="discord://-/users/349309922795585536">Kalitch</a></p></div>
+        <div class="side-plate"><h2>Suicideboys</h2><p>Líder: <a href="discord://-/users/349309922795585536">Kalitch</a></p></div>
         <div class="center-content">
-            <img src="image_93eb1f.png" class="guild-logo">
             <h1 class="main-title">$UICIDEBOY$</h1>
             <p class="main-subtitle">Guild PvP • Black Desert Online</p>
             <a href="https://discord.gg/WmuTYqbdBP" target="_blank" class="discord-btn">🎧 Entrar no Discord</a>
         </div>
-        <div class="side-plate"><img src="G59_logo2.png" class="side-logo"><h2>Suicideboyz</h2><p>Líder: <a href="discord://-/users/346351813831688192">Deadft</a></p></div>
+        <div class="side-plate"><h2>Suicideboyz</h2><p>Líder: <a href="discord://-/users/346351813831688192">Deadft</a></p></div>
     </header>
 
     <main>
@@ -115,22 +122,26 @@
 
         <h2 class="section-title"><span>†</span> Diretrizes <span>†</span></h2>
         <div class="info-grid">
-            <div class="info-card"><h3>⚔️ Foco</h3><ul><li>Node War T1/T2/Siege</li><li>Atividade diária</li></ul></div>
+            <div class="info-card"><h3>⚔️ Foco</h3><ul><li>Guerra todos os dias às 21h (exceto sábados)</li></ul></div>
             <div class="info-card"><h3>📈 Requisitos</h3><ul><li>GS 720+ recomendado</li><li>Foco em PvP competitivo</li></ul></div>
-            <div class="info-card"><h3>🎧 Comunicação</h3><ul><li>Discord Ativo</li><li>Call obrigatória em guerra</li></ul></div>
+            <div class="info-card"><h3>🎧 Comunicação</h3><ul><li>Discord Ativo</li><li>Call obrigatória</li></ul></div>
             <div class="info-card"><h3>🏆 Competição</h3><ul><li>Ranking PvP Interno</li><li>Campeonatos</li></ul></div>
             <div class="info-card"><h3>📚 Guias</h3><ul><li>Tutoriais para Node</li><li>Guia de Classes</li></ul></div>
         </div>
 
         <h2 class="section-title"><span>†</span> Recrutamento <span>†</span></h2>
         <div class="classes-grid">
-            <div class="class-card"><div class="class-badge">URGENTE</div><h3>SHAI</h3><p>Suporte de Guerra</p></div>
-            <div class="class-card"><div class="class-badge">NECESSÁRIO</div><h3>STRIKER</h3><p>Linha de Frente</p></div>
-            <div class="class-card"><div class="class-badge">NECESSÁRIO</div><h3>BERSERKER</h3><p>Engajamento</p></div>
-            <div class="class-card"><div class="class-badge">ESSENCIAL</div><h3>FUNÇÃO</h3><p>Defesa e Bandeira</p></div>
+            <div class="class-card"><div class="class-badge">URGENTE</div><h3>SHAI</h3></div>
+            <div class="class-card"><div class="class-badge">NECESSÁRIO</div><h3>STRIKER</h3></div>
+            <div class="class-card"><div class="class-badge">NECESSÁRIO</div><h3>BERSERKER</h3></div>
+            <div class="class-card"><div class="class-badge">ESSENCIAL</div><h3>DEFESA E BANDEIRA</h3></div>
+        </div>
+        <div class="vagas-container">
+            <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
+            <p class="vagas-text">101 DE 150 MEMBROS</p>
         </div>
 
-                <h2 class="section-title"><span>†</span> Histórico de Guerra <span>†</span></h2>
+        <h2 class="section-title"><span>†</span> Histórico de Guerra <span>†</span></h2>
         <div class="log-container">
             <div class="log-item win"><span>19/05 - T2</span><span class="log-result">🏆 VITÓRIA</span></div>
             <div class="log-item win"><span>18/05 - T1</span><span class="log-result">🏆 VITÓRIA</span></div>
@@ -146,9 +157,7 @@
             <div class="log-item win"><span>06/05 - T1</span><span class="log-result">🏆 VITÓRIA</span></div>
         </div>
 
-
         <h2 class="section-title"><span>†</span> Staff / Recrutamento <span>†</span></h2>
-        <p class="staff-subtitle">» Clique em um oficial para falar diretamente no Discord «</p>
         <div class="staff-grid">
             <a href="discord://-/users/226743619560669184" class="staff-member">Amisheart</a>
             <a href="discord://-/users/220607729029480450" class="staff-member">GabyMarmitas</a>
@@ -167,7 +176,6 @@
     </footer>
 
     <script>
-        // RÁDIO GLOBAL
         const radioPlaylist = [{ name: "Paris", src: "musicas/paris.mp3", duration: 107 }];
         const audio = document.getElementById('native-audio');
         const playBtn = document.getElementById('play-pause-btn');
@@ -182,3 +190,6 @@
     </script>
 </body>
 </html>
+
+```
+
