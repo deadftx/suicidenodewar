@@ -43,7 +43,8 @@
         .radio-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 5px 15px; font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; font-weight: 600; border-radius: 4px; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
         .radio-btn:hover { border-color: var(--accent-red); background: rgba(138, 3, 3, 0.1); }
         .top-action-btn { background: rgba(138, 3, 3, 0.1); border: 1px solid var(--accent-red); color: #fff; padding: 6px 20px; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; text-decoration: none; border-radius: 4px; transition: 0.3s; }
-        
+        .top-action-btn:hover { background: var(--accent-red); }
+
         /* --- HERO --- */
         .hero-section { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 2rem; max-width: 1400px; margin: 0 auto; padding: 40px 20px; min-height: 70vh; }
         .side-plate { background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px; text-align: center; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
@@ -54,7 +55,8 @@
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
         .main-title { font-family: 'Cinzel', serif; font-size: 4rem; color: #fff; text-shadow: 0 0 20px var(--accent-glow); line-height: 1; }
         .discord-btn { margin-top: 25px; background: rgba(138, 3, 3, 0.1); border: 1px solid var(--accent-red); color: #fff; padding: 12px 35px; text-transform: uppercase; font-weight: 700; text-decoration: none; border-radius: 4px; transition: 0.3s; }
-        
+        .discord-btn:hover { background: var(--accent-red); }
+
         /* --- CONTENT --- */
         main { max-width: 1100px; margin: 0 auto; padding: 0 20px 80px 20px; }
         .section-title { font-family: 'Cinzel', serif; text-align: center; font-size: 2.2rem; margin: 80px 0 40px 0; color: #fff; }
@@ -83,6 +85,7 @@
 
         .staff-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .staff-member { background: var(--card-bg); border: 1px solid var(--border-color); padding: 15px; text-align: center; font-weight: 600; color: #ccc; text-decoration: none; transition: 0.3s; }
+        .staff-member:hover { border-color: var(--accent-red); color: #fff; }
         footer { display: flex; justify-content: space-between; align-items: center; padding: 40px 60px; background: #020202; }
     </style>
 </head>
@@ -114,11 +117,11 @@
 
         <h2 class="section-title"><span>†</span> Diretrizes <span>†</span></h2>
         <div class="info-grid">
-            <div class="info-card"><h3>⚔️ Foco</h3><ul><li>Guerra todos os dias às 21h (exceto sábados)</li></ul></div>
+            <div class="info-card"><h3>⚔️ PvP</h3><ul><li>NodeWar todos os dias</li></ul></div>
             <div class="info-card"><h3>📈 Requisitos</h3><ul><li>GS 720+ recomendado</li><li>Foco em PvP competitivo</li></ul></div>
             <div class="info-card"><h3>🎧 Comunicação</h3><ul><li>Discord Ativo</li><li>Call obrigatória</li></ul></div>
             <div class="info-card"><h3>🏆 Competição</h3><ul><li>Ranking PvP Interno</li><li>Campeonatos</li></ul></div>
-            <div class="info-card"><h3>📚 Guias</h3><ul><li>Tutoriais para Node</li><li>Guia de Classes</li></ul></div>
+            <div class="info-card"><h3>🤖 Sistema de Vagas</h3><ul><li>Bot exclusivo para garantir sua vaga nas próximas nodes</li></ul></div>
         </div>
 
         <h2 class="section-title"><span>†</span> Recrutamento <span>†</span></h2>
@@ -126,7 +129,7 @@
             <div class="class-card"><div class="class-badge">URGENTE</div><h3>SHAI</h3></div>
             <div class="class-card"><div class="class-badge">NECESSÁRIO</div><h3>STRIKER</h3></div>
             <div class="class-card"><div class="class-badge">NECESSÁRIO</div><h3>BERSERKER</h3></div>
-            <div class="class-card"><div class="class-badge">ESSENCIAL</div><h3>DEFESA E BANDEIRA</h3></div>
+            <div class="class-card"><div class="class-badge">ESSENCIAL</div><h3>DEFESA E BANDEIRA</h3><p style="font-size: 0.9rem; color: #888; margin-top: 10px;">Temos PT fixa, buscamos Backup</p></div>
         </div>
         <div class="vagas-container">
             <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
@@ -166,5 +169,17 @@
         <div id="discord-online-count">🟢 45 Membros Online Agora</div>
         <div>G59 TILL THE GRAVE. † $UICIDEBOY$ † Black Desert Online.</div>
     </footer>
+    <script>
+        const radioPlaylist = [{ name: "Paris", src: "musicas/paris.mp3", duration: 107 }];
+        const audio = document.getElementById('native-audio');
+        const playBtn = document.getElementById('play-pause-btn');
+        let isPlaying = false;
+        playBtn.addEventListener('click', () => {
+            if(!isPlaying) { audio.play(); isPlaying = true; playBtn.innerHTML = '⏹ DESCONECTAR'; }
+            else { audio.pause(); isPlaying = false; playBtn.innerHTML = '▶ SINTONIZAR'; }
+        });
+        window.onload = () => { audio.play().catch(()=>{}); };
+    </script>
 </body>
 </html>
+X
