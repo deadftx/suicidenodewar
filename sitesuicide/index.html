@@ -34,8 +34,8 @@
             padding-top: 60px; 
         }
 
-        /* --- BARRA DA RÁDIO (CUSTOM PLAYER) --- */
-        .radio-bar {
+        /* --- BARRA FIXA NO TOPO (RÁDIO + RANKING) --- */
+        .top-bar {
             position: fixed;
             top: 0;
             left: 0;
@@ -46,9 +46,15 @@
             z-index: 9999;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            padding: 0 40px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.9), 0 0 15px rgba(138, 3, 3, 0.3);
             backdrop-filter: blur(5px);
+        }
+
+        .radio-wrapper {
+            display: flex;
+            align-items: center;
             gap: 30px;
         }
 
@@ -63,7 +69,6 @@
             letter-spacing: 2px;
         }
 
-        /* Controles Customizados */
         .custom-controls {
             display: flex;
             gap: 10px;
@@ -96,7 +101,32 @@
             font-size: 0.9rem;
             color: var(--text-muted);
             min-width: 100px;
-            text-align: center;
+            text-align: left;
+        }
+
+        /* Botão do Ranking na Barra do Topo */
+        .top-action-btn {
+            background: rgba(138, 3, 3, 0.1);
+            border: 1px solid var(--accent-red);
+            color: #fff;
+            padding: 6px 20px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .top-action-btn:hover {
+            background: var(--accent-red);
+            box-shadow: 0 0 10px var(--accent-glow);
+            color: #fff;
         }
 
         /* --- LAYOUT DO CABEÇALHO --- */
@@ -207,24 +237,16 @@
             font-weight: 600;
         }
 
-        /* Grupo de Botões (Discord + Ranking) */
-        .action-buttons {
-            display: flex;
-            gap: 15px;
+        .discord-btn {
             margin-top: 25px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .action-btn {
             display: inline-flex;
             align-items: center;
             gap: 10px;
             background: rgba(138, 3, 3, 0.1);
             border: 1px solid var(--accent-red);
             color: #fff;
-            padding: 12px 25px;
-            font-size: 1.1rem;
+            padding: 12px 35px;
+            font-size: 1.2rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -234,7 +256,7 @@
             box-shadow: 0 0 15px rgba(138, 3, 3, 0.3);
         }
 
-        .action-btn:hover {
+        .discord-btn:hover {
             background: var(--accent-red);
             box-shadow: 0 0 25px var(--accent-red);
             transform: translateY(-3px);
@@ -373,6 +395,7 @@
             transform: translateY(0);
         }
 
+        /* Responssividade e ajuste da barra no Mobile */
         @media (max-width: 1024px) {
             .hero-section {
                 grid-template-columns: 1fr;
@@ -382,14 +405,19 @@
             .center-content { order: -1; }
             .side-plate { max-width: 400px; margin: 0 auto; width: 100%; }
             .main-title { font-size: 3rem; }
+            .radio-title { display: none; }
         }
 
-        @media (max-width: 600px) {
-            .radio-bar { flex-direction: column; height: 80px; gap: 5px; padding-top: 5px; }
-            body { padding-top: 80px; }
-            .radio-title { font-size: 1rem; }
-            .action-buttons { flex-direction: column; width: 100%; }
-            .action-btn { justify-content: center; }
+        @media (max-width: 768px) {
+            .top-bar { 
+                flex-direction: column; 
+                height: auto; 
+                padding: 10px; 
+                gap: 15px; 
+                justify-content: center;
+            }
+            .radio-wrapper { gap: 15px; flex-wrap: wrap; justify-content: center; }
+            body { padding-top: 110px; }
         }
     </style>
 </head>
@@ -397,13 +425,19 @@
 
     <div id="youtube-player" style="position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none;"></div>
 
-    <div class="radio-bar">
-        <div class="radio-title"><span>📻</span> RÁDIO SUICIDE</div>
-        <div class="custom-controls">
-            <button id="play-pause-btn" class="radio-btn">▶ PLAY</button>
-            <button id="next-btn" class="radio-btn">⏭ NEXT</button>
-            <div id="track-status">Pausado</div>
+    <div class="top-bar">
+        
+        <div class="radio-wrapper">
+            <div class="radio-title"><span>📻</span> RÁDIO SUICIDE</div>
+            <div class="custom-controls">
+                <button id="play-pause-btn" class="radio-btn">▶ PLAY</button>
+                <button id="next-btn" class="radio-btn">⏭ NEXT</button>
+                <div id="track-status">Pausado</div>
+            </div>
         </div>
+
+        <a href="https://deadftx.github.io/suicidenodewar/" target="_blank" class="top-action-btn">🏆 Ranking Interno</a>
+    
     </div>
 
     <header class="hero-section">
@@ -418,11 +452,7 @@
             <h1 class="main-title">$UICIDEBOY$</h1>
             <p class="main-subtitle">Guild PvP • Black Desert Online</p>
             
-            <div class="action-buttons">
-                <a href="https://discord.gg/WmuTYqbdBP" target="_blank" class="action-btn">🎧 Discord</a>
-                <a href="https://deadftx.github.io/suicidenodewar/" target="_blank" class="action-btn">🏆 Ranking Interno</a>
-            </div>
-            
+            <a href="https://discord.gg/WmuTYqbdBP" target="_blank" class="discord-btn">🎧 Entrar no Discord</a>
         </div>
 
         <div class="side-plate fade-in">
@@ -483,7 +513,6 @@
 
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        // LÓGICA DO PLAYER CUSTOMIZADO
         let player;
         let isPlaying = false;
 
