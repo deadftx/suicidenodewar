@@ -42,10 +42,8 @@
         .radio-title { font-family: 'Cinzel', serif; color: var(--accent-red); font-size: 1.1rem; display: flex; align-items: center; gap: 10px; letter-spacing: 2px; }
         .radio-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 5px 15px; font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; font-weight: 600; border-radius: 4px; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
         .radio-btn:hover { border-color: var(--accent-red); background: rgba(138, 3, 3, 0.1); }
-        #track-status { font-size: 0.9rem; color: var(--text-muted); min-width: 150px; font-weight: 600; }
         .top-action-btn { background: rgba(138, 3, 3, 0.1); border: 1px solid var(--accent-red); color: #fff; padding: 6px 20px; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; text-decoration: none; border-radius: 4px; transition: 0.3s; }
-        .top-action-btn:hover { background: var(--accent-red); }
-
+        
         /* --- HERO --- */
         .hero-section { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 2rem; max-width: 1400px; margin: 0 auto; padding: 40px 20px; min-height: 70vh; }
         .side-plate { background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px; text-align: center; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
@@ -56,8 +54,7 @@
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
         .main-title { font-family: 'Cinzel', serif; font-size: 4rem; color: #fff; text-shadow: 0 0 20px var(--accent-glow); line-height: 1; }
         .discord-btn { margin-top: 25px; background: rgba(138, 3, 3, 0.1); border: 1px solid var(--accent-red); color: #fff; padding: 12px 35px; text-transform: uppercase; font-weight: 700; text-decoration: none; border-radius: 4px; transition: 0.3s; }
-        .discord-btn:hover { background: var(--accent-red); }
-
+        
         /* --- CONTENT --- */
         main { max-width: 1100px; margin: 0 auto; padding: 0 20px 80px 20px; }
         .section-title { font-family: 'Cinzel', serif; text-align: center; font-size: 2.2rem; margin: 80px 0 40px 0; color: #fff; }
@@ -68,10 +65,10 @@
         .info-card h3 { color: #fff; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
         .info-card li { margin-left: 15px; color: var(--text-main); margin-bottom: 5px; }
 
-        /* VAGAS BAR (IDEIA 10) */
+        /* VAGAS BAR */
         .vagas-container { margin: 20px auto 80px auto; max-width: 600px; text-align: center; }
-        .progress-bar-bg { width: 100%; height: 20px; background: #111; border: 1px solid #333; border-radius: 10px; overflow: hidden; position: relative; box-shadow: 0 0 15px rgba(138,3,3,0.3); }
-        .progress-bar-fill { height: 100%; width: 67.3%; background: var(--accent-red); box-shadow: 0 0 10px #ff0000; animation: pulse 2s infinite; }
+        .progress-bar-bg { width: 100%; height: 20px; background: #111; border: 1px solid #333; border-radius: 10px; overflow: hidden; position: relative; }
+        .progress-bar-fill { height: 100%; width: 67.3%; background: var(--accent-red); animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         .vagas-text { color: #fff; margin-top: 10px; font-weight: 700; letter-spacing: 2px; }
 
@@ -96,19 +93,19 @@
         <div class="radio-wrapper">
             <div class="radio-title"><span>📻</span> RÁDIO SUICIDE</div>
             <button id="play-pause-btn" class="radio-btn">▶ SINTONIZAR</button>
-            <div id="track-status">Pausado</div>
         </div>
         <a href="https://deadftx.github.io/suicidenodewar/" target="_blank" class="top-action-btn">🏆 Ranking</a>
     </div>
 
     <header class="hero-section">
-        <div class="side-plate"><h2>Suicideboys</h2><p>Líder: <a href="discord://-/users/349309922795585536">Kalitch</a></p></div>
+        <div class="side-plate"><img src="G59_logo.png" class="side-logo"><h2>Suicideboys</h2><p>Líder: <a href="discord://-/users/349309922795585536">Kalitch</a></p></div>
         <div class="center-content">
+            <img src="image_93eb1f.png" class="guild-logo">
             <h1 class="main-title">$UICIDEBOY$</h1>
             <p class="main-subtitle">Guild PvP • Black Desert Online</p>
             <a href="https://discord.gg/WmuTYqbdBP" target="_blank" class="discord-btn">🎧 Entrar no Discord</a>
         </div>
-        <div class="side-plate"><h2>Suicideboyz</h2><p>Líder: <a href="discord://-/users/346351813831688192">Deadft</a></p></div>
+        <div class="side-plate"><img src="G59_logo2.png" class="side-logo"><h2>Suicideboyz</h2><p>Líder: <a href="discord://-/users/346351813831688192">Deadft</a></p></div>
     </header>
 
     <main>
@@ -124,7 +121,7 @@
             <div class="info-card"><h3>📚 Guias</h3><ul><li>Tutoriais para Node</li><li>Guia de Classes</li></ul></div>
         </div>
 
-        <h2 class="section-title"><span>†</span> Recrutamento <spn>†</span></h2>
+        <h2 class="section-title"><span>†</span> Recrutamento <span>†</span></h2>
         <div class="classes-grid">
             <div class="class-card"><div class="class-badge">URGENTE</div><h3>SHAI</h3></div>
             <div class="class-card"><div class="class-badge">NECESSÁRIO</div><h3>STRIKER</h3></div>
@@ -169,22 +166,5 @@
         <div id="discord-online-count">🟢 45 Membros Online Agora</div>
         <div>G59 TILL THE GRAVE. † $UICIDEBOY$ † Black Desert Online.</div>
     </footer>
-
-    <script>
-        const radioPlaylist = [{ name: "Paris", src: "musicas/paris.mp3", duration: 107 }];
-        const audio = document.getElementById('native-audio');
-        const playBtn = document.getElementById('play-pause-btn');
-        let isPlaying = false;
-        
-        playBtn.addEventListener('click', () => {
-            if(!isPlaying) { audio.play(); isPlaying = true; playBtn.innerHTML = '⏹ DESCONECTAR'; }
-            else { audio.pause(); isPlaying = false; playBtn.innerHTML = '▶ SINTONIZAR'; }
-        });
-        
-        window.onload = () => { audio.play().catch(()=>{}); };
-    </script>
 </body>
 </html>
-
-```
-
