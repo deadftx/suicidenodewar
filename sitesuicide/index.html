@@ -207,16 +207,24 @@
             font-weight: 600;
         }
 
-        .discord-btn {
+        /* Grupo de Botões (Discord + Ranking) */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
             margin-top: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .action-btn {
             display: inline-flex;
             align-items: center;
             gap: 10px;
             background: rgba(138, 3, 3, 0.1);
             border: 1px solid var(--accent-red);
             color: #fff;
-            padding: 12px 35px;
-            font-size: 1.2rem;
+            padding: 12px 25px;
+            font-size: 1.1rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -226,7 +234,7 @@
             box-shadow: 0 0 15px rgba(138, 3, 3, 0.3);
         }
 
-        .discord-btn:hover {
+        .action-btn:hover {
             background: var(--accent-red);
             box-shadow: 0 0 25px var(--accent-red);
             transform: translateY(-3px);
@@ -380,6 +388,8 @@
             .radio-bar { flex-direction: column; height: 80px; gap: 5px; padding-top: 5px; }
             body { padding-top: 80px; }
             .radio-title { font-size: 1rem; }
+            .action-buttons { flex-direction: column; width: 100%; }
+            .action-btn { justify-content: center; }
         }
     </style>
 </head>
@@ -407,7 +417,12 @@
             <img src="image_93eb1f.png" alt="Guild Logo" class="guild-logo">
             <h1 class="main-title">$UICIDEBOY$</h1>
             <p class="main-subtitle">Guild PvP • Black Desert Online</p>
-            <a href="https://discord.gg/WmuTYqbdBP" target="_blank" class="discord-btn">🎧 Entrar no Discord</a>
+            
+            <div class="action-buttons">
+                <a href="https://discord.gg/WmuTYqbdBP" target="_blank" class="action-btn">🎧 Discord</a>
+                <a href="https://deadftx.github.io/suicidenodewar/" target="_blank" class="action-btn">🏆 Ranking Interno</a>
+            </div>
+            
         </div>
 
         <div class="side-plate fade-in">
@@ -478,7 +493,6 @@
                 width: '0',
                 playerVars: {
                     listType: 'playlist',
-                    // AQUI ESTÁ SUA PLAYLIST
                     list: 'PLX5kBmaBTPbSbjULcr4mzl_gySY9W8va1',
                     autoplay: 0,
                     loop: 1,
@@ -514,13 +528,11 @@
             const playPauseBtn = document.getElementById('play-pause-btn');
             const trackStatus = document.getElementById('track-status');
 
-            // 1 = Tocando
             if (event.data == YT.PlayerState.PLAYING) {
                 isPlaying = true;
                 playPauseBtn.innerHTML = '⏸ PAUSE';
                 trackStatus.innerHTML = 'Tocando... 🎶';
             } 
-            // 2 = Pausado ou 0 = Acabou
             else if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
                 isPlaying = false;
                 playPauseBtn.innerHTML = '▶ PLAY';
@@ -528,7 +540,6 @@
             }
         }
 
-        // SCROLL REVEAL DAS SEÇÕES
         document.addEventListener("DOMContentLoaded", () => {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
