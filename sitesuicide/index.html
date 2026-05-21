@@ -232,7 +232,8 @@
             try {
                 if(statusText) statusText.innerHTML = 'Conectando Rádio...';
                 
-                const response = await fetch('radio.php');
+                const urlDaRadioGoogle = 'https://script.google.com/macros/s/AKfycbwL1HiOU4k_RSn38L4xQwYBCr0hbFDnd9wVjjcp-2XDREP364yfDw2FkGULYMIjqQUw_w/exec'; 
+                const response = await fetch(urlDaRadioGoogle);
                 radioPlaylist = await response.json();
                 
                 if(radioPlaylist.length === 0) {
