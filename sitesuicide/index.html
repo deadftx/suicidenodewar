@@ -139,19 +139,8 @@
         </div>
 
         <h2 class="section-title"><span>†</span> Histórico de Guerra <span>†</span></h2>
-        <div class="log-container">
-            <div class="log-item win"><span>19/05 - T2</span><span class="log-result">🏆 VITÓRIA</span></div>
-            <div class="log-item win"><span>18/05 - T1</span><span class="log-result">🏆 VITÓRIA</span></div>
-            <div class="log-item win"><span>17/05 - T1</span><span class="log-result">🏆 VITÓRIA</span></div>
-            <div class="log-item"><span>15/05 - T1</span><span>⚔️ PARTICIPAÇÃO</span></div>
-            <div class="log-item win"><span>14/05 - T2</span><span class="log-result">🏆 VITÓRIA</span></div>
-            <div class="log-item"><span>13/05 - T1</span><span>⚔️ PARTICIPAÇÃO</span></div>
-            <div class="log-item"><span>12/05 - T1</span><span>⚔️ PARTICIPAÇÃO</span></div>
-            <div class="log-item win"><span>11/05 - T1</span><span class="log-result">🏆 VITÓRIA</span></div>
-            <div class="log-item win"><span>10/05 - T1</span><span class="log-result">🏆 VITÓRIA</span></div>
-            <div class="log-item win"><span>08/05 - T1</span><span class="log-result">🏆 VITÓRIA</span></div>
-            <div class="log-item win"><span>07/05 - T1</span><span class="log-result">🏆 VITÓRIA</span></div>
-            <div class="log-item win"><span>06/05 - T1</span><span class="log-result">🏆 VITÓRIA</span></div>
+        <div class="log-container" id="historico-box">
+            <div class="log-item"><span>⚔️ Sincronizando registros...</span></div>
         </div>
 
         <h2 class="section-title"><span>†</span> Staff / Recrutamento <span>†</span></h2>
@@ -173,6 +162,49 @@
     </footer>
 
     <script>
+        // --- SCRIPT DO HISTÓRICO DE NODES ---
+        const urlHistoricoCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?gid=1314573793&single=true&output=csv";
+        
+        async function carregarHistoricoNodes() {
+            const box = document.getElementById('historico-box');
+            if (!box) return;
+
+            try {
+                const response = await fetch(urlHistoricoCSV);
+                const csvText = await response.text();
+                
+                // Separa o texto pelas quebras de linha
+                const linhas = csvText.split('\n').map(linha => linha.trim()).filter(linha => linha.length > 0);
+                
+                box.innerHTML = ''; // Limpa o "Sincronizando registros..."
+                
+                // O loop começa no 1 para pular a linha de cabeçalho "DATA, RESULTADO"
+                for (let i = 1; i < linhas.length; i++) {
+                    const colunas = linhas[i].split(',');
+                    
+                    if (colunas.length >= 2) {
+                        const dataNode = colunas[0].trim();
+                        const resultadoNode = colunas[1].trim().toUpperCase();
+                        
+                        let ehVitoria = resultadoNode.includes("VITÓRIA");
+                        let icone = ehVitoria ? "🏆" : "⚔️";
+                        let classeEstilo = ehVitoria ? "win" : "";
+
+                        box.innerHTML += `
+                            <div class="log-item ${classeEstilo}">
+                                <span>${dataNode}</span>
+                                <span class="log-result">${icone} ${resultadoNode}</span>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                box.innerHTML = '<div class="log-item"><span>❌ Falha ao carregar o histórico.</span></div>';
+                console.error("Erro no CSV do histórico:", error);
+            }
+        }
+
+        // --- SCRIPT DA RÁDIO ---
         const audio = document.getElementById('native-audio');
         const playBtn = document.getElementById('play-pause-btn');
         const statusText = document.getElementById('track-status');
@@ -182,7 +214,6 @@
         let totalDuration = 0;
         let syncInterval;
 
-        // Puxa a lista inteligente do PHP
         async function carregarRadio() {
             try {
                 if(statusText) statusText.innerHTML = 'Conectando Rádio...';
@@ -204,7 +235,6 @@
             }
         }
 
-        // Lógica de Sincronia de Tempo Global
         function syncRadio() {
             if (radioPlaylist.length === 0) return;
 
@@ -249,8 +279,9 @@
             }
         });
 
-        // Carrega o PHP logo ao abrir a página
+        // Carrega o Histórico e a Rádio logo ao abrir a página
         window.onload = () => { 
+            carregarHistoricoNodes();
             carregarRadio();
         };
     </script>
