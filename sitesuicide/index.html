@@ -38,16 +38,42 @@
             padding: 0 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.9); backdrop-filter: blur(5px);
         }
 
-        .radio-wrapper { display: flex; align-items: center; gap: 30px; }
+        .radio-wrapper { display: flex; align-items: center; gap: 20px; }
         .radio-title { font-family: 'Cinzel', serif; color: var(--accent-red); font-size: 1.1rem; display: flex; align-items: center; gap: 10px; letter-spacing: 2px; }
         .radio-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 5px 15px; font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; font-weight: 600; border-radius: 4px; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
         .radio-btn:hover { border-color: var(--accent-red); background: rgba(138, 3, 3, 0.1); }
         
+        /* Controles de Volume Customizados */
+        .vol-slider {
+            -webkit-appearance: none;
+            background: #222;
+            height: 4px;
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .vol-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent-red);
+            box-shadow: 0 0 10px rgba(138, 3, 3, 0.8);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .vol-slider::-webkit-slider-thumb:hover { transform: scale(1.2); background: #ff3b3b; }
+        .vol-slider-top { width: 80px; }
+        .vol-slider-sp { width: 150px; }
+
+        .vol-container { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 1.1rem; }
+
         /* Botão do Modo Player */
-        .mode-btn { background: rgba(20, 20, 20, 0.8); border: 1px dashed var(--text-muted); color: var(--text-main); padding: 5px 15px; font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; font-weight: 600; border-radius: 4px; cursor: pointer; text-transform: uppercase; transition: 0.3s; margin-left: 15px; }
+        .mode-btn { background: rgba(20, 20, 20, 0.8); border: 1px dashed var(--text-muted); color: var(--text-main); padding: 5px 15px; font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; font-weight: 600; border-radius: 4px; cursor: pointer; text-transform: uppercase; transition: 0.3s; margin-left: 10px; }
         .mode-btn:hover { border-color: #fff; background: rgba(255, 255, 255, 0.1); }
 
-        #track-status { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; min-width: 150px; }
+        #track-status { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; min-width: 150px; margin-left: 10px;}
         .top-action-btn { background: rgba(138, 3, 3, 0.1); border: 1px solid var(--accent-red); color: #fff; padding: 6px 20px; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; text-decoration: none; border-radius: 4px; transition: 0.3s; }
         .top-action-btn:hover { background: var(--accent-red); }
 
@@ -146,8 +172,9 @@
 
         .sp-controls {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 25px;
         }
 
         .sp-play-btn {
@@ -178,6 +205,11 @@
         <div class="radio-wrapper">
             <div class="radio-title"><span>📻</span> RÁDIO SUICIDE</div>
             <button id="play-pause-btn" class="radio-btn">▶ SINTONIZAR</button>
+            
+            <div class="vol-container" title="Volume">
+                🔈<input type="range" id="vol-top" class="vol-slider vol-slider-top" min="0" max="1" step="0.01" value="0.5">
+            </div>
+
             <div id="track-status">Pausado</div>
             <button id="toggle-player-btn" class="mode-btn">🎧 MODO PLAYER</button>
         </div>
@@ -190,6 +222,10 @@
         <div class="sp-artist">$UICIDEBOY$ RADIO</div>
         <div class="sp-controls">
             <button id="sp-play-btn" class="sp-play-btn">▶</button>
+            
+            <div class="vol-container">
+                🔉<input type="range" id="vol-sp" class="vol-slider vol-slider-sp" min="0" max="1" step="0.01" value="0.5">🔊
+            </div>
         </div>
     </div>
 
@@ -307,15 +343,18 @@
 
         // --- SCRIPT DA RÁDIO E PLAYER ---
         const audio = document.getElementById('native-audio');
+        audio.volume = 0.5; // Inicia na metade
         
         // Elementos da barra de topo
         const playBtn = document.getElementById('play-pause-btn');
         const statusText = document.getElementById('track-status');
         const toggleModeBtn = document.getElementById('toggle-player-btn');
+        const volTop = document.getElementById('vol-top');
         
         // Elementos do Spotify View
         const spTrackTitle = document.getElementById('sp-track-title');
         const spPlayBtn = document.getElementById('sp-play-btn');
+        const volSp = document.getElementById('vol-sp');
 
         let isPlaying = false;
         let radioPlaylist = [];
@@ -327,6 +366,15 @@
             const isActive = document.body.classList.toggle('player-active');
             toggleModeBtn.innerHTML = isActive ? '❌ FECHAR PLAYER' : '🎧 MODO PLAYER';
         });
+
+        // Sincronia de Volume entre as duas barras
+        function updateVolume(val) {
+            audio.volume = val;
+            volTop.value = val;
+            volSp.value = val;
+        }
+        volTop.addEventListener('input', (e) => updateVolume(e.target.value));
+        volSp.addEventListener('input', (e) => updateVolume(e.target.value));
 
         async function carregarRadio() {
             try {
