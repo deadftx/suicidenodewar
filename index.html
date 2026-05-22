@@ -70,7 +70,7 @@
 
         #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4vh; color: #ffd700; z-index: 100; }
         
-        /* Cores estendidas para suportar mais de 9 Cards */
+        /* Cores estendidas para suportar todos os Cards */
         .card:nth-child(1)::before { background: #457b9d; } 
         .card:nth-child(2)::before { background: #e63946; } 
         .card:nth-child(3)::before { background: #f4a261; } 
@@ -203,12 +203,8 @@
             const colEst = columns.find(c => c.toUpperCase().includes("ESTRUTURA"));
             const colMortes = columns.find(c => c.toUpperCase().includes("DEATH") && c.toUpperCase().includes("MÉDIA"));
             const colCura = columns.find(c => c.toUpperCase().includes("CURA") && c.toUpperCase().includes("MÉDIA"));
-            
-            // Colunas Totais para o KDR
-            const colTotalKills = columns.find(c => c.toUpperCase().includes("TOTAL KILL"));
-            const colTotalDeaths = columns.find(c => c.toUpperCase().includes("TOTAL DEATH"));
 
-            colunasCalculadas = { nameCol, colNodes, colKills, colDano, colCC, colEst, colMortes, colCura, colTotalKills, colTotalDeaths };
+            colunasCalculadas = { nameCol, colNodes, colKills, colDano, colCC, colEst, colMortes, colCura };
 
             let maxNodesGeral = 0;
             let presencasMap = {}; 
@@ -260,7 +256,7 @@
                 if(p.cura < mins.cura) mins.cura = p.cura; if(p.cura > maxs.cura) maxs.cura = p.cura;
             });
 
-            // MVP
+            // MVP ATAQUE E SUPORTE
             let rankAtaque = players.map(p => {
                 let s = (normalize(p.k, mins.k, maxs.k) * 20) + (normalize(p.d, mins.d, maxs.d) * 20) + (normalize(p.c, mins.c, maxs.c) * 20) + (normalize(p.e, mins.e, maxs.e) * 20) + ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
                 return { nome: p.nome, score: parseFloat(s.toFixed(1)) };
@@ -274,8 +270,8 @@
             boxAtaque.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">⚔️ MVP ATAQUE ⚔️</div><div class="mvp-list">` + rankAtaque.slice(0, 10).map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i+1}º</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') + `</div>`;
             boxSuporte.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">🚑 MVP SUPORTE 🚑</div><div class="mvp-list">` + (rankSuporte.length > 0 ? rankSuporte.slice(0, 10).map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i+1}º</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') : '<div style="color:#aaa; text-align:center; padding: 2vh;">Dados insuficientes</div>') + `</div>`;
 
-            // ======= OS CARDS ORIGINAIS ======
-            const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
+            // ======= OS CARDS BÁSICOS (IGNORANDO CURA AQUI PRA FAZER INTELIGENTE DEPOIS) ======
+            const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH", "CURA"];
             const statsCols = columns.filter(col => {
                 if (col === nameCol) return false;
                 let ignore = false;
@@ -283,36 +279,24 @@
                 return !ignore;
             });
 
+            // Renderiza Kill, Dano, CC, Estrutura, Mortes
             statsCols.forEach(stat => {
-                let lista = players.map(p => ({ nome: p.nome, val: parseToNumber(p.row[stat]), visual: p.row[stat] }))
-                    .filter(p => !(stat.toUpperCase().includes("CURA") && p.val < 100000))
-                    .sort((a,b) => b.val - a.val);
+                let lista = players.map(p => ({ nome: p.nome, val: parseToNumber(p.row[stat]), visual: p.row[stat] }));
+                
+                // Morte é invertido (quem morre menos é Rank 1)
+                if (stat.toUpperCase().includes("DEATH") || stat.toUpperCase().includes("MORTE")) {
+                    lista.sort((a,b) => a.val - b.val);
+                } else {
+                    lista.sort((a,b) => b.val - a.val);
+                }
                 renderCardHtml(grid, stat, lista);
             });
-            
-            // ====== NOVOS CARDS DE KDR ======
-            let listaKdrTotal = players.map(p => {
-                let tk = parseToNumber(p.row[colTotalKills]);
-                let td = parseToNumber(p.row[colTotalDeaths]);
-                if(tk === -Infinity) tk = 0;
-                if(td === -Infinity || td === 0) td = 1; // Previne divisão por zero
-                let kdr = tk / td;
-                return { nome: p.nome, val: kdr, visual: kdr.toFixed(2) };
-            }).sort((a,b) => b.val - a.val);
 
-            let listaKdrMedio = players.map(p => {
-                let mk = parseToNumber(p.row[colKills]);
-                let md = parseToNumber(p.row[colMortes]);
-                if(mk === -Infinity) mk = 0;
-                if(md === -Infinity || md === 0) md = 1; // Previne divisão por zero
-                let kdr = mk / md;
-                return { nome: p.nome, val: kdr, visual: kdr.toFixed(2) };
-            }).sort((a,b) => b.val - a.val);
+            // Espaços em branco reservados para os Cards Inteligentes que virão do Histórico
+            renderCardHtml(grid, "☠️ KDR TOTAL (KILL/DEATH)", [], "card-kdr-total");
+            renderCardHtml(grid, "⚖️ KDR MÉDIO POR NODE", [], "card-kdr-medio");
+            renderCardHtml(grid, "🚑 MÉDIA CURA CAUSADA", [], "card-media-cura");
 
-            renderCardHtml(grid, "☠️ KDR TOTAL", listaKdrTotal);
-            renderCardHtml(grid, "⚖️ KDR MÉDIO POR NODE", listaKdrMedio);
-
-            // ====== CARD VETERANOS ======
             let listaVeteranos = Object.keys(presencasMap).map(numNodes => {
                 return {
                     nome: presencasMap[numNodes].join(" • "), 
@@ -322,12 +306,13 @@
             }).sort((a,b) => b.val - a.val);
             renderCardHtml(grid, "🛡️ VETERANOS (MAIS PRESENÇAS)", listaVeteranos);
 
-            // ====== CARDS DE HISTÓRICO ======
             renderCardHtml(grid, "📈 EVOLUÇÃO (FLUTUAÇÃO POSITIVA)", [], "card-evolucao");
             renderCardHtml(grid, "🏅 CONSISTÊNCIA (TOP 5 MVP)", [], "card-consistencia");
 
-            // Cache atualizado armazenando as listas novas e TODAS as colunas para a lupa
-            window.cacheRankings = { rankAtaque, rankSuporte, players, allColumns: columns, nameCol, colNodes, listaEvolucao: [], listaConsistencia: [], listaKdrTotal, listaKdrMedio, listaVeteranos };
+            window.cacheRankings = { 
+                rankAtaque, rankSuporte, players, allColumns: columns, nameCol, 
+                listaEvolucao: [], listaConsistencia: [], listaKdrTotal: [], listaKdrMedio: [], listaMediaCura: [], listaVeteranos 
+            };
             
             processarNovaAbaHistorico();
         }
@@ -355,27 +340,86 @@
                     let ordensNodes = []; 
                     let contagemNodesPorPlayer = {};
                     
+                    // VARIÁVEL DE ESTATÍSTICA INTELIGENTE (KDR e Cura)
+                    let playerNodeStats = {};
+
                     hData.forEach(row => {
                         let dataValor = row[colData] ? String(row[colData]).trim() : null;
                         let playerNome = row[nameCol] ? String(row[nameCol]).trim() : null;
                         
                         if (dataValor && dataValor.length > 2 && playerNome) {
+                            // Agrupamento temporal
                             if(!nodesAgrupados[dataValor]) {
                                 nodesAgrupados[dataValor] = [];
                                 ordensNodes.push(dataValor);
                             }
                             nodesAgrupados[dataValor].push(row);
                             contagemNodesPorPlayer[playerNome] = (contagemNodesPorPlayer[playerNome] || 0) + 1;
+                            
+                            // Agrupamento do jogador (Somas Totais)
+                            if(!playerNodeStats[playerNome]) {
+                                playerNodeStats[playerNome] = { nodes: 0, k: 0, m: 0, cura: 0, curaNodes: 0, sumKdr: 0 };
+                            }
+                            let k = parseToNumber(row[colK]); if(k===-Infinity) k=0;
+                            let m = parseToNumber(row[colM]); if(m===-Infinity) m=0;
+                            let curaVal = colCura ? parseToNumber(row[colCura]) : 0; if(curaVal===-Infinity) curaVal=0;
+                            
+                            playerNodeStats[playerNome].nodes += 1;
+                            playerNodeStats[playerNome].k += k;
+                            playerNodeStats[playerNome].m += m;
+                            playerNodeStats[playerNome].cura += curaVal;
+                            
+                            // Regra de Cura: Conta como "guerra de cura" só se curou > 100k
+                            if(curaVal >= 100000) {
+                                playerNodeStats[playerNome].curaNodes += 1;
+                            }
+                            
+                            // KDR Isolado do dia pra fazer a média
+                            let kdrDiario = k / (m > 0 ? m : 1);
+                            playerNodeStats[playerNome].sumKdr += kdrDiario;
                         }
                     });
 
                     let totalDeGuerras = ordensNodes.length;
-                    
-                    // DATA FIXADA MANUALMENTE CONFORME PEDIDO
                     document.getElementById('estatisticas-guilda').innerHTML = `🚩 ${totalDeGuerras} GUERRAS REGISTRADAS (DESDE 03/05) 🚩`;
 
                     let minNodesReqHist = Math.max(2, Math.floor(totalDeGuerras * 0.25));
 
+                    // ==========================================
+                    // CONSTRUINDO AS LISTAS DOS NOVOS CARDS 
+                    // ==========================================
+                    let listaKdrTotal = [];
+                    let listaKdrMedio = [];
+                    let listaMediaCura = [];
+                    
+                    Object.keys(playerNodeStats).forEach(n => {
+                        let stats = playerNodeStats[n];
+                        // Só passa pra frente quem tem o minimo de nodes
+                        if(stats.nodes >= minNodesReqHist) {
+                            
+                            // KDR TOTAL (Kills totais / Mortes totais)
+                            let kdrTot = stats.k / (stats.m > 0 ? stats.m : 1);
+                            listaKdrTotal.push({ nome: n, val: kdrTot, visual: kdrTot.toFixed(2) });
+                            
+                            // KDR MÉDIO (Soma de todos os KDRs diários / número de nodes)
+                            let kdrMed = stats.sumKdr / stats.nodes;
+                            listaKdrMedio.push({ nome: n, val: kdrMed, visual: kdrMed.toFixed(2) });
+                            
+                            // MÉDIA CURA (Total de Cura / Apenas Nodes em que atuou como Healer)
+                            if(stats.curaNodes > 0) {
+                                let medCura = stats.cura / stats.curaNodes;
+                                listaMediaCura.push({ nome: n, val: medCura, visual: Math.round(medCura).toLocaleString('pt-BR') });
+                            }
+                        }
+                    });
+
+                    listaKdrTotal.sort((a,b) => b.val - a.val);
+                    listaKdrMedio.sort((a,b) => b.val - a.val);
+                    listaMediaCura.sort((a,b) => b.val - a.val);
+
+                    // ==========================================
+                    // ROTINA DE MVP E HISTÓRICO
+                    // ==========================================
                     let consistenciaMap = {};
                     let historicoNotasMap = {}; 
 
@@ -456,27 +500,31 @@
 
                     listaEvolucao.sort((a,b) => b.val - a.val);
 
+                    // SALVA TUDO NO CACHE PARA A LUPA PUXAR
                     window.cacheRankings.listaEvolucao = listaEvolucao;
                     window.cacheRankings.listaConsistencia = listaConsistencia;
+                    window.cacheRankings.listaKdrTotal = listaKdrTotal;
+                    window.cacheRankings.listaKdrMedio = listaKdrMedio;
+                    window.cacheRankings.listaMediaCura = listaMediaCura;
 
-                    const divEvolucao = document.getElementById('card-evolucao');
-                    const divConsistencia = document.getElementById('card-consistencia');
-                    
-                    divEvolucao.innerHTML = ""; divConsistencia.innerHTML = ""; 
-                    renderCardHtml(divEvolucao, "📈 EVOLUÇÃO (FLUTUAÇÃO POSITIVA)", listaEvolucao);
-                    renderCardHtml(divConsistencia, "🏅 CONSISTÊNCIA (TOP 5 MVP)", listaConsistencia);
-                    
-                    divEvolucao.innerHTML = divEvolucao.firstChild.innerHTML;
-                    divConsistencia.innerHTML = divConsistencia.firstChild.innerHTML;
+                    // PINTA OS NOVOS CARDS NA TELA
+                    document.getElementById('card-kdr-total').innerHTML = ""; renderCardHtml(document.getElementById('card-kdr-total'), "☠️ KDR TOTAL (KILL/DEATH)", listaKdrTotal); document.getElementById('card-kdr-total').innerHTML = document.getElementById('card-kdr-total').firstChild.innerHTML;
+                    document.getElementById('card-kdr-medio').innerHTML = ""; renderCardHtml(document.getElementById('card-kdr-medio'), "⚖️ KDR MÉDIO POR NODE", listaKdrMedio); document.getElementById('card-kdr-medio').innerHTML = document.getElementById('card-kdr-medio').firstChild.innerHTML;
+                    document.getElementById('card-media-cura').innerHTML = ""; renderCardHtml(document.getElementById('card-media-cura'), "🚑 MÉDIA CURA CAUSADA", listaMediaCura); document.getElementById('card-media-cura').innerHTML = document.getElementById('card-media-cura').firstChild.innerHTML;
+                    document.getElementById('card-evolucao').innerHTML = ""; renderCardHtml(document.getElementById('card-evolucao'), "📈 EVOLUÇÃO (FLUTUAÇÃO POSITIVA)", listaEvolucao); document.getElementById('card-evolucao').innerHTML = document.getElementById('card-evolucao').firstChild.innerHTML;
+                    document.getElementById('card-consistencia').innerHTML = ""; renderCardHtml(document.getElementById('card-consistencia'), "🏅 CONSISTÊNCIA (TOP 5 MVP)", listaConsistencia); document.getElementById('card-consistencia').innerHTML = document.getElementById('card-consistencia').firstChild.innerHTML;
                 }
             });
         }
 
+        // =====================================
+        // NOVA LUPA: O DOSSIÊ COMPLETO
+        // =====================================
         function buscarPlayer() {
             const query = document.getElementById('player-search').value.toLowerCase().trim();
             if (!query) return;
 
-            const { rankAtaque, rankSuporte, players, allColumns, nameCol, colNodes, listaEvolucao, listaConsistencia, listaKdrTotal, listaKdrMedio, listaVeteranos } = window.cacheRankings;
+            const { rankAtaque, rankSuporte, players, allColumns, nameCol, listaEvolucao, listaConsistencia, listaKdrTotal, listaKdrMedio, listaMediaCura, listaVeteranos } = window.cacheRankings;
             
             let player = players.find(p => p.nome.toLowerCase() === query);
             if (!player) player = players.find(p => p.nome.toLowerCase().includes(query));
@@ -500,16 +548,16 @@
 
             let statsHtml = "";
             
-            // Loop cego pegando TODAS as colunas que vieram do Google Sheets (Dano, Kill, Mortes, etc)
-            const colunasInfo = allColumns.filter(c => c !== nameCol);
+            // FILTRA AS COLUNAS ORIGINAIS (Kill, Dano, CC, Estrutura, Mortes)
+            // IGNORANDO A CURA DA PLANILHA GERAL PRA USAR A CURA INTELIGENTE
+            const colunasInfo = allColumns.filter(c => c !== nameCol && !c.toUpperCase().includes("CURA") && !c.toUpperCase().includes("TOTAL DEATH") && !c.toUpperCase().includes("TOTAL KILL"));
             
             colunasInfo.forEach(stat => {
                 let isDeath = stat.toUpperCase().includes("DEATH") || stat.toUpperCase().includes("MORTE");
                 
-                let fullRank = players.map(p => ({ nome: p.nome, val: parseToNumber(p.row[stat]), visual: p.row[stat] }))
-                    .filter(p => !(stat.toUpperCase().includes("CURA") && p.val < 100000));
+                let fullRank = players.map(p => ({ nome: p.nome, val: parseToNumber(p.row[stat]), visual: p.row[stat] }));
                 
-                // Se for atributo de morte, quem morre menos é o Rank 1
+                // Morte inverte a posição do rank (quem morre menos é o melhor)
                 if (isDeath) {
                     fullRank.sort((a,b) => a.val - b.val);
                 } else {
@@ -522,17 +570,28 @@
                 statsHtml += `<div class="result-item"><span class="result-label">${stat}</span><div><span class="result-value">${val}</span><span class="result-rank">${pos > 0 ? pos + 'º' : 'N/A'}</span></div></div>`;
             });
 
-            // ====== ADICIONA AS INFOS MANUAIS ======
+            // ====== ADICIONA AS NOVAS INTELIGÊNCIAS NO DOSSIÊ ======
             
             let objKdrTot = listaKdrTotal.find(f => f.nome === player.nome);
-            let valKdrTot = objKdrTot ? objKdrTot.visual : "0";
+            let valKdrTot = objKdrTot ? objKdrTot.visual : "0.00";
             let posKdrTot = objKdrTot ? listaKdrTotal.findIndex(f => f.nome === player.nome) + 1 : "N/A";
             statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">☠️ KDR TOTAL</span><div><span class="result-value" style="color:#ffd700;">${valKdrTot}</span><span class="result-rank">${posKdrTot !== "N/A" ? posKdrTot + 'º' : 'N/A'}</span></div></div>`;
 
             let objKdrMed = listaKdrMedio.find(f => f.nome === player.nome);
-            let valKdrMed = objKdrMed ? objKdrMed.visual : "0";
+            let valKdrMed = objKdrMed ? objKdrMed.visual : "0.00";
             let posKdrMed = objKdrMed ? listaKdrMedio.findIndex(f => f.nome === player.nome) + 1 : "N/A";
-            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">⚖️ KDR MÉDIO</span><div><span class="result-value" style="color:#ffd700;">${valKdrMed}</span><span class="result-rank">${posKdrMed !== "N/A" ? posKdrMed + 'º' : 'N/A'}</span></div></div>`;
+            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">⚖️ KDR MÉDIO / NODE</span><div><span class="result-value" style="color:#ffd700;">${valKdrMed}</span><span class="result-rank">${posKdrMed !== "N/A" ? posKdrMed + 'º' : 'N/A'}</span></div></div>`;
+
+            let objMediaCura = listaMediaCura.find(f => f.nome === player.nome);
+            if (objMediaCura) {
+                let posMediaCura = listaMediaCura.findIndex(f => f.nome === player.nome) + 1;
+                statsHtml += `<div class="result-item" style="background: rgba(0, 245, 212, 0.1);"><span class="result-label">🚑 CURA MÉDIA REAL</span><div><span class="result-value" style="color:#00f5d4;">${objMediaCura.visual}</span><span class="result-rank">${posMediaCura}º</span></div></div>`;
+            }
+
+            let objVet = listaVeteranos.find(f => f.nome.includes(player.nome));
+            let valVet = objVet ? objVet.visual : "N/A";
+            let posVet = objVet ? listaVeteranos.findIndex(f => f.nome.includes(player.nome)) + 1 : "N/A";
+            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">🛡️ PRESENÇAS NA GUERRA</span><div><span class="result-value" style="color:#ffd700;">${valVet}</span><span class="result-rank">${posVet !== "N/A" ? posVet + 'º' : 'N/A'}</span></div></div>`;
 
             let objEv = listaEvolucao.find(f => f.nome === player.nome);
             let valEv = objEv ? objEv.visual : "0 pts (Não Superou a Média)";
