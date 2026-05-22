@@ -67,10 +67,8 @@
         .rank-pos { color: #a8a8b3; font-weight: bold; width: 10%; }
         .rank-name { color: #e2e2e2; width: 60%; word-wrap: break-word; line-height: 1.3; margin: 0.5vh 0; }
         .rank-value { color: #00f5d4; font-weight: bold; text-align: right; width: 30%; }
-
         #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4vh; color: #ffd700; z-index: 100; }
         
-        /* Cores estendidas para suportar mais de 9 Cards */
         .card:nth-child(1)::before { background: #457b9d; } 
         .card:nth-child(2)::before { background: #e63946; } 
         .card:nth-child(3)::before { background: #f4a261; } 
@@ -92,28 +90,14 @@
     <header><h1>🏆 HALL DA FAMA - NODEWAR SUICIDE 🏆</h1></header>
 
     <div class="homenagem-container">
-        <div class="homenagem-box">
-            <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
-            <div class="homenagem-titulo">🚩 Sem sua bandeira a gente não vive 🚩</div>
-            <div class="homenagem-nomes">Apokalypse</div>
-        </div>
-        
-        <div class="homenagem-box">
-            <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
-            <div class="homenagem-titulo">🛡️ Sentinelas da Base 🛡️</div>
-            <div class="homenagem-nomes">ZeXXay • YonaShirai • LinkyShirai</div>
-        </div>
-        
-        <div class="homenagem-box">
-            <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
-            <div class="homenagem-titulo">🎵 Sem nossas Shais a gente não consegue 🎵</div>
-            <div class="homenagem-nomes">Bandagem • Malia • Amisheart • Iloicca</div>
-        </div>
+        <div class="homenagem-box"><div class="homenagem-titulo">🚩 Sem sua bandeira a gente não vive 🚩</div><div class="homenagem-nomes">Apokalypse</div></div>
+        <div class="homenagem-box"><div class="homenagem-titulo">🛡️ Sentinelas da Base 🛡️</div><div class="homenagem-nomes">ZeXXay • YonaShirai • LinkyShirai</div></div>
+        <div class="homenagem-box"><div class="homenagem-titulo">🎵 Sem nossas Shais a gente não consegue 🎵</div><div class="homenagem-nomes">Bandagem • Malia • Amisheart • Iloicca</div></div>
     </div>
 
     <div class="search-container">
         <div class="search-box">
-            <input type="text" id="player-search" class="search-input" placeholder="Pesquisando requisito de corte...">
+            <input type="text" id="player-search" class="search-input" placeholder="Pesquisando...">
             <button onclick="buscarPlayer()" class="search-btn">BUSCAR</button>
         </div>
     </div>
@@ -135,31 +119,18 @@
 
     <script>
         let globalData = [];
-        let colunasCalculadas = {};
-
-        // === LINKS DAS PLANILHAS CSV ===
         const csvUrlGeral = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?gid=1115049823&single=true&output=csv";
         const csvUrlHistorico = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?gid=343036287&single=true&output=csv";
-        
         const proxyGeral = "https://corsproxy.io/?" + encodeURIComponent(csvUrlGeral);
         const proxyHist = "https://corsproxy.io/?" + encodeURIComponent(csvUrlHistorico);
 
         function parseToNumber(val) {
-            if (!val || String(val).trim() === "") return -Infinity;
             let str = String(val).trim().replace(/[^\d.,-]/g, '').replace(/\./g, '').replace(',', '.'); 
-            const num = parseFloat(str);
-            return isNaN(num) ? -Infinity : num;
-        }
-
-        function normalize(val, min, max) {
-            if (max === min) return 0;
-            return (val - min) / (max - min);
+            return parseFloat(str) || 0;
         }
 
         Papa.parse(proxyGeral, {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
+            download: true, header: true, skipEmptyLines: true,
             complete: function(res) {
                 globalData = res.data;
                 document.getElementById('loading').style.display = 'none';
@@ -171,401 +142,112 @@
             const card = document.createElement('div');
             card.className = 'card';
             if(id) card.id = id;
-            let html = `<video class="hover-video" src="gifsuicide.mp4" loop muted playsinline></video><div class="card-content-wrapper"><div class="card-title">${title}</div>`;
+            let html = `<div class="card-content-wrapper"><div class="card-title">${title}</div>`;
             if (lista && lista.length > 0) {
                 html += `<div class="top1-container"><div class="top1-player">🏆 ${lista[0].nome}</div><div class="top1-value">${lista[0].visual}</div></div><div class="ranking-list">`;
                 lista.slice(1, 5).forEach((p, i) => { html += `<div class="ranking-item"><span class="rank-pos">${i+2}º</span><span class="rank-name">${p.nome}</span><span class="rank-value">${p.visual}</span></div>`; });
                 html += `</div>`;
             } else {
-                html += `<div class="top1-player" style="font-size:2vh; margin-top:2vh; color:#ffd700;">Vasculhando Histórico...</div>`;
+                html += `<div class="top1-player" style="font-size:2vh; margin-top:2vh; color:#ffd700;">Vasculhando...</div>`;
             }
             html += `</div>`;
             card.innerHTML = html;
             container.appendChild(card);
-            const v = card.querySelector('video');
-            card.onmouseenter = () => v && v.play();
-            card.onmouseleave = () => v && v.pause();
         }
 
         function processarRankingsPrincipais() {
             const data = globalData;
             const grid = document.getElementById('grid');
-            const boxAtaque = document.getElementById('mvp-ataque-box');
-            const boxSuporte = document.getElementById('mvp-suporte-box');
-            
             const columns = Object.keys(data[0]);
             const nameCol = columns[0];
+            const colNodes = columns.find(c => c.toUpperCase().includes("NODE")) || columns[1];
             
-            const colNodes = columns.find(c => c.toUpperCase().includes("NODE") || c.toUpperCase().includes("PARTICIPA")) || columns[1];
-            const colKills = columns.find(c => c.toUpperCase().includes("KILL") && c.toUpperCase().includes("MÉDIA"));
-            const colDano = columns.find(c => c.toUpperCase().includes("DANO") && c.toUpperCase().includes("MÉDI"));
-            const colCC = columns.find(c => c.toUpperCase().includes("CC"));
-            const colEst = columns.find(c => c.toUpperCase().includes("ESTRUTURA"));
-            const colMortes = columns.find(c => c.toUpperCase().includes("DEATH") && c.toUpperCase().includes("MÉDIA"));
-            const colCura = columns.find(c => c.toUpperCase().includes("CURA") && c.toUpperCase().includes("MÉDIA"));
-            
-            // Colunas Totais para o KDR
-            const colTotalKills = columns.find(c => c.toUpperCase().includes("TOTAL KILL"));
-            const colTotalDeaths = columns.find(c => c.toUpperCase().includes("TOTAL DEATH"));
+            let maxNodes = 0;
+            data.forEach(r => { let n = parseInt(r[colNodes], 10); if(!isNaN(n) && n > maxNodes) maxNodes = n; });
+            let minNodes = Math.max(2, Math.floor(maxNodes * 0.25));
+            document.getElementById('player-search').placeholder = `Pesquisar (Corte: min. ${minNodes} de ${maxNodes} guerras)...`;
 
-            colunasCalculadas = { nameCol, colNodes, colKills, colDano, colCC, colEst, colMortes, colCura, colTotalKills, colTotalDeaths };
-
-            let maxNodesGeral = 0;
-            let presencasMap = {}; 
-
-            data.forEach(row => {
-                let n = parseInt(row[colNodes], 10);
-                let playerName = row[nameCol] ? String(row[nameCol]).trim() : null;
-
-                if (!isNaN(n) && n > 0 && n < 200) {
-                    if (n > maxNodesGeral) maxNodesGeral = n;
-                    
-                    if (playerName) {
-                        if (!presencasMap[n]) presencasMap[n] = [];
-                        presencasMap[n].push(playerName);
-                    }
-                }
-            });
-            
-            let minNodesReqGeral = Math.max(2, Math.floor(maxNodesGeral * 0.25));
-            document.getElementById('player-search').placeholder = `Pesquisar (Corte: min. ${minNodesReqGeral} de ${maxNodesGeral} guerras)...`;
-
-            let players = [];
-            data.forEach(row => {
-                const nodes = parseToNumber(row[colNodes]);
-                let playerName = row[nameCol] ? String(row[nameCol]).trim() : null;
-
-                if (playerName && nodes >= minNodesReqGeral) {
-                    players.push({
-                        nome: playerName,
-                        k: parseToNumber(row[colKills]) === -Infinity ? 0 : parseToNumber(row[colKills]),
-                        d: parseToNumber(row[colDano]) === -Infinity ? 0 : parseToNumber(row[colDano]),
-                        c: parseToNumber(row[colCC]) === -Infinity ? 0 : parseToNumber(row[colCC]),
-                        e: parseToNumber(row[colEst]) === -Infinity ? 0 : parseToNumber(row[colEst]),
-                        m: parseToNumber(row[colMortes]) === -Infinity ? 0 : parseToNumber(row[colMortes]),
-                        cura: parseToNumber(row[colCura]) === -Infinity ? 0 : parseToNumber(row[colCura]),
-                        row: row
-                    });
-                }
-            });
-
-            let mins = {k: Infinity, d: Infinity, c: Infinity, e: Infinity, m: Infinity, cura: Infinity};
-            let maxs = {k: -Infinity, d: -Infinity, c: -Infinity, e: -Infinity, m: -Infinity, cura: -Infinity};
-            players.forEach(p => {
-                if(p.k < mins.k) mins.k = p.k; if(p.k > maxs.k) maxs.k = p.k;
-                if(p.d < mins.d) mins.d = p.d; if(p.d > maxs.d) maxs.d = p.d;
-                if(p.c < mins.c) mins.c = p.c; if(p.c > maxs.c) maxs.c = p.c;
-                if(p.e < mins.e) mins.e = p.e; if(p.e > maxs.e) maxs.e = p.e;
-                if(p.m < mins.m) mins.m = p.m; if(p.m > maxs.m) maxs.m = p.m;
-                if(p.cura < mins.cura) mins.cura = p.cura; if(p.cura > maxs.cura) maxs.cura = p.cura;
-            });
-
-            // MVP
-            let rankAtaque = players.map(p => {
-                let s = (normalize(p.k, mins.k, maxs.k) * 20) + (normalize(p.d, mins.d, maxs.d) * 20) + (normalize(p.c, mins.c, maxs.c) * 20) + (normalize(p.e, mins.e, maxs.e) * 20) + ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
-                return { nome: p.nome, score: parseFloat(s.toFixed(1)) };
-            }).sort((a,b) => b.score - a.score);
-
-            let rankSuporte = players.filter(p => p.cura >= 100000).map(p => {
-                let s = (normalize(p.cura, mins.cura, maxs.cura) * 50) + ((1 - normalize(p.m, mins.m, maxs.m)) * 50);
-                return { nome: p.nome, score: parseFloat(s.toFixed(1)) };
-            }).sort((a,b) => b.score - a.score);
-
-            boxAtaque.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">⚔️ MVP ATAQUE ⚔️</div><div class="mvp-list">` + rankAtaque.slice(0, 10).map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i+1}º</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') + `</div>`;
-            boxSuporte.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">🚑 MVP SUPORTE 🚑</div><div class="mvp-list">` + (rankSuporte.length > 0 ? rankSuporte.slice(0, 10).map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i+1}º</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') : '<div style="color:#aaa; text-align:center; padding: 2vh;">Dados insuficientes</div>') + `</div>`;
-
-            // ======= OS CARDS ORIGINAIS ======
-            const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
-            const statsCols = columns.filter(col => {
-                if (col === nameCol) return false;
-                let ignore = false;
-                colunasIgnoradas.forEach(i => { if (col.toUpperCase().includes(i)) ignore = true; });
-                return !ignore;
-            });
-
-            statsCols.forEach(stat => {
-                let lista = players.map(p => ({ nome: p.nome, val: parseToNumber(p.row[stat]), visual: p.row[stat] }))
-                    .filter(p => !(stat.toUpperCase().includes("CURA") && p.val < 100000))
-                    .sort((a,b) => b.val - a.val);
-                renderCardHtml(grid, stat, lista);
-            });
-            
-            // ====== NOVOS CARDS DE KDR ======
-            let listaKdrTotal = players.map(p => {
-                let tk = parseToNumber(p.row[colTotalKills]);
-                let td = parseToNumber(p.row[colTotalDeaths]);
-                if(tk === -Infinity) tk = 0;
-                if(td === -Infinity || td === 0) td = 1; // Previne divisão por zero
-                let kdr = tk / td;
-                return { nome: p.nome, val: kdr, visual: kdr.toFixed(2) };
-            }).sort((a,b) => b.val - a.val);
-
-            let listaKdrMedio = players.map(p => {
-                let mk = parseToNumber(p.row[colKills]);
-                let md = parseToNumber(p.row[colMortes]);
-                if(mk === -Infinity) mk = 0;
-                if(md === -Infinity || md === 0) md = 1; // Previne divisão por zero
-                let kdr = mk / md;
-                return { nome: p.nome, val: kdr, visual: kdr.toFixed(2) };
-            }).sort((a,b) => b.val - a.val);
-
-            renderCardHtml(grid, "☠️ KDR TOTAL", listaKdrTotal);
-            renderCardHtml(grid, "⚖️ KDR MÉDIO POR NODE", listaKdrMedio);
-
-            // ====== CARD VETERANOS ======
-            let listaVeteranos = Object.keys(presencasMap).map(numNodes => {
-                return {
-                    nome: presencasMap[numNodes].join(" • "), 
-                    val: parseInt(numNodes, 10),
-                    visual: numNodes + (numNodes == 1 ? " Guerra" : " Guerras")
-                };
-            }).sort((a,b) => b.val - a.val);
-            renderCardHtml(grid, "🛡️ VETERANOS (MAIS PRESENÇAS)", listaVeteranos);
-
-            // ====== CARDS DE HISTÓRICO ======
-            renderCardHtml(grid, "📈 EVOLUÇÃO (FLUTUAÇÃO POSITIVA)", [], "card-evolucao");
-            renderCardHtml(grid, "🏅 CONSISTÊNCIA (TOP 5 MVP)", [], "card-consistencia");
-
-            // Cache atualizado armazenando as listas novas e TODAS as colunas para a lupa
-            window.cacheRankings = { rankAtaque, rankSuporte, players, allColumns: columns, nameCol, colNodes, listaEvolucao: [], listaConsistencia: [], listaKdrTotal, listaKdrMedio, listaVeteranos };
-            
+            window.cacheRankings = { players: data, allColumns: columns, nameCol, minNodes };
             processarNovaAbaHistorico();
         }
 
         function processarNovaAbaHistorico() {
             Papa.parse(proxyHist, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
+                download: true, header: true, skipEmptyLines: true,
                 complete: function(res) {
                     const hData = res.data;
-                    if(hData.length === 0) return;
-
                     const cols = Object.keys(hData[0]);
-                    const nameCol = cols[0]; 
-                    const colData = cols.find(c => c.toUpperCase().includes("DATA") || c.toUpperCase().includes("DIA") || c.toUpperCase().includes("NODE") || c.toUpperCase().includes("GUERRA"));
-                    const colK = cols.find(c => c.toUpperCase().includes("KILL"));
-                    const colD = cols.find(c => c.toUpperCase().includes("DANO") && !c.toUpperCase().includes("ESTRUTURA"));
-                    const colC = cols.find(c => c.toUpperCase().includes("CC"));
-                    const colE = cols.find(c => c.toUpperCase().includes("ESTRUTURA"));
-                    const colM = cols.find(c => c.toUpperCase().includes("DEATH"));
-                    const colCura = cols.find(c => c.toUpperCase().includes("CURA"));
+                    const nameCol = cols[0];
+                    const colK = cols.find(c => c.toUpperCase().includes("KILL") && !c.toUpperCase().includes("TOTAL"));
+                    const colM = cols.find(c => c.toUpperCase().includes("DEATH") && !c.toUpperCase().includes("TOTAL"));
+                    const colC = cols.find(c => c.toUpperCase().includes("CURA") && !c.toUpperCase().includes("TOTAL"));
+                    const colTotalK = cols.find(c => c.toUpperCase().includes("TOTAL KILL"));
+                    const colTotalM = cols.find(c => c.toUpperCase().includes("TOTAL DEATH"));
 
-                    let nodesAgrupados = {};
-                    let ordensNodes = []; 
-                    let contagemNodesPorPlayer = {};
-                    
-                    hData.forEach(row => {
-                        let dataValor = row[colData] ? String(row[colData]).trim() : null;
-                        let playerNome = row[nameCol] ? String(row[nameCol]).trim() : null;
-                        
-                        if (dataValor && dataValor.length > 2 && playerNome) {
-                            if(!nodesAgrupados[dataValor]) {
-                                nodesAgrupados[dataValor] = [];
-                                ordensNodes.push(dataValor);
-                            }
-                            nodesAgrupados[dataValor].push(row);
-                            contagemNodesPorPlayer[playerNome] = (contagemNodesPorPlayer[playerNome] || 0) + 1;
+                    let stats = {};
+                    let ordensNodes = [];
+                    hData.forEach(r => {
+                        let p = r[nameCol]?.trim();
+                        if(!p) return;
+                        if(!stats[p]) stats[p] = { k:0, m:0, tk:0, tm:0, c:0, cNodes:0, nodes:0, sumKdrDiario:0 };
+                        let k = parseToNumber(r[colK]), m = parseToNumber(r[colM]), c = parseToNumber(r[colC]), tk = parseToNumber(r[colTotalK]), tm = parseToNumber(r[colTotalM]);
+                        stats[p].nodes++; stats[p].k += k; stats[p].m += m; stats[p].tk = tk; stats[p].tm = tm; stats[p].c += c;
+                        if(c >= 450000) stats[p].cNodes++;
+                        stats[p].sumKdrDiario += (k / (m > 0 ? m : 1));
+                        if(!ordensNodes.includes(r[cols.find(c => c.toUpperCase().includes("DATA"))])) ordensNodes.push(r[cols.find(c => c.toUpperCase().includes("DATA"))]);
+                    });
+
+                    document.getElementById('estatisticas-guilda').innerHTML = `🚩 ${ordensNodes.length} GUERRAS REGISTRADAS (DESDE 03/05) 🚩`;
+                    let min = Math.max(2, Math.floor(ordensNodes.length * 0.25));
+
+                    let kdrTot = [], kdrMed = [], medCura = [], vet = [];
+                    Object.keys(stats).forEach(n => {
+                        if(stats[n].nodes >= min) {
+                            let kt = stats[n].tk / (stats[n].tm || 1);
+                            kdrTot.push({ nome: n, val: kt, visual: kt.toFixed(2) });
+                            let km = stats[n].sumKdrDiario / stats[n].nodes;
+                            kdrMed.push({ nome: n, val: km, visual: km.toFixed(2) });
+                            if(stats[n].cNodes > 0) medCura.push({ nome: n, val: stats[n].cTotal / stats[n].cNodes, visual: Math.round(stats[n].cTotal / stats[n].cNodes).toLocaleString('pt-BR') });
+                            vet.push({ nome: n, val: stats[n].nodes, visual: stats[n].nodes + " Guerras" });
                         }
                     });
 
-                    let totalDeGuerras = ordensNodes.length;
+                    [kdrTot, kdrMed, medCura, vet].forEach(l => l.sort((a,b) => b.val - a.val));
+                    const grid = document.getElementById('grid');
+                    renderCardHtml(grid, "☠️ KDR TOTAL (KILL/DEATH)", kdrTot);
+                    renderCardHtml(grid, "⚖️ KDR MÉDIO POR NODE", kdrMed);
+                    renderCardHtml(grid, "🚑 MÉDIA CURA REAL (ACIMA DE 450K)", medCura);
+                    renderCardHtml(grid, "🛡️ VETERANOS (MAIS PRESENÇAS)", vet);
                     
-                    // DATA FIXADA MANUALMENTE CONFORME PEDIDO
-                    document.getElementById('estatisticas-guilda').innerHTML = `🚩 ${totalDeGuerras} GUERRAS REGISTRADAS (DESDE 03/05) 🚩`;
-
-                    let minNodesReqHist = Math.max(2, Math.floor(totalDeGuerras * 0.25));
-
-                    let consistenciaMap = {};
-                    let historicoNotasMap = {}; 
-
-                    ordensNodes.forEach(dataKey => {
-                        let sData = nodesAgrupados[dataKey];
-                        let sPlayers = [];
-
-                        sData.forEach(r => {
-                            let pNome = String(r[nameCol]).trim();
-                            let curaVal = colCura ? parseToNumber(r[colCura]) : 0;
-                            
-                            if(curaVal < 100000) {
-                                sPlayers.push({
-                                    nome: pNome,
-                                    k: parseToNumber(r[colK]),
-                                    d: parseToNumber(r[colD]),
-                                    c: colC ? parseToNumber(r[colC]) : 0,
-                                    e: colE ? parseToNumber(r[colE]) : 0,
-                                    m: colM ? parseToNumber(r[colM]) : 0
-                                });
-                            }
-                        });
-
-                        let mins = {k: Infinity, d: Infinity, c: Infinity, e: Infinity, m: Infinity};
-                        let maxs = {k: -Infinity, d: -Infinity, c: -Infinity, e: -Infinity, m: -Infinity};
-                        sPlayers.forEach(p => {
-                            if(p.k < mins.k) mins.k = p.k; if(p.k > maxs.k) maxs.k = p.k;
-                            if(p.d < mins.d) mins.d = p.d; if(p.d > maxs.d) maxs.d = p.d;
-                            if(p.c < mins.c) mins.c = p.c; if(p.c > maxs.c) maxs.c = p.c;
-                            if(p.e < mins.e) mins.e = p.e; if(p.e > maxs.e) maxs.e = p.e;
-                            if(p.m < mins.m) mins.m = p.m; if(p.m > maxs.m) maxs.m = p.m;
-                        });
-
-                        sPlayers.forEach(p => {
-                            let score = (normalize(p.k, mins.k, maxs.k) * 20) + 
-                                        (normalize(p.d, mins.d, maxs.d) * 20) + 
-                                        (normalize(p.c, mins.c, maxs.c) * 20) + 
-                                        (normalize(p.e, mins.e, maxs.e) * 20) + 
-                                        ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
-                            p.score = score;
-                            if(!historicoNotasMap[p.nome]) historicoNotasMap[p.nome] = [];
-                            historicoNotasMap[p.nome].push(score);
-                        });
-
-                        sPlayers.sort((a,b) => b.score - a.score);
-                        
-                        sPlayers.slice(0, 5).forEach(p => {
-                            if(contagemNodesPorPlayer[p.nome] >= minNodesReqHist) {
-                                consistenciaMap[p.nome] = (consistenciaMap[p.nome] || 0) + 1;
-                            }
-                        });
-                    });
-
-                    let listaConsistencia = Object.keys(consistenciaMap).map(n => ({
-                        nome: n, val: consistenciaMap[n], visual: consistenciaMap[n] + " Troféus"
-                    })).sort((a,b) => b.val - a.val);
-
-                    let listaEvolucao = [];
-                    Object.keys(historicoNotasMap).forEach(n => {
-                        let notas = historicoNotasMap[n];
-                        
-                        if(contagemNodesPorPlayer[n] >= minNodesReqHist && notas.length >= 2) {
-                            let somaTotal = notas.reduce((acc, val) => acc + val, 0);
-                            let mediaGeral = somaTotal / notas.length;
-                            
-                            let notaAtual = notas[notas.length - 1];
-                            let flutuacao = notaAtual - mediaGeral;
-
-                            if (flutuacao > 0) {
-                                listaEvolucao.push({
-                                    nome: n, 
-                                    val: flutuacao, 
-                                    visual: "+" + flutuacao.toFixed(1) + " pts"
-                                });
-                            }
-                        }
-                    });
-
-                    listaEvolucao.sort((a,b) => b.val - a.val);
-
-                    window.cacheRankings.listaEvolucao = listaEvolucao;
-                    window.cacheRankings.listaConsistencia = listaConsistencia;
-
-                    const divEvolucao = document.getElementById('card-evolucao');
-                    const divConsistencia = document.getElementById('card-consistencia');
-                    
-                    divEvolucao.innerHTML = ""; divConsistencia.innerHTML = ""; 
-                    renderCardHtml(divEvolucao, "📈 EVOLUÇÃO (FLUTUAÇÃO POSITIVA)", listaEvolucao);
-                    renderCardHtml(divConsistencia, "🏅 CONSISTÊNCIA (TOP 5 MVP)", listaConsistencia);
-                    
-                    divEvolucao.innerHTML = divEvolucao.firstChild.innerHTML;
-                    divConsistencia.innerHTML = divConsistencia.firstChild.innerHTML;
+                    window.cacheRankings = { ...window.cacheRankings, kdrTot, kdrMed, medCura, vet };
                 }
             });
         }
 
         function buscarPlayer() {
             const query = document.getElementById('player-search').value.toLowerCase().trim();
-            if (!query) return;
-
-            const { rankAtaque, rankSuporte, players, allColumns, nameCol, colNodes, listaEvolucao, listaConsistencia, listaKdrTotal, listaKdrMedio, listaVeteranos } = window.cacheRankings;
+            const { players, allColumns, nameCol, kdrTot, kdrMed, medCura, vet } = window.cacheRankings;
+            let player = players.find(p => p[nameCol]?.toLowerCase().includes(query));
+            if(!player) { alert("Jogador não encontrado!"); return; }
             
-            let player = players.find(p => p.nome.toLowerCase() === query);
-            if (!player) player = players.find(p => p.nome.toLowerCase().includes(query));
-
             const overlay = document.getElementById('search-result-overlay');
-            const content = document.getElementById('result-card-content');
-
-            if (!player) {
-                content.innerHTML = `<span class="close-result" onclick="fecharBusca()">&times;</span><div class="result-header"><div class="result-name">JOGADOR NÃO ENCONTRADO (OU ABAIXO DA RÉGUA)</div></div>`;
-                overlay.style.display = 'flex';
-                return;
-            }
-
-            const objAtaque = rankAtaque.find(r => r.nome === player.nome);
-            const posAtaque = objAtaque ? rankAtaque.findIndex(r => r.nome === player.nome) + 1 : "N/A";
-            const scoreAtaque = objAtaque ? objAtaque.score : "N/A";
-
-            const objSuporte = rankSuporte.find(r => r.nome === player.nome);
-            const posSuporte = objSuporte ? rankSuporte.findIndex(r => r.nome === player.nome) + 1 : "N/A";
-            const scoreSuporte = objSuporte ? objSuporte.score : "N/A";
-
-            let statsHtml = "";
+            let statsHtml = allColumns.filter(c => c !== nameCol).map(c => `<div class="result-item"><span class="result-label">${c}</span><span class="result-value">${player[c]}</span></div>`).join('');
             
-            // Loop cego pegando TODAS as colunas que vieram do Google Sheets (Dano, Kill, Mortes, etc)
-            const colunasInfo = allColumns.filter(c => c !== nameCol);
+            let kt = kdrTot.find(f => f.nome === player[nameCol])?.visual || "0";
+            let km = kdrMed.find(f => f.nome === player[nameCol])?.visual || "0";
+            let mc = medCura.find(f => f.nome === player[nameCol])?.visual || "0";
             
-            colunasInfo.forEach(stat => {
-                let isDeath = stat.toUpperCase().includes("DEATH") || stat.toUpperCase().includes("MORTE");
-                
-                let fullRank = players.map(p => ({ nome: p.nome, val: parseToNumber(p.row[stat]), visual: p.row[stat] }))
-                    .filter(p => !(stat.toUpperCase().includes("CURA") && p.val < 100000));
-                
-                // Se for atributo de morte, quem morre menos é o Rank 1
-                if (isDeath) {
-                    fullRank.sort((a,b) => a.val - b.val);
-                } else {
-                    fullRank.sort((a,b) => b.val - a.val);
-                }
-                
-                let pos = fullRank.findIndex(f => f.nome === player.nome) + 1;
-                let val = player.row[stat] || "0";
-                
-                statsHtml += `<div class="result-item"><span class="result-label">${stat}</span><div><span class="result-value">${val}</span><span class="result-rank">${pos > 0 ? pos + 'º' : 'N/A'}</span></div></div>`;
-            });
-
-            // ====== ADICIONA AS INFOS MANUAIS ======
-            
-            let objKdrTot = listaKdrTotal.find(f => f.nome === player.nome);
-            let valKdrTot = objKdrTot ? objKdrTot.visual : "0";
-            let posKdrTot = objKdrTot ? listaKdrTotal.findIndex(f => f.nome === player.nome) + 1 : "N/A";
-            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">☠️ KDR TOTAL</span><div><span class="result-value" style="color:#ffd700;">${valKdrTot}</span><span class="result-rank">${posKdrTot !== "N/A" ? posKdrTot + 'º' : 'N/A'}</span></div></div>`;
-
-            let objKdrMed = listaKdrMedio.find(f => f.nome === player.nome);
-            let valKdrMed = objKdrMed ? objKdrMed.visual : "0";
-            let posKdrMed = objKdrMed ? listaKdrMedio.findIndex(f => f.nome === player.nome) + 1 : "N/A";
-            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">⚖️ KDR MÉDIO</span><div><span class="result-value" style="color:#ffd700;">${valKdrMed}</span><span class="result-rank">${posKdrMed !== "N/A" ? posKdrMed + 'º' : 'N/A'}</span></div></div>`;
-
-            let objEv = listaEvolucao.find(f => f.nome === player.nome);
-            let valEv = objEv ? objEv.visual : "0 pts (Não Superou a Média)";
-            let posEv = objEv ? listaEvolucao.findIndex(f => f.nome === player.nome) + 1 : "N/A";
-            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">📈 EVOLUÇÃO</span><div><span class="result-value" style="color:#ffd700; font-size: 1.6vh;">${valEv}</span><span class="result-rank">${posEv !== "N/A" ? posEv + 'º' : 'N/A'}</span></div></div>`;
-
-            let objCon = listaConsistencia.find(f => f.nome === player.nome);
-            let valCon = objCon ? objCon.visual : "0 Troféus";
-            let posCon = objCon ? listaConsistencia.findIndex(f => f.nome === player.nome) + 1 : "N/A";
-            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">🏅 CONSISTÊNCIA</span><div><span class="result-value" style="color:#ffd700;">${valCon}</span><span class="result-rank">${posCon !== "N/A" ? posCon + 'º' : 'N/A'}</span></div></div>`;
-
-            content.innerHTML = `
-                <span class="close-result" onclick="fecharBusca()">&times;</span>
-                <div class="result-header">
-                    <div class="result-name">${player.nome}</div>
-                    <div style="color: #ffd700; font-weight: bold; margin-top: 10px;">BOLETIM GERAL DE DESEMPENHO</div>
-                </div>
-                <div class="result-grid">
-                    <div class="result-item" style="background: rgba(230, 57, 70, 0.2);"><span class="result-label">MVP ATAQUE</span><div><span class="result-value">${scoreAtaque} pts</span><span class="result-rank">${posAtaque !== "N/A" ? posAtaque + 'º' : 'N/A'}</span></div></div>
-                    <div class="result-item" style="background: rgba(0, 245, 212, 0.2);"><span class="result-label">MVP SUPORTE</span><div><span class="result-value">${scoreSuporte} ${scoreSuporte !== 'N/A' ? 'pts' : ''}</span><span class="result-rank">${posSuporte !== "N/A" ? posSuporte + 'º' : 'N/A'}</span></div></div>
-                    ${statsHtml}
-                </div>
-            `;
+            overlay.innerHTML = `
+                <div class="result-card"><span class="close-result" onclick="fecharBusca()">&times;</span>
+                <div class="result-header"><div class="result-name">${player[nameCol]}</div></div>
+                <div class="result-grid">${statsHtml}
+                <div class="result-item"><span class="result-label">KDR TOTAL</span><span class="result-value">${kt}</span></div>
+                <div class="result-item"><span class="result-label">KDR MÉDIO</span><span class="result-value">${km}</span></div>
+                <div class="result-item"><span class="result-label">CURA MÉDIA</span><span class="result-value">${mc}</span></div>
+                </div></div>`;
             overlay.style.display = 'flex';
         }
-
-        function fecharBusca() {
-            document.getElementById('search-result-overlay').style.display = 'none';
-        }
-
-        document.getElementById('player-search').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') buscarPlayer();
-        });
+        function fecharBusca() { document.getElementById('search-result-overlay').style.display = 'none'; }
     </script>
 </body>
 </html>
