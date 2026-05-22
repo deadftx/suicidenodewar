@@ -1,571 +1,571 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nodewar Tops - Sistema de Busca, MVP e Histórico</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background-color: #0f0f13; color: #ffffff; min-height: 100vh; width: 100vw; overflow-x: hidden; display: flex; flex-direction: column; }
-        header { text-align: center; height: 8vh; min-height: 60px; display: flex; align-items: center; justify-content: center; background: linear-gradient(90deg, #1f1c2c 0%, #928dab 100%); box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase; }
-        header h1 { font-size: 2.8vh; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
-        
-        /* ====== SEÇÃO DE HOMENAGENS ====== */
-        .homenagem-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vh; height: 11vh; width: 100vw; padding: 0 4vh; margin-top: 2vh; }
-        .homenagem-box { background: rgba(45, 45, 60, 0.4); border: 1px solid #457b9d; border-radius: 8px; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; padding: 1vh; }
-        .homenagem-titulo { font-size: 1.5vh; color: #457b9d; font-weight: bold; text-transform: uppercase; z-index: 2; position: relative; }
-        .homenagem-nomes { font-size: 1.8vh; color: #fff; font-weight: 800; letter-spacing: 1px; text-shadow: 0 0 10px rgba(69, 123, 157, 0.5); z-index: 2; position: relative; margin-top: 0.5vh; }
-        .video-homenagem { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: 1; opacity: 0.25; object-fit: cover; pointer-events: none; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nodewar Tops - Sistema de Busca, MVP e Histórico</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: #0f0f13; color: #ffffff; min-height: 100vh; width: 100vw; overflow-x: hidden; display: flex; flex-direction: column; }
+        header { text-align: center; height: 8vh; min-height: 60px; display: flex; align-items: center; justify-content: center; background: linear-gradient(90deg, #1f1c2c 0%, #928dab 100%); box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase; }
+        header h1 { font-size: 2.8vh; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
+        
+        /* ====== SEÇÃO DE HOMENAGENS ====== */
+        .homenagem-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vh; height: 11vh; width: 100vw; padding: 0 4vh; margin-top: 2vh; }
+        .homenagem-box { background: rgba(45, 45, 60, 0.4); border: 1px solid #457b9d; border-radius: 8px; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; padding: 1vh; }
+        .homenagem-titulo { font-size: 1.5vh; color: #457b9d; font-weight: bold; text-transform: uppercase; z-index: 2; position: relative; }
+        .homenagem-nomes { font-size: 1.8vh; color: #fff; font-weight: 800; letter-spacing: 1px; text-shadow: 0 0 10px rgba(69, 123, 157, 0.5); z-index: 2; position: relative; margin-top: 0.5vh; }
+        .video-homenagem { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: 1; opacity: 0.25; object-fit: cover; pointer-events: none; }
 
-        /* ====== BARRA DE PESQUISA E ESTATÍSTICAS ====== */
-        .search-container { width: 100%; display: flex; justify-content: center; padding: 2vh 0 1vh 0; }
-        .search-box { width: 50%; display: flex; gap: 10px; }
-        .search-input { flex: 1; padding: 12px 20px; border-radius: 30px; border: 1px solid #457b9d; background: #1c1c24; color: white; outline: none; font-size: 1.8vh; }
-        .search-input:focus { border-color: #ffd700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
-        .search-btn { padding: 10px 25px; border-radius: 30px; border: none; background: #457b9d; color: white; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .search-btn:hover { background: #ffd700; color: #000; }
-        
-        #estatisticas-guilda { text-align: center; color: #a8a8b3; font-size: 1.6vh; font-weight: bold; margin-bottom: 2vh; text-transform: uppercase; letter-spacing: 1px; }
+        /* ====== BARRA DE PESQUISA E ESTATÍSTICAS ====== */
+        .search-container { width: 100%; display: flex; justify-content: center; padding: 2vh 0 1vh 0; }
+        .search-box { width: 50%; display: flex; gap: 10px; }
+        .search-input { flex: 1; padding: 12px 20px; border-radius: 30px; border: 1px solid #457b9d; background: #1c1c24; color: white; outline: none; font-size: 1.8vh; }
+        .search-input:focus { border-color: #ffd700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
+        .search-btn { padding: 10px 25px; border-radius: 30px; border: none; background: #457b9d; color: white; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .search-btn:hover { background: #ffd700; color: #000; }
+        
+        #estatisticas-guilda { text-align: center; color: #a8a8b3; font-size: 1.6vh; font-weight: bold; margin-bottom: 2vh; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* ====== RESULTADO DA BUSCA ====== */
-        #search-result-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 5vh; }
-        .result-card { background: #1c1c24; border: 2px solid #ffd700; border-radius: 20px; width: 80%; max-width: 900px; padding: 4vh; position: relative; max-height: 90vh; overflow-y: auto; }
-        .close-result { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 4vh; cursor: pointer; }
-        .result-header { text-align: center; margin-bottom: 3vh; border-bottom: 1px solid #333; padding-bottom: 2vh; }
-        .result-name { font-size: 5vh; color: #ffd700; font-weight: 900; text-transform: uppercase; }
-        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .result-item { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .result-label { color: #a8a8b3; font-weight: bold; font-size: 1.8vh; text-transform: uppercase; }
-        .result-value { color: #fff; font-weight: 900; font-size: 2.2vh; }
-        .result-rank { color: #ffd700; background: rgba(255, 215, 0, 0.1); padding: 4px 10px; border-radius: 5px; margin-left: 10px; }
+        /* ====== RESULTADO DA BUSCA ====== */
+        #search-result-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 5vh; }
+        .result-card { background: #1c1c24; border: 2px solid #ffd700; border-radius: 20px; width: 80%; max-width: 900px; padding: 4vh; position: relative; max-height: 90vh; overflow-y: auto; }
+        .close-result { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 4vh; cursor: pointer; }
+        .result-header { text-align: center; margin-bottom: 3vh; border-bottom: 1px solid #333; padding-bottom: 2vh; }
+        .result-name { font-size: 5vh; color: #ffd700; font-weight: 900; text-transform: uppercase; }
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .result-item { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .result-label { color: #a8a8b3; font-weight: bold; font-size: 1.8vh; text-transform: uppercase; }
+        .result-value { color: #fff; font-weight: 900; font-size: 2.2vh; }
+        .result-rank { color: #ffd700; background: rgba(255, 215, 0, 0.1); padding: 4px 10px; border-radius: 5px; margin-left: 10px; }
 
-        /* ====== MVPS E GRID ====== */
-        .mvp-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2vh; width: 100vw; padding: 1vh 4vh; }
-        .mvp-card { border-radius: 12px; padding: 2vh; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; border: 2px solid rgba(255, 255, 255, 0.1); }
-        .mvp-ataque { background: linear-gradient(145deg, #2d0a0a, #4e1414); border-color: #e63946; }
-        .mvp-suporte { background: linear-gradient(145deg, #0a2d2d, #144e4e); border-color: #00f5d4; }
-        .mvp-title { font-size: 2.5vh; text-transform: uppercase; margin-bottom: 1.5vh; font-weight: 900; color: #fff; }
-        .mvp-list { width: 100%; display: flex; flex-direction: column; gap: 0.6vh; z-index: 2; }
-        .mvp-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.4); padding: 0.7vh 1.5vh; border-radius: 6px; font-size: 1.8vh; }
-        .mvp-item.top1 { background: rgba(255, 215, 0, 0.15); border: 1px solid #ffd700; }
-        
-        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vh; padding: 2vh 4vh; margin-bottom: 5vh; }
-        .card { background: #1c1c24; border-radius: 12px; display: flex; flex-direction: column; align-items: center; border: 1px solid #333; position: relative; padding: 1.5vh 2vh; overflow: hidden; min-height: 240px; }
-        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; z-index: 5; }
-        .hover-video { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 100%; min-height: 100%; z-index: 1; opacity: 0; transition: opacity 0.5s ease; object-fit: cover; pointer-events: none; }
-        .card:hover .hover-video { opacity: 0.15; }
-        .card-content-wrapper { position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; height: 100%; }
-        .card-title { font-size: 2vh; color: #a8a8b3; text-transform: uppercase; margin-bottom: 1vh; font-weight: 600; text-align: center; }
-        
-        .top1-container { display: flex; flex-direction: column; align-items: center; background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 0.8vh 2vh; width: 100%; margin-bottom: 1vh; }
-        .top1-player { font-size: 1.8vh; font-weight: bold; color: #ffd700; text-align: center; word-wrap: break-word; max-width: 100%; line-height: 1.4; padding: 0.5vh 0; }
-        .top1-value { font-size: 1.6vh; color: #fff; font-weight: bold; margin-top: 0.5vh; }
-        
-        .ranking-list { width: 100%; display: flex; flex-direction: column; gap: 0.5vh; }
-        .ranking-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5vh 1.2vh; border-radius: 6px; font-size: 1.6vh; }
-        .rank-pos { color: #a8a8b3; font-weight: bold; width: 10%; }
-        .rank-name { color: #e2e2e2; width: 60%; word-wrap: break-word; line-height: 1.3; margin: 0.5vh 0; }
-        .rank-value { color: #00f5d4; font-weight: bold; text-align: right; width: 30%; }
+        /* ====== MVPS E GRID ====== */
+        .mvp-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2vh; width: 100vw; padding: 1vh 4vh; }
+        .mvp-card { border-radius: 12px; padding: 2vh; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; border: 2px solid rgba(255, 255, 255, 0.1); }
+        .mvp-ataque { background: linear-gradient(145deg, #2d0a0a, #4e1414); border-color: #e63946; }
+        .mvp-suporte { background: linear-gradient(145deg, #0a2d2d, #144e4e); border-color: #00f5d4; }
+        .mvp-title { font-size: 2.5vh; text-transform: uppercase; margin-bottom: 1.5vh; font-weight: 900; color: #fff; }
+        .mvp-list { width: 100%; display: flex; flex-direction: column; gap: 0.6vh; z-index: 2; }
+        .mvp-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.4); padding: 0.7vh 1.5vh; border-radius: 6px; font-size: 1.8vh; }
+        .mvp-item.top1 { background: rgba(255, 215, 0, 0.15); border: 1px solid #ffd700; }
+        
+        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vh; padding: 2vh 4vh; margin-bottom: 5vh; }
+        .card { background: #1c1c24; border-radius: 12px; display: flex; flex-direction: column; align-items: center; border: 1px solid #333; position: relative; padding: 1.5vh 2vh; overflow: hidden; min-height: 240px; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; z-index: 5; }
+        .hover-video { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 100%; min-height: 100%; z-index: 1; opacity: 0; transition: opacity 0.5s ease; object-fit: cover; pointer-events: none; }
+        .card:hover .hover-video { opacity: 0.15; }
+        .card-content-wrapper { position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; height: 100%; }
+        .card-title { font-size: 2vh; color: #a8a8b3; text-transform: uppercase; margin-bottom: 1vh; font-weight: 600; text-align: center; }
+        
+        .top1-container { display: flex; flex-direction: column; align-items: center; background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 0.8vh 2vh; width: 100%; margin-bottom: 1vh; }
+        .top1-player { font-size: 1.8vh; font-weight: bold; color: #ffd700; text-align: center; word-wrap: break-word; max-width: 100%; line-height: 1.4; padding: 0.5vh 0; }
+        .top1-value { font-size: 1.6vh; color: #fff; font-weight: bold; margin-top: 0.5vh; }
+        
+        .ranking-list { width: 100%; display: flex; flex-direction: column; gap: 0.5vh; }
+        .ranking-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5vh 1.2vh; border-radius: 6px; font-size: 1.6vh; }
+        .rank-pos { color: #a8a8b3; font-weight: bold; width: 10%; }
+        .rank-name { color: #e2e2e2; width: 60%; word-wrap: break-word; line-height: 1.3; margin: 0.5vh 0; }
+        .rank-value { color: #00f5d4; font-weight: bold; text-align: right; width: 30%; }
 
-        #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4vh; color: #ffd700; z-index: 100; }
-        
-        /* Cores estendidas para suportar mais de 9 Cards */
-        .card:nth-child(1)::before { background: #457b9d; } 
-        .card:nth-child(2)::before { background: #e63946; } 
-        .card:nth-child(3)::before { background: #f4a261; } 
-        .card:nth-child(4)::before { background: #9b5de5; } 
-        .card:nth-child(5)::before { background: #00f5d4; } 
-        .card:nth-child(6)::before { background: #fee440; } 
-        .card:nth-child(7)::before { background: #ff5400; } 
-        .card:nth-child(8)::before { background: #39ff14; } 
-        .card:nth-child(9)::before { background: #ff00ff; }
-        .card:nth-child(10)::before { background: #00bbf9; }
-        .card:nth-child(11)::before { background: #f15bb5; }
-        .card:nth-child(12)::before { background: #8338ec; }
-        .card:nth-child(13)::before { background: #3a86ff; }
-        .card:nth-child(14)::before { background: #fb5607; }
-    </style>
+        #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4vh; color: #ffd700; z-index: 100; }
+        
+        /* Cores estendidas para suportar mais de 9 Cards */
+        .card:nth-child(1)::before { background: #457b9d; } 
+        .card:nth-child(2)::before { background: #e63946; } 
+        .card:nth-child(3)::before { background: #f4a261; } 
+        .card:nth-child(4)::before { background: #9b5de5; } 
+        .card:nth-child(5)::before { background: #00f5d4; } 
+        .card:nth-child(6)::before { background: #fee440; } 
+        .card:nth-child(7)::before { background: #ff5400; } 
+        .card:nth-child(8)::before { background: #39ff14; } 
+        .card:nth-child(9)::before { background: #ff00ff; }
+        .card:nth-child(10)::before { background: #00bbf9; }
+        .card:nth-child(11)::before { background: #f15bb5; }
+        .card:nth-child(12)::before { background: #8338ec; }
+        .card:nth-child(13)::before { background: #3a86ff; }
+        .card:nth-child(14)::before { background: #fb5607; }
+    </style>
 </head>
 <body>
 
-    <header><h1>🏆 HALL DA FAMA - NODEWAR SUICIDE 🏆</h1></header>
+    <header><h1>🏆 HALL DA FAMA - NODEWAR SUICIDE 🏆</h1></header>
 
-    <div class="homenagem-container">
-        <div class="homenagem-box">
-            <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
-            <div class="homenagem-titulo">🚩 Sem sua bandeira a gente não vive 🚩</div>
-            <div class="homenagem-nomes">Apokalypse</div>
-        </div>
-        
-        <div class="homenagem-box">
-            <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
-            <div class="homenagem-titulo">🛡️ Sentinelas da Base 🛡️</div>
-            <div class="homenagem-nomes">ZeXXay • YonaShirai • LinkyShirai</div>
-        </div>
-        
-        <div class="homenagem-box">
-            <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
-            <div class="homenagem-titulo">🎵 Sem nossas Shais a gente não consegue 🎵</div>
-            <div class="homenagem-nomes">Bandagem • Malia • Amisheart • Iloicca</div>
-        </div>
-    </div>
+    <div class="homenagem-container">
+        <div class="homenagem-box">
+            <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
+            <div class="homenagem-titulo">🚩 Sem sua bandeira a gente não vive 🚩</div>
+            <div class="homenagem-nomes">Apokalypse</div>
+        </div>
+        
+        <div class="homenagem-box">
+            <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
+            <div class="homenagem-titulo">🛡️ Sentinelas da Base 🛡️</div>
+            <div class="homenagem-nomes">ZeXXay • YonaShirai • LinkyShirai</div>
+        </div>
+        
+        <div class="homenagem-box">
+            <video class="video-homenagem" src="raiosdefesa.mp4" autoplay loop muted playsinline preload="auto"></video>
+            <div class="homenagem-titulo">🎵 Sem nossas Shais a gente não consegue 🎵</div>
+            <div class="homenagem-nomes">Bandagem • Malia • Amisheart • Iloicca</div>
+        </div>
+    </div>
 
-    <div class="search-container">
-        <div class="search-box">
-            <input type="text" id="player-search" class="search-input" placeholder="Pesquisando requisito de corte...">
-            <button onclick="buscarPlayer()" class="search-btn">BUSCAR</button>
-        </div>
-    </div>
-    <div id="estatisticas-guilda">🚩 CALCULANDO HISTÓRICO... 🚩</div>
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="player-search" class="search-input" placeholder="Pesquisando requisito de corte...">
+            <button onclick="buscarPlayer()" class="search-btn">BUSCAR</button>
+        </div>
+    </div>
+    <div id="estatisticas-guilda">🚩 CALCULANDO HISTÓRICO... 🚩</div>
 
-    <div class="mvp-container">
-        <div class="mvp-card mvp-ataque" id="mvp-ataque-box"></div>
-        <div class="mvp-card mvp-suporte" id="mvp-suporte-box"></div>
-    </div>
+    <div class="mvp-container">
+        <div class="mvp-card mvp-ataque" id="mvp-ataque-box"></div>
+        <div class="mvp-card mvp-suporte" id="mvp-suporte-box"></div>
+    </div>
 
-    <div id="loading">Sincronizando Rankings...</div>
-    <div class="grid-container" id="grid"></div>
+    <div id="loading">Sincronizando Rankings...</div>
+    <div class="grid-container" id="grid"></div>
 
-    <div id="search-result-overlay">
-        <div class="result-card" id="result-card-content">
-            <span class="close-result" onclick="fecharBusca()">&times;</span>
-        </div>
-    </div>
+    <div id="search-result-overlay">
+        <div class="result-card" id="result-card-content">
+            <span class="close-result" onclick="fecharBusca()">&times;</span>
+        </div>
+    </div>
 
-    <script>
-        let globalData = [];
-        let colunasCalculadas = {};
+    <script>
+        let globalData = [];
+        let colunasCalculadas = {};
 
-        // === LINKS DAS PLANILHAS CSV ===
-        const csvUrlGeral = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?gid=1115049823&single=true&output=csv";
-        const csvUrlHistorico = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?gid=343036287&single=true&output=csv";
-        
-        const proxyGeral = "https://corsproxy.io/?" + encodeURIComponent(csvUrlGeral);
-        const proxyHist = "https://corsproxy.io/?" + encodeURIComponent(csvUrlHistorico);
+        // === LINKS DAS PLANILHAS CSV ===
+        const csvUrlGeral = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?gid=1115049823&single=true&output=csv";
+        const csvUrlHistorico = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?gid=343036287&single=true&output=csv";
+        
+        const proxyGeral = "https://corsproxy.io/?" + encodeURIComponent(csvUrlGeral);
+        const proxyHist = "https://corsproxy.io/?" + encodeURIComponent(csvUrlHistorico);
 
-        function parseToNumber(val) {
-            if (!val || String(val).trim() === "") return -Infinity;
-            let str = String(val).trim().replace(/[^\d.,-]/g, '').replace(/\./g, '').replace(',', '.'); 
-            const num = parseFloat(str);
-            return isNaN(num) ? -Infinity : num;
-        }
+        function parseToNumber(val) {
+            if (!val || String(val).trim() === "") return -Infinity;
+            let str = String(val).trim().replace(/[^\d.,-]/g, '').replace(/\./g, '').replace(',', '.'); 
+            const num = parseFloat(str);
+            return isNaN(num) ? -Infinity : num;
+        }
 
-        function normalize(val, min, max) {
-            if (max === min) return 0;
-            return (val - min) / (max - min);
-        }
+        function normalize(val, min, max) {
+            if (max === min) return 0;
+            return (val - min) / (max - min);
+        }
 
-        Papa.parse(proxyGeral, {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function(res) {
-                globalData = res.data;
-                document.getElementById('loading').style.display = 'none';
-                processarRankingsPrincipais();
-            }
-        });
+        Papa.parse(proxyGeral, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(res) {
+                globalData = res.data;
+                document.getElementById('loading').style.display = 'none';
+                processarRankingsPrincipais();
+            }
+        });
 
-        function renderCardHtml(container, title, lista, id = null) {
-            const card = document.createElement('div');
-            card.className = 'card';
-            if(id) card.id = id;
-            let html = `<video class="hover-video" src="gifsuicide.mp4" loop muted playsinline></video><div class="card-content-wrapper"><div class="card-title">${title}</div>`;
-            if (lista && lista.length > 0) {
-                html += `<div class="top1-container"><div class="top1-player">🏆 ${lista[0].nome}</div><div class="top1-value">${lista[0].visual}</div></div><div class="ranking-list">`;
-                lista.slice(1, 5).forEach((p, i) => { html += `<div class="ranking-item"><span class="rank-pos">${i+2}º</span><span class="rank-name">${p.nome}</span><span class="rank-value">${p.visual}</span></div>`; });
-                html += `</div>`;
-            } else {
-                html += `<div class="top1-player" style="font-size:2vh; margin-top:2vh; color:#ffd700;">Vasculhando Histórico...</div>`;
-            }
-            html += `</div>`;
-            card.innerHTML = html;
-            container.appendChild(card);
-            const v = card.querySelector('video');
-            card.onmouseenter = () => v && v.play();
-            card.onmouseleave = () => v && v.pause();
-        }
+        function renderCardHtml(container, title, lista, id = null) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            if(id) card.id = id;
+            let html = `<video class="hover-video" src="gifsuicide.mp4" loop muted playsinline></video><div class="card-content-wrapper"><div class="card-title">${title}</div>`;
+            if (lista && lista.length > 0) {
+                html += `<div class="top1-container"><div class="top1-player">🏆 ${lista[0].nome}</div><div class="top1-value">${lista[0].visual}</div></div><div class="ranking-list">`;
+                lista.slice(1, 5).forEach((p, i) => { html += `<div class="ranking-item"><span class="rank-pos">${i+2}º</span><span class="rank-name">${p.nome}</span><span class="rank-value">${p.visual}</span></div>`; });
+                html += `</div>`;
+            } else {
+                html += `<div class="top1-player" style="font-size:2vh; margin-top:2vh; color:#ffd700;">Vasculhando Histórico...</div>`;
+            }
+            html += `</div>`;
+            card.innerHTML = html;
+            container.appendChild(card);
+            const v = card.querySelector('video');
+            card.onmouseenter = () => v && v.play();
+            card.onmouseleave = () => v && v.pause();
+        }
 
-        function processarRankingsPrincipais() {
-            const data = globalData;
-            const grid = document.getElementById('grid');
-            const boxAtaque = document.getElementById('mvp-ataque-box');
-            const boxSuporte = document.getElementById('mvp-suporte-box');
-            
-            const columns = Object.keys(data[0]);
-            const nameCol = columns[0];
-            
-            const colNodes = columns.find(c => c.toUpperCase().includes("NODE") || c.toUpperCase().includes("PARTICIPA")) || columns[1];
-            const colKills = columns.find(c => c.toUpperCase().includes("KILL") && c.toUpperCase().includes("MÉDIA"));
-            const colDano = columns.find(c => c.toUpperCase().includes("DANO") && c.toUpperCase().includes("MÉDI"));
-            const colCC = columns.find(c => c.toUpperCase().includes("CC"));
-            const colEst = columns.find(c => c.toUpperCase().includes("ESTRUTURA"));
-            const colMortes = columns.find(c => c.toUpperCase().includes("DEATH") && c.toUpperCase().includes("MÉDIA"));
-            const colCura = columns.find(c => c.toUpperCase().includes("CURA") && c.toUpperCase().includes("MÉDIA"));
-            
-            // Colunas Totais para o KDR
-            const colTotalKills = columns.find(c => c.toUpperCase().includes("TOTAL KILL"));
-            const colTotalDeaths = columns.find(c => c.toUpperCase().includes("TOTAL DEATH"));
+        function processarRankingsPrincipais() {
+            const data = globalData;
+            const grid = document.getElementById('grid');
+            const boxAtaque = document.getElementById('mvp-ataque-box');
+            const boxSuporte = document.getElementById('mvp-suporte-box');
+            
+            const columns = Object.keys(data[0]);
+            const nameCol = columns[0];
+            
+            const colNodes = columns.find(c => c.toUpperCase().includes("NODE") || c.toUpperCase().includes("PARTICIPA")) || columns[1];
+            const colKills = columns.find(c => c.toUpperCase().includes("KILL") && c.toUpperCase().includes("MÉDIA"));
+            const colDano = columns.find(c => c.toUpperCase().includes("DANO") && c.toUpperCase().includes("MÉDI"));
+            const colCC = columns.find(c => c.toUpperCase().includes("CC"));
+            const colEst = columns.find(c => c.toUpperCase().includes("ESTRUTURA"));
+            const colMortes = columns.find(c => c.toUpperCase().includes("DEATH") && c.toUpperCase().includes("MÉDIA"));
+            const colCura = columns.find(c => c.toUpperCase().includes("CURA") && c.toUpperCase().includes("MÉDIA"));
+            
+            // Colunas Totais para o KDR
+            const colTotalKills = columns.find(c => c.toUpperCase().includes("TOTAL KILL"));
+            const colTotalDeaths = columns.find(c => c.toUpperCase().includes("TOTAL DEATH"));
 
-            colunasCalculadas = { nameCol, colNodes, colKills, colDano, colCC, colEst, colMortes, colCura, colTotalKills, colTotalDeaths };
+            colunasCalculadas = { nameCol, colNodes, colKills, colDano, colCC, colEst, colMortes, colCura, colTotalKills, colTotalDeaths };
 
-            let maxNodesGeral = 0;
-            let presencasMap = {}; 
+            let maxNodesGeral = 0;
+            let presencasMap = {}; 
 
-            data.forEach(row => {
-                let n = parseInt(row[colNodes], 10);
-                let playerName = row[nameCol] ? String(row[nameCol]).trim() : null;
+            data.forEach(row => {
+                let n = parseInt(row[colNodes], 10);
+                let playerName = row[nameCol] ? String(row[nameCol]).trim() : null;
 
-                if (!isNaN(n) && n > 0 && n < 200) {
-                    if (n > maxNodesGeral) maxNodesGeral = n;
-                    
-                    if (playerName) {
-                        if (!presencasMap[n]) presencasMap[n] = [];
-                        presencasMap[n].push(playerName);
-                    }
-                }
-            });
-            
-            let minNodesReqGeral = Math.max(2, Math.floor(maxNodesGeral * 0.25));
-            document.getElementById('player-search').placeholder = `Pesquisar (Corte: min. ${minNodesReqGeral} de ${maxNodesGeral} guerras)...`;
+                if (!isNaN(n) && n > 0 && n < 200) {
+                    if (n > maxNodesGeral) maxNodesGeral = n;
+                    
+                    if (playerName) {
+                        if (!presencasMap[n]) presencasMap[n] = [];
+                        presencasMap[n].push(playerName);
+                    }
+                }
+            });
+            
+            let minNodesReqGeral = Math.max(2, Math.floor(maxNodesGeral * 0.25));
+            document.getElementById('player-search').placeholder = `Pesquisar (Corte: min. ${minNodesReqGeral} de ${maxNodesGeral} guerras)...`;
 
-            let players = [];
-            data.forEach(row => {
-                const nodes = parseToNumber(row[colNodes]);
-                let playerName = row[nameCol] ? String(row[nameCol]).trim() : null;
+            let players = [];
+            data.forEach(row => {
+                const nodes = parseToNumber(row[colNodes]);
+                let playerName = row[nameCol] ? String(row[nameCol]).trim() : null;
 
-                if (playerName && nodes >= minNodesReqGeral) {
-                    players.push({
-                        nome: playerName,
-                        k: parseToNumber(row[colKills]) === -Infinity ? 0 : parseToNumber(row[colKills]),
-                        d: parseToNumber(row[colDano]) === -Infinity ? 0 : parseToNumber(row[colDano]),
-                        c: parseToNumber(row[colCC]) === -Infinity ? 0 : parseToNumber(row[colCC]),
-                        e: parseToNumber(row[colEst]) === -Infinity ? 0 : parseToNumber(row[colEst]),
-                        m: parseToNumber(row[colMortes]) === -Infinity ? 0 : parseToNumber(row[colMortes]),
-                        cura: parseToNumber(row[colCura]) === -Infinity ? 0 : parseToNumber(row[colCura]),
-                        row: row
-                    });
-                }
-            });
+                if (playerName && nodes >= minNodesReqGeral) {
+                    players.push({
+                        nome: playerName,
+                        k: parseToNumber(row[colKills]) === -Infinity ? 0 : parseToNumber(row[colKills]),
+                        d: parseToNumber(row[colDano]) === -Infinity ? 0 : parseToNumber(row[colDano]),
+                        c: parseToNumber(row[colCC]) === -Infinity ? 0 : parseToNumber(row[colCC]),
+                        e: parseToNumber(row[colEst]) === -Infinity ? 0 : parseToNumber(row[colEst]),
+                        m: parseToNumber(row[colMortes]) === -Infinity ? 0 : parseToNumber(row[colMortes]),
+                        cura: parseToNumber(row[colCura]) === -Infinity ? 0 : parseToNumber(row[colCura]),
+                        row: row
+                    });
+                }
+            });
 
-            let mins = {k: Infinity, d: Infinity, c: Infinity, e: Infinity, m: Infinity, cura: Infinity};
-            let maxs = {k: -Infinity, d: -Infinity, c: -Infinity, e: -Infinity, m: -Infinity, cura: -Infinity};
-            players.forEach(p => {
-                if(p.k < mins.k) mins.k = p.k; if(p.k > maxs.k) maxs.k = p.k;
-                if(p.d < mins.d) mins.d = p.d; if(p.d > maxs.d) maxs.d = p.d;
-                if(p.c < mins.c) mins.c = p.c; if(p.c > maxs.c) maxs.c = p.c;
-                if(p.e < mins.e) mins.e = p.e; if(p.e > maxs.e) maxs.e = p.e;
-                if(p.m < mins.m) mins.m = p.m; if(p.m > maxs.m) maxs.m = p.m;
-                if(p.cura < mins.cura) mins.cura = p.cura; if(p.cura > maxs.cura) maxs.cura = p.cura;
-            });
+            let mins = {k: Infinity, d: Infinity, c: Infinity, e: Infinity, m: Infinity, cura: Infinity};
+            let maxs = {k: -Infinity, d: -Infinity, c: -Infinity, e: -Infinity, m: -Infinity, cura: -Infinity};
+            players.forEach(p => {
+                if(p.k < mins.k) mins.k = p.k; if(p.k > maxs.k) maxs.k = p.k;
+                if(p.d < mins.d) mins.d = p.d; if(p.d > maxs.d) maxs.d = p.d;
+                if(p.c < mins.c) mins.c = p.c; if(p.c > maxs.c) maxs.c = p.c;
+                if(p.e < mins.e) mins.e = p.e; if(p.e > maxs.e) maxs.e = p.e;
+                if(p.m < mins.m) mins.m = p.m; if(p.m > maxs.m) maxs.m = p.m;
+                if(p.cura < mins.cura) mins.cura = p.cura; if(p.cura > maxs.cura) maxs.cura = p.cura;
+            });
 
-            // MVP
-            let rankAtaque = players.map(p => {
-                let s = (normalize(p.k, mins.k, maxs.k) * 20) + (normalize(p.d, mins.d, maxs.d) * 20) + (normalize(p.c, mins.c, maxs.c) * 20) + (normalize(p.e, mins.e, maxs.e) * 20) + ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
-                return { nome: p.nome, score: parseFloat(s.toFixed(1)) };
-            }).sort((a,b) => b.score - a.score);
+            // MVP
+            let rankAtaque = players.map(p => {
+                let s = (normalize(p.k, mins.k, maxs.k) * 20) + (normalize(p.d, mins.d, maxs.d) * 20) + (normalize(p.c, mins.c, maxs.c) * 20) + (normalize(p.e, mins.e, maxs.e) * 20) + ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
+                return { nome: p.nome, score: parseFloat(s.toFixed(1)) };
+            }).sort((a,b) => b.score - a.score);
 
-            let rankSuporte = players.filter(p => p.cura >= 100000).map(p => {
-                let s = (normalize(p.cura, mins.cura, maxs.cura) * 50) + ((1 - normalize(p.m, mins.m, maxs.m)) * 50);
-                return { nome: p.nome, score: parseFloat(s.toFixed(1)) };
-            }).sort((a,b) => b.score - a.score);
+            let rankSuporte = players.filter(p => p.cura >= 100000).map(p => {
+                let s = (normalize(p.cura, mins.cura, maxs.cura) * 50) + ((1 - normalize(p.m, mins.m, maxs.m)) * 50);
+                return { nome: p.nome, score: parseFloat(s.toFixed(1)) };
+            }).sort((a,b) => b.score - a.score);
 
-            boxAtaque.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">⚔️ MVP ATAQUE ⚔️</div><div class="mvp-list">` + rankAtaque.slice(0, 10).map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i+1}º</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') + `</div>`;
-            boxSuporte.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">🚑 MVP SUPORTE 🚑</div><div class="mvp-list">` + (rankSuporte.length > 0 ? rankSuporte.slice(0, 10).map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i+1}º</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') : '<div style="color:#aaa; text-align:center; padding: 2vh;">Dados insuficientes</div>') + `</div>`;
+            boxAtaque.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">⚔️ MVP ATAQUE ⚔️</div><div class="mvp-list">` + rankAtaque.slice(0, 10).map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i+1}º</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') + `</div>`;
+            boxSuporte.innerHTML = `<video class="hover-video" src="gifsuicide.mp4" autoplay loop muted playsinline style="opacity: 0.1;"></video><div class="mvp-title">🚑 MVP SUPORTE 🚑</div><div class="mvp-list">` + (rankSuporte.length > 0 ? rankSuporte.slice(0, 10).map((p, i) => `<div class="mvp-item ${i===0?'top1':''}"><span class="rank-pos">${i+1}º</span><span class="rank-name">${p.nome}</span><span class="rank-score">${p.score} pts</span></div>`).join('') : '<div style="color:#aaa; text-align:center; padding: 2vh;">Dados insuficientes</div>') + `</div>`;
 
-            // ======= OS CARDS ORIGINAIS ======
-            const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
-            const statsCols = columns.filter(col => {
-                if (col === nameCol) return false;
-                let ignore = false;
-                colunasIgnoradas.forEach(i => { if (col.toUpperCase().includes(i)) ignore = true; });
-                return !ignore;
-            });
+            // ======= OS CARDS ORIGINAIS ======
+            const colunasIgnoradas = ["NUMERO DE NODES", "MÉDIA DEATHS POR NODE", "TOTAL DEATH"];
+            const statsCols = columns.filter(col => {
+                if (col === nameCol) return false;
+                let ignore = false;
+                colunasIgnoradas.forEach(i => { if (col.toUpperCase().includes(i)) ignore = true; });
+                return !ignore;
+            });
 
-            statsCols.forEach(stat => {
-                let lista = players.map(p => ({ nome: p.nome, val: parseToNumber(p.row[stat]), visual: p.row[stat] }))
-                    .filter(p => !(stat.toUpperCase().includes("CURA") && p.val < 100000))
-                    .sort((a,b) => b.val - a.val);
-                renderCardHtml(grid, stat, lista);
-            });
-            
-            // ====== NOVOS CARDS DE KDR ======
-            let listaKdrTotal = players.map(p => {
-                let tk = parseToNumber(p.row[colTotalKills]);
-                let td = parseToNumber(p.row[colTotalDeaths]);
-                if(tk === -Infinity) tk = 0;
-                if(td === -Infinity || td === 0) td = 1; // Previne divisão por zero
-                let kdr = tk / td;
-                return { nome: p.nome, val: kdr, visual: kdr.toFixed(2) };
-            }).sort((a,b) => b.val - a.val);
+            statsCols.forEach(stat => {
+                let lista = players.map(p => ({ nome: p.nome, val: parseToNumber(p.row[stat]), visual: p.row[stat] }))
+                    .filter(p => !(stat.toUpperCase().includes("CURA") && p.val < 100000))
+                    .sort((a,b) => b.val - a.val);
+                renderCardHtml(grid, stat, lista);
+            });
+            
+            // ====== NOVOS CARDS DE KDR ======
+            let listaKdrTotal = players.map(p => {
+                let tk = parseToNumber(p.row[colTotalKills]);
+                let td = parseToNumber(p.row[colTotalDeaths]);
+                if(tk === -Infinity) tk = 0;
+                if(td === -Infinity || td === 0) td = 1; // Previne divisão por zero
+                let kdr = tk / td;
+                return { nome: p.nome, val: kdr, visual: kdr.toFixed(2) };
+            }).sort((a,b) => b.val - a.val);
 
-            let listaKdrMedio = players.map(p => {
-                let mk = parseToNumber(p.row[colKills]);
-                let md = parseToNumber(p.row[colMortes]);
-                if(mk === -Infinity) mk = 0;
-                if(md === -Infinity || md === 0) md = 1; // Previne divisão por zero
-                let kdr = mk / md;
-                return { nome: p.nome, val: kdr, visual: kdr.toFixed(2) };
-            }).sort((a,b) => b.val - a.val);
+            let listaKdrMedio = players.map(p => {
+                let mk = parseToNumber(p.row[colKills]);
+                let md = parseToNumber(p.row[colMortes]);
+                if(mk === -Infinity) mk = 0;
+                if(md === -Infinity || md === 0) md = 1; // Previne divisão por zero
+                let kdr = mk / md;
+                return { nome: p.nome, val: kdr, visual: kdr.toFixed(2) };
+            }).sort((a,b) => b.val - a.val);
 
-            renderCardHtml(grid, "☠️ KDR TOTAL", listaKdrTotal);
-            renderCardHtml(grid, "⚖️ KDR MÉDIO POR NODE", listaKdrMedio);
+            renderCardHtml(grid, "☠️ KDR TOTAL", listaKdrTotal);
+            renderCardHtml(grid, "⚖️ KDR MÉDIO POR NODE", listaKdrMedio);
 
-            // ====== CARD VETERANOS ======
-            let listaVeteranos = Object.keys(presencasMap).map(numNodes => {
-                return {
-                    nome: presencasMap[numNodes].join(" • "), 
-                    val: parseInt(numNodes, 10),
-                    visual: numNodes + (numNodes == 1 ? " Guerra" : " Guerras")
-                };
-            }).sort((a,b) => b.val - a.val);
-            renderCardHtml(grid, "🛡️ VETERANOS (MAIS PRESENÇAS)", listaVeteranos);
+            // ====== CARD VETERANOS ======
+            let listaVeteranos = Object.keys(presencasMap).map(numNodes => {
+                return {
+                    nome: presencasMap[numNodes].join(" • "), 
+                    val: parseInt(numNodes, 10),
+                    visual: numNodes + (numNodes == 1 ? " Guerra" : " Guerras")
+                };
+            }).sort((a,b) => b.val - a.val);
+            renderCardHtml(grid, "🛡️ VETERANOS (MAIS PRESENÇAS)", listaVeteranos);
 
-            // ====== CARDS DE HISTÓRICO ======
-            renderCardHtml(grid, "📈 EVOLUÇÃO (FLUTUAÇÃO POSITIVA)", [], "card-evolucao");
-            renderCardHtml(grid, "🏅 CONSISTÊNCIA (TOP 5 MVP)", [], "card-consistencia");
+            // ====== CARDS DE HISTÓRICO ======
+            renderCardHtml(grid, "📈 EVOLUÇÃO (FLUTUAÇÃO POSITIVA)", [], "card-evolucao");
+            renderCardHtml(grid, "🏅 CONSISTÊNCIA (TOP 5 MVP)", [], "card-consistencia");
 
-            // Cache atualizado armazenando as listas novas e TODAS as colunas para a lupa
-            window.cacheRankings = { rankAtaque, rankSuporte, players, allColumns: columns, nameCol, colNodes, listaEvolucao: [], listaConsistencia: [], listaKdrTotal, listaKdrMedio, listaVeteranos };
-            
-            processarNovaAbaHistorico();
-        }
+            // Cache atualizado armazenando as listas novas e TODAS as colunas para a lupa
+            window.cacheRankings = { rankAtaque, rankSuporte, players, allColumns: columns, nameCol, colNodes, listaEvolucao: [], listaConsistencia: [], listaKdrTotal, listaKdrMedio, listaVeteranos };
+            
+            processarNovaAbaHistorico();
+        }
 
-        function processarNovaAbaHistorico() {
-            Papa.parse(proxyHist, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(res) {
-                    const hData = res.data;
-                    if(hData.length === 0) return;
+        function processarNovaAbaHistorico() {
+            Papa.parse(proxyHist, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(res) {
+                    const hData = res.data;
+                    if(hData.length === 0) return;
 
-                    const cols = Object.keys(hData[0]);
-                    const nameCol = cols[0]; 
-                    const colData = cols.find(c => c.toUpperCase().includes("DATA") || c.toUpperCase().includes("DIA") || c.toUpperCase().includes("NODE") || c.toUpperCase().includes("GUERRA"));
-                    const colK = cols.find(c => c.toUpperCase().includes("KILL"));
-                    const colD = cols.find(c => c.toUpperCase().includes("DANO") && !c.toUpperCase().includes("ESTRUTURA"));
-                    const colC = cols.find(c => c.toUpperCase().includes("CC"));
-                    const colE = cols.find(c => c.toUpperCase().includes("ESTRUTURA"));
-                    const colM = cols.find(c => c.toUpperCase().includes("DEATH"));
-                    const colCura = cols.find(c => c.toUpperCase().includes("CURA"));
+                    const cols = Object.keys(hData[0]);
+                    const nameCol = cols[0]; 
+                    const colData = cols.find(c => c.toUpperCase().includes("DATA") || c.toUpperCase().includes("DIA") || c.toUpperCase().includes("NODE") || c.toUpperCase().includes("GUERRA"));
+                    const colK = cols.find(c => c.toUpperCase().includes("KILL"));
+                    const colD = cols.find(c => c.toUpperCase().includes("DANO") && !c.toUpperCase().includes("ESTRUTURA"));
+                    const colC = cols.find(c => c.toUpperCase().includes("CC"));
+                    const colE = cols.find(c => c.toUpperCase().includes("ESTRUTURA"));
+                    const colM = cols.find(c => c.toUpperCase().includes("DEATH"));
+                    const colCura = cols.find(c => c.toUpperCase().includes("CURA"));
 
-                    let nodesAgrupados = {};
-                    let ordensNodes = []; 
-                    let contagemNodesPorPlayer = {};
-                    
-                    hData.forEach(row => {
-                        let dataValor = row[colData] ? String(row[colData]).trim() : null;
-                        let playerNome = row[nameCol] ? String(row[nameCol]).trim() : null;
-                        
-                        if (dataValor && dataValor.length > 2 && playerNome) {
-                            if(!nodesAgrupados[dataValor]) {
-                                nodesAgrupados[dataValor] = [];
-                                ordensNodes.push(dataValor);
-                            }
-                            nodesAgrupados[dataValor].push(row);
-                            contagemNodesPorPlayer[playerNome] = (contagemNodesPorPlayer[playerNome] || 0) + 1;
-                        }
-                    });
+                    let nodesAgrupados = {};
+                    let ordensNodes = []; 
+                    let contagemNodesPorPlayer = {};
+                    
+                    hData.forEach(row => {
+                        let dataValor = row[colData] ? String(row[colData]).trim() : null;
+                        let playerNome = row[nameCol] ? String(row[nameCol]).trim() : null;
+                        
+                        if (dataValor && dataValor.length > 2 && playerNome) {
+                            if(!nodesAgrupados[dataValor]) {
+                                nodesAgrupados[dataValor] = [];
+                                ordensNodes.push(dataValor);
+                            }
+                            nodesAgrupados[dataValor].push(row);
+                            contagemNodesPorPlayer[playerNome] = (contagemNodesPorPlayer[playerNome] || 0) + 1;
+                        }
+                    });
 
-                    let totalDeGuerras = ordensNodes.length;
-                    
-                    // DATA FIXADA MANUALMENTE CONFORME PEDIDO
-                    document.getElementById('estatisticas-guilda').innerHTML = `🚩 ${totalDeGuerras} GUERRAS REGISTRADAS (DESDE 03/05) 🚩`;
+                    let totalDeGuerras = ordensNodes.length;
+                    
+                    // DATA FIXADA MANUALMENTE CONFORME PEDIDO
+                    document.getElementById('estatisticas-guilda').innerHTML = `🚩 ${totalDeGuerras} GUERRAS REGISTRADAS (DESDE 03/05) 🚩`;
 
-                    let minNodesReqHist = Math.max(2, Math.floor(totalDeGuerras * 0.25));
+                    let minNodesReqHist = Math.max(2, Math.floor(totalDeGuerras * 0.25));
 
-                    let consistenciaMap = {};
-                    let historicoNotasMap = {}; 
+                    let consistenciaMap = {};
+                    let historicoNotasMap = {}; 
 
-                    ordensNodes.forEach(dataKey => {
-                        let sData = nodesAgrupados[dataKey];
-                        let sPlayers = [];
+                    ordensNodes.forEach(dataKey => {
+                        let sData = nodesAgrupados[dataKey];
+                        let sPlayers = [];
 
-                        sData.forEach(r => {
-                            let pNome = String(r[nameCol]).trim();
-                            let curaVal = colCura ? parseToNumber(r[colCura]) : 0;
-                            
-                            if(curaVal < 100000) {
-                                sPlayers.push({
-                                    nome: pNome,
-                                    k: parseToNumber(r[colK]),
-                                    d: parseToNumber(r[colD]),
-                                    c: colC ? parseToNumber(r[colC]) : 0,
-                                    e: colE ? parseToNumber(r[colE]) : 0,
-                                    m: colM ? parseToNumber(r[colM]) : 0
-                                });
-                            }
-                        });
+                        sData.forEach(r => {
+                            let pNome = String(r[nameCol]).trim();
+                            let curaVal = colCura ? parseToNumber(r[colCura]) : 0;
+                            
+                            if(curaVal < 100000) {
+                                sPlayers.push({
+                                    nome: pNome,
+                                    k: parseToNumber(r[colK]),
+                                    d: parseToNumber(r[colD]),
+                                    c: colC ? parseToNumber(r[colC]) : 0,
+                                    e: colE ? parseToNumber(r[colE]) : 0,
+                                    m: colM ? parseToNumber(r[colM]) : 0
+                                });
+                            }
+                        });
 
-                        let mins = {k: Infinity, d: Infinity, c: Infinity, e: Infinity, m: Infinity};
-                        let maxs = {k: -Infinity, d: -Infinity, c: -Infinity, e: -Infinity, m: -Infinity};
-                        sPlayers.forEach(p => {
-                            if(p.k < mins.k) mins.k = p.k; if(p.k > maxs.k) maxs.k = p.k;
-                            if(p.d < mins.d) mins.d = p.d; if(p.d > maxs.d) maxs.d = p.d;
-                            if(p.c < mins.c) mins.c = p.c; if(p.c > maxs.c) maxs.c = p.c;
-                            if(p.e < mins.e) mins.e = p.e; if(p.e > maxs.e) maxs.e = p.e;
-                            if(p.m < mins.m) mins.m = p.m; if(p.m > maxs.m) maxs.m = p.m;
-                        });
+                        let mins = {k: Infinity, d: Infinity, c: Infinity, e: Infinity, m: Infinity};
+                        let maxs = {k: -Infinity, d: -Infinity, c: -Infinity, e: -Infinity, m: -Infinity};
+                        sPlayers.forEach(p => {
+                            if(p.k < mins.k) mins.k = p.k; if(p.k > maxs.k) maxs.k = p.k;
+                            if(p.d < mins.d) mins.d = p.d; if(p.d > maxs.d) maxs.d = p.d;
+                            if(p.c < mins.c) mins.c = p.c; if(p.c > maxs.c) maxs.c = p.c;
+                            if(p.e < mins.e) mins.e = p.e; if(p.e > maxs.e) maxs.e = p.e;
+                            if(p.m < mins.m) mins.m = p.m; if(p.m > maxs.m) maxs.m = p.m;
+                        });
 
-                        sPlayers.forEach(p => {
-                            let score = (normalize(p.k, mins.k, maxs.k) * 20) + 
-                                        (normalize(p.d, mins.d, maxs.d) * 20) + 
-                                        (normalize(p.c, mins.c, maxs.c) * 20) + 
-                                        (normalize(p.e, mins.e, maxs.e) * 20) + 
-                                        ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
-                            p.score = score;
-                            if(!historicoNotasMap[p.nome]) historicoNotasMap[p.nome] = [];
-                            historicoNotasMap[p.nome].push(score);
-                        });
+                        sPlayers.forEach(p => {
+                            let score = (normalize(p.k, mins.k, maxs.k) * 20) + 
+                                        (normalize(p.d, mins.d, maxs.d) * 20) + 
+                                        (normalize(p.c, mins.c, maxs.c) * 20) + 
+                                        (normalize(p.e, mins.e, maxs.e) * 20) + 
+                                        ((1 - normalize(p.m, mins.m, maxs.m)) * 20);
+                            p.score = score;
+                            if(!historicoNotasMap[p.nome]) historicoNotasMap[p.nome] = [];
+                            historicoNotasMap[p.nome].push(score);
+                        });
 
-                        sPlayers.sort((a,b) => b.score - a.score);
-                        
-                        sPlayers.slice(0, 5).forEach(p => {
-                            if(contagemNodesPorPlayer[p.nome] >= minNodesReqHist) {
-                                consistenciaMap[p.nome] = (consistenciaMap[p.nome] || 0) + 1;
-                            }
-                        });
-                    });
+                        sPlayers.sort((a,b) => b.score - a.score);
+                        
+                        sPlayers.slice(0, 5).forEach(p => {
+                            if(contagemNodesPorPlayer[p.nome] >= minNodesReqHist) {
+                                consistenciaMap[p.nome] = (consistenciaMap[p.nome] || 0) + 1;
+                            }
+                        });
+                    });
 
-                    let listaConsistencia = Object.keys(consistenciaMap).map(n => ({
-                        nome: n, val: consistenciaMap[n], visual: consistenciaMap[n] + " Troféus"
-                    })).sort((a,b) => b.val - a.val);
+                    let listaConsistencia = Object.keys(consistenciaMap).map(n => ({
+                        nome: n, val: consistenciaMap[n], visual: consistenciaMap[n] + " Troféus"
+                    })).sort((a,b) => b.val - a.val);
 
-                    let listaEvolucao = [];
-                    Object.keys(historicoNotasMap).forEach(n => {
-                        let notas = historicoNotasMap[n];
-                        
-                        if(contagemNodesPorPlayer[n] >= minNodesReqHist && notas.length >= 2) {
-                            let somaTotal = notas.reduce((acc, val) => acc + val, 0);
-                            let mediaGeral = somaTotal / notas.length;
-                            
-                            let notaAtual = notas[notas.length - 1];
-                            let flutuacao = notaAtual - mediaGeral;
+                    let listaEvolucao = [];
+                    Object.keys(historicoNotasMap).forEach(n => {
+                        let notas = historicoNotasMap[n];
+                        
+                        if(contagemNodesPorPlayer[n] >= minNodesReqHist && notas.length >= 2) {
+                            let somaTotal = notas.reduce((acc, val) => acc + val, 0);
+                            let mediaGeral = somaTotal / notas.length;
+                            
+                            let notaAtual = notas[notas.length - 1];
+                            let flutuacao = notaAtual - mediaGeral;
 
-                            if (flutuacao > 0) {
-                                listaEvolucao.push({
-                                    nome: n, 
-                                    val: flutuacao, 
-                                    visual: "+" + flutuacao.toFixed(1) + " pts"
-                                });
-                            }
-                        }
-                    });
+                            if (flutuacao > 0) {
+                                listaEvolucao.push({
+                                    nome: n, 
+                                    val: flutuacao, 
+                                    visual: "+" + flutuacao.toFixed(1) + " pts"
+                                });
+                            }
+                        }
+                    });
 
-                    listaEvolucao.sort((a,b) => b.val - a.val);
+                    listaEvolucao.sort((a,b) => b.val - a.val);
 
-                    window.cacheRankings.listaEvolucao = listaEvolucao;
-                    window.cacheRankings.listaConsistencia = listaConsistencia;
+                    window.cacheRankings.listaEvolucao = listaEvolucao;
+                    window.cacheRankings.listaConsistencia = listaConsistencia;
 
-                    const divEvolucao = document.getElementById('card-evolucao');
-                    const divConsistencia = document.getElementById('card-consistencia');
-                    
-                    divEvolucao.innerHTML = ""; divConsistencia.innerHTML = ""; 
-                    renderCardHtml(divEvolucao, "📈 EVOLUÇÃO (FLUTUAÇÃO POSITIVA)", listaEvolucao);
-                    renderCardHtml(divConsistencia, "🏅 CONSISTÊNCIA (TOP 5 MVP)", listaConsistencia);
-                    
-                    divEvolucao.innerHTML = divEvolucao.firstChild.innerHTML;
-                    divConsistencia.innerHTML = divConsistencia.firstChild.innerHTML;
-                }
-            });
-        }
+                    const divEvolucao = document.getElementById('card-evolucao');
+                    const divConsistencia = document.getElementById('card-consistencia');
+                    
+                    divEvolucao.innerHTML = ""; divConsistencia.innerHTML = ""; 
+                    renderCardHtml(divEvolucao, "📈 EVOLUÇÃO (FLUTUAÇÃO POSITIVA)", listaEvolucao);
+                    renderCardHtml(divConsistencia, "🏅 CONSISTÊNCIA (TOP 5 MVP)", listaConsistencia);
+                    
+                    divEvolucao.innerHTML = divEvolucao.firstChild.innerHTML;
+                    divConsistencia.innerHTML = divConsistencia.firstChild.innerHTML;
+                }
+            });
+        }
 
-        function buscarPlayer() {
-            const query = document.getElementById('player-search').value.toLowerCase().trim();
-            if (!query) return;
+        function buscarPlayer() {
+            const query = document.getElementById('player-search').value.toLowerCase().trim();
+            if (!query) return;
 
-            const { rankAtaque, rankSuporte, players, allColumns, nameCol, colNodes, listaEvolucao, listaConsistencia, listaKdrTotal, listaKdrMedio, listaVeteranos } = window.cacheRankings;
-            
-            let player = players.find(p => p.nome.toLowerCase() === query);
-            if (!player) player = players.find(p => p.nome.toLowerCase().includes(query));
+            const { rankAtaque, rankSuporte, players, allColumns, nameCol, colNodes, listaEvolucao, listaConsistencia, listaKdrTotal, listaKdrMedio, listaVeteranos } = window.cacheRankings;
+            
+            let player = players.find(p => p.nome.toLowerCase() === query);
+            if (!player) player = players.find(p => p.nome.toLowerCase().includes(query));
 
-            const overlay = document.getElementById('search-result-overlay');
-            const content = document.getElementById('result-card-content');
+            const overlay = document.getElementById('search-result-overlay');
+            const content = document.getElementById('result-card-content');
 
-            if (!player) {
-                content.innerHTML = `<span class="close-result" onclick="fecharBusca()">&times;</span><div class="result-header"><div class="result-name">JOGADOR NÃO ENCONTRADO (OU ABAIXO DA RÉGUA)</div></div>`;
-                overlay.style.display = 'flex';
-                return;
-            }
+            if (!player) {
+                content.innerHTML = `<span class="close-result" onclick="fecharBusca()">&times;</span><div class="result-header"><div class="result-name">JOGADOR NÃO ENCONTRADO (OU ABAIXO DA RÉGUA)</div></div>`;
+                overlay.style.display = 'flex';
+                return;
+            }
 
-            const objAtaque = rankAtaque.find(r => r.nome === player.nome);
-            const posAtaque = objAtaque ? rankAtaque.findIndex(r => r.nome === player.nome) + 1 : "N/A";
-            const scoreAtaque = objAtaque ? objAtaque.score : "N/A";
+            const objAtaque = rankAtaque.find(r => r.nome === player.nome);
+            const posAtaque = objAtaque ? rankAtaque.findIndex(r => r.nome === player.nome) + 1 : "N/A";
+            const scoreAtaque = objAtaque ? objAtaque.score : "N/A";
 
-            const objSuporte = rankSuporte.find(r => r.nome === player.nome);
-            const posSuporte = objSuporte ? rankSuporte.findIndex(r => r.nome === player.nome) + 1 : "N/A";
-            const scoreSuporte = objSuporte ? objSuporte.score : "N/A";
+            const objSuporte = rankSuporte.find(r => r.nome === player.nome);
+            const posSuporte = objSuporte ? rankSuporte.findIndex(r => r.nome === player.nome) + 1 : "N/A";
+            const scoreSuporte = objSuporte ? objSuporte.score : "N/A";
 
-            let statsHtml = "";
-            
-            // Loop cego pegando TODAS as colunas que vieram do Google Sheets (Dano, Kill, Mortes, etc)
-            const colunasInfo = allColumns.filter(c => c !== nameCol);
-            
-            colunasInfo.forEach(stat => {
-                let isDeath = stat.toUpperCase().includes("DEATH") || stat.toUpperCase().includes("MORTE");
-                
-                let fullRank = players.map(p => ({ nome: p.nome, val: parseToNumber(p.row[stat]), visual: p.row[stat] }))
-                    .filter(p => !(stat.toUpperCase().includes("CURA") && p.val < 100000));
-                
-                // Se for atributo de morte, quem morre menos é o Rank 1
-                if (isDeath) {
-                    fullRank.sort((a,b) => a.val - b.val);
-                } else {
-                    fullRank.sort((a,b) => b.val - a.val);
-                }
-                
-                let pos = fullRank.findIndex(f => f.nome === player.nome) + 1;
-                let val = player.row[stat] || "0";
-                
-                statsHtml += `<div class="result-item"><span class="result-label">${stat}</span><div><span class="result-value">${val}</span><span class="result-rank">${pos > 0 ? pos + 'º' : 'N/A'}</span></div></div>`;
-            });
+            let statsHtml = "";
+            
+            // Loop cego pegando TODAS as colunas que vieram do Google Sheets (Dano, Kill, Mortes, etc)
+            const colunasInfo = allColumns.filter(c => c !== nameCol);
+            
+            colunasInfo.forEach(stat => {
+                let isDeath = stat.toUpperCase().includes("DEATH") || stat.toUpperCase().includes("MORTE");
+                
+                let fullRank = players.map(p => ({ nome: p.nome, val: parseToNumber(p.row[stat]), visual: p.row[stat] }))
+                    .filter(p => !(stat.toUpperCase().includes("CURA") && p.val < 100000));
+                
+                // Se for atributo de morte, quem morre menos é o Rank 1
+                if (isDeath) {
+                    fullRank.sort((a,b) => a.val - b.val);
+                } else {
+                    fullRank.sort((a,b) => b.val - a.val);
+                }
+                
+                let pos = fullRank.findIndex(f => f.nome === player.nome) + 1;
+                let val = player.row[stat] || "0";
+                
+                statsHtml += `<div class="result-item"><span class="result-label">${stat}</span><div><span class="result-value">${val}</span><span class="result-rank">${pos > 0 ? pos + 'º' : 'N/A'}</span></div></div>`;
+            });
 
-            // ====== ADICIONA AS INFOS MANUAIS ======
-            
-            let objKdrTot = listaKdrTotal.find(f => f.nome === player.nome);
-            let valKdrTot = objKdrTot ? objKdrTot.visual : "0";
-            let posKdrTot = objKdrTot ? listaKdrTotal.findIndex(f => f.nome === player.nome) + 1 : "N/A";
-            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">☠️ KDR TOTAL</span><div><span class="result-value" style="color:#ffd700;">${valKdrTot}</span><span class="result-rank">${posKdrTot !== "N/A" ? posKdrTot + 'º' : 'N/A'}</span></div></div>`;
+            // ====== ADICIONA AS INFOS MANUAIS ======
+            
+            let objKdrTot = listaKdrTotal.find(f => f.nome === player.nome);
+            let valKdrTot = objKdrTot ? objKdrTot.visual : "0";
+            let posKdrTot = objKdrTot ? listaKdrTotal.findIndex(f => f.nome === player.nome) + 1 : "N/A";
+            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">☠️ KDR TOTAL</span><div><span class="result-value" style="color:#ffd700;">${valKdrTot}</span><span class="result-rank">${posKdrTot !== "N/A" ? posKdrTot + 'º' : 'N/A'}</span></div></div>`;
 
-            let objKdrMed = listaKdrMedio.find(f => f.nome === player.nome);
-            let valKdrMed = objKdrMed ? objKdrMed.visual : "0";
-            let posKdrMed = objKdrMed ? listaKdrMedio.findIndex(f => f.nome === player.nome) + 1 : "N/A";
-            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">⚖️ KDR MÉDIO</span><div><span class="result-value" style="color:#ffd700;">${valKdrMed}</span><span class="result-rank">${posKdrMed !== "N/A" ? posKdrMed + 'º' : 'N/A'}</span></div></div>`;
+            let objKdrMed = listaKdrMedio.find(f => f.nome === player.nome);
+            let valKdrMed = objKdrMed ? objKdrMed.visual : "0";
+            let posKdrMed = objKdrMed ? listaKdrMedio.findIndex(f => f.nome === player.nome) + 1 : "N/A";
+            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">⚖️ KDR MÉDIO</span><div><span class="result-value" style="color:#ffd700;">${valKdrMed}</span><span class="result-rank">${posKdrMed !== "N/A" ? posKdrMed + 'º' : 'N/A'}</span></div></div>`;
 
-            let objEv = listaEvolucao.find(f => f.nome === player.nome);
-            let valEv = objEv ? objEv.visual : "0 pts (Não Superou a Média)";
-            let posEv = objEv ? listaEvolucao.findIndex(f => f.nome === player.nome) + 1 : "N/A";
-            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">📈 EVOLUÇÃO</span><div><span class="result-value" style="color:#ffd700; font-size: 1.6vh;">${valEv}</span><span class="result-rank">${posEv !== "N/A" ? posEv + 'º' : 'N/A'}</span></div></div>`;
+            let objEv = listaEvolucao.find(f => f.nome === player.nome);
+            let valEv = objEv ? objEv.visual : "0 pts (Não Superou a Média)";
+            let posEv = objEv ? listaEvolucao.findIndex(f => f.nome === player.nome) + 1 : "N/A";
+            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">📈 EVOLUÇÃO</span><div><span class="result-value" style="color:#ffd700; font-size: 1.6vh;">${valEv}</span><span class="result-rank">${posEv !== "N/A" ? posEv + 'º' : 'N/A'}</span></div></div>`;
 
-            let objCon = listaConsistencia.find(f => f.nome === player.nome);
-            let valCon = objCon ? objCon.visual : "0 Troféus";
-            let posCon = objCon ? listaConsistencia.findIndex(f => f.nome === player.nome) + 1 : "N/A";
-            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">🏅 CONSISTÊNCIA</span><div><span class="result-value" style="color:#ffd700;">${valCon}</span><span class="result-rank">${posCon !== "N/A" ? posCon + 'º' : 'N/A'}</span></div></div>`;
+            let objCon = listaConsistencia.find(f => f.nome === player.nome);
+            let valCon = objCon ? objCon.visual : "0 Troféus";
+            let posCon = objCon ? listaConsistencia.findIndex(f => f.nome === player.nome) + 1 : "N/A";
+            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">🏅 CONSISTÊNCIA</span><div><span class="result-value" style="color:#ffd700;">${valCon}</span><span class="result-rank">${posCon !== "N/A" ? posCon + 'º' : 'N/A'}</span></div></div>`;
 
-            content.innerHTML = `
-                <span class="close-result" onclick="fecharBusca()">&times;</span>
-                <div class="result-header">
-                    <div class="result-name">${player.nome}</div>
-                    <div style="color: #ffd700; font-weight: bold; margin-top: 10px;">BOLETIM GERAL DE DESEMPENHO</div>
-                </div>
-                <div class="result-grid">
-                    <div class="result-item" style="background: rgba(230, 57, 70, 0.2);"><span class="result-label">MVP ATAQUE</span><div><span class="result-value">${scoreAtaque} pts</span><span class="result-rank">${posAtaque !== "N/A" ? posAtaque + 'º' : 'N/A'}</span></div></div>
-                    <div class="result-item" style="background: rgba(0, 245, 212, 0.2);"><span class="result-label">MVP SUPORTE</span><div><span class="result-value">${scoreSuporte} ${scoreSuporte !== 'N/A' ? 'pts' : ''}</span><span class="result-rank">${posSuporte !== "N/A" ? posSuporte + 'º' : 'N/A'}</span></div></div>
-                    ${statsHtml}
-                </div>
-            `;
-            overlay.style.display = 'flex';
-        }
+            content.innerHTML = `
+                <span class="close-result" onclick="fecharBusca()">&times;</span>
+                <div class="result-header">
+                    <div class="result-name">${player.nome}</div>
+                    <div style="color: #ffd700; font-weight: bold; margin-top: 10px;">BOLETIM GERAL DE DESEMPENHO</div>
+                </div>
+                <div class="result-grid">
+                    <div class="result-item" style="background: rgba(230, 57, 70, 0.2);"><span class="result-label">MVP ATAQUE</span><div><span class="result-value">${scoreAtaque} pts</span><span class="result-rank">${posAtaque !== "N/A" ? posAtaque + 'º' : 'N/A'}</span></div></div>
+                    <div class="result-item" style="background: rgba(0, 245, 212, 0.2);"><span class="result-label">MVP SUPORTE</span><div><span class="result-value">${scoreSuporte} ${scoreSuporte !== 'N/A' ? 'pts' : ''}</span><span class="result-rank">${posSuporte !== "N/A" ? posSuporte + 'º' : 'N/A'}</span></div></div>
+                    ${statsHtml}
+                </div>
+            `;
+            overlay.style.display = 'flex';
+        }
 
-        function fecharBusca() {
-            document.getElementById('search-result-overlay').style.display = 'none';
-        }
+        function fecharBusca() {
+            document.getElementById('search-result-overlay').style.display = 'none';
+        }
 
-        document.getElementById('player-search').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') buscarPlayer();
-        });
-    </script>
+        document.getElementById('player-search').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') buscarPlayer();
+        });
+    </script>
 </body>
 </html>
