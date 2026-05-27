@@ -136,13 +136,18 @@
     <script>
         let globalData = [];
         let colunasCalculadas = {};
+        let totalDeGuerrasGlobal = 21; // Valor Padrão para fallback
 
         // === LINKS DAS PLANILHAS CSV ===
         const csvUrlGeral = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?gid=1115049823&single=true&output=csv";
         const csvUrlHistorico = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?gid=343036287&single=true&output=csv";
         
+        // 👉 ATENÇÃO: COLOQUE AQUI O LINK CSV DA SUA ABA "RESULTADO NODES" (Mude apenas a URL abaixo)
+        const csvUrlResultadoNodes = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWXNm1v3X1xMg8t_or4J4m0jQ4i6jh56JwEBtWHplmPnvd7y0shwNT6DKHKIg3B-aSqkBrs_5vej9Q/pub?gid=1314573793&single=true&output=csv";
+        
         const proxyGeral = "https://corsproxy.io/?" + encodeURIComponent(csvUrlGeral);
         const proxyHist = "https://corsproxy.io/?" + encodeURIComponent(csvUrlHistorico);
+        const proxyResultado = "https://corsproxy.io/?" + encodeURIComponent(csvUrlResultadoNodes);
 
         function parseToNumber(val) {
             if (!val || String(val).trim() === "") return -Infinity;
@@ -156,16 +161,42 @@
             return (val - min) / (max - min);
         }
 
-        Papa.parse(proxyGeral, {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function(res) {
-                globalData = res.data;
-                document.getElementById('loading').style.display = 'none';
-                processarRankingsPrincipais();
-            }
-        });
+        function carregarDadosIniciais() {
+            // 1) Busca a quantidade de Nodes na aba RESULTADO NODES
+            Papa.parse(proxyResultado, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(resResultado) {
+                    if (resResultado.data && resResultado.data.length > 0) {
+                        // Conta os registros ignorando o cabeçalho
+                        totalDeGuerrasGlobal = resResultado.data.length;
+                    }
+                    carregarAbaGeral();
+                },
+                error: function() {
+                    // Fallback caso a URL não esteja certa
+                    carregarAbaGeral();
+                }
+            });
+        }
+
+        function carregarAbaGeral() {
+            // 2) Busca a aba GERAL principal
+            Papa.parse(proxyGeral, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(res) {
+                    globalData = res.data;
+                    document.getElementById('loading').style.display = 'none';
+                    processarRankingsPrincipais();
+                }
+            });
+        }
+
+        // Inicia o processo
+        carregarDadosIniciais();
 
         function renderCardHtml(container, title, lista, id = null) {
             const card = document.createElement('div');
@@ -210,7 +241,6 @@
 
             colunasCalculadas = { nameCol, colNodes, colKills, colDano, colCC, colEst, colMortes, colCura, colTotalKills, colTotalDeaths };
 
-            let maxNodesGeral = 0;
             let presencasMap = {}; 
 
             data.forEach(row => {
@@ -218,8 +248,6 @@
                 let playerName = row[nameCol] ? String(row[nameCol]).trim() : null;
 
                 if (!isNaN(n) && n > 0 && n < 200) {
-                    if (n > maxNodesGeral) maxNodesGeral = n;
-                    
                     if (playerName) {
                         if (!presencasMap[n]) presencasMap[n] = [];
                         presencasMap[n].push(playerName);
@@ -227,8 +255,9 @@
                 }
             });
             
-            let minNodesReqGeral = Math.max(2, Math.floor(maxNodesGeral * 0.25));
-            document.getElementById('player-search').placeholder = `Pesquisar (Corte: min. ${minNodesReqGeral} de ${maxNodesGeral} guerras)...`;
+            // Usando a variável contada globalmente da aba RESULTADO NODES
+            let minNodesReqGeral = Math.max(2, Math.floor(totalDeGuerrasGlobal * 0.25));
+            document.getElementById('player-search').placeholder = `Pesquisar (Corte: min. ${minNodesReqGeral} de ${totalDeGuerrasGlobal} guerras)...`;
 
             let players = [];
             data.forEach(row => {
@@ -290,7 +319,7 @@
                 renderCardHtml(grid, stat, lista);
             });
             
-            // ====== NOVOS CARDS DE KDR ======
+            // ====== CARD KDR TOTAL ======
             let listaKdrTotal = players.map(p => {
                 let tk = parseToNumber(p.row[colTotalKills]);
                 let td = parseToNumber(p.row[colTotalDeaths]);
@@ -300,17 +329,7 @@
                 return { nome: p.nome, val: kdr, visual: kdr.toFixed(2) };
             }).sort((a,b) => b.val - a.val);
 
-            let listaKdrMedio = players.map(p => {
-                let mk = parseToNumber(p.row[colKills]);
-                let md = parseToNumber(p.row[colMortes]);
-                if(mk === -Infinity) mk = 0;
-                if(md === -Infinity || md === 0) md = 1; // Previne divisão por zero
-                let kdr = mk / md;
-                return { nome: p.nome, val: kdr, visual: kdr.toFixed(2) };
-            }).sort((a,b) => b.val - a.val);
-
             renderCardHtml(grid, "☠️ KDR TOTAL", listaKdrTotal);
-            renderCardHtml(grid, "⚖️ KDR MÉDIO POR NODE", listaKdrMedio);
 
             // ====== CARD VETERANOS ======
             let listaVeteranos = Object.keys(presencasMap).map(numNodes => {
@@ -327,7 +346,7 @@
             renderCardHtml(grid, "🏅 CONSISTÊNCIA (TOP 5 MVP)", [], "card-consistencia");
 
             // Cache atualizado armazenando as listas novas e TODAS as colunas para a lupa
-            window.cacheRankings = { rankAtaque, rankSuporte, players, allColumns: columns, nameCol, colNodes, listaEvolucao: [], listaConsistencia: [], listaKdrTotal, listaKdrMedio, listaVeteranos };
+            window.cacheRankings = { rankAtaque, rankSuporte, players, allColumns: columns, nameCol, colNodes, listaEvolucao: [], listaConsistencia: [], listaKdrTotal, listaVeteranos };
             
             processarNovaAbaHistorico();
         }
@@ -369,12 +388,10 @@
                         }
                     });
 
-                    let totalDeGuerras = ordensNodes.length;
-                    
-                    // DATA FIXADA MANUALMENTE CONFORME PEDIDO
-                    document.getElementById('estatisticas-guilda').innerHTML = `🚩 ${totalDeGuerras} GUERRAS REGISTRADAS (DESDE 03/05) 🚩`;
+                    // Aplica a contagem geral registrada na aba de resultados
+                    document.getElementById('estatisticas-guilda').innerHTML = `🚩 ${totalDeGuerrasGlobal} GUERRAS REGISTRADAS (DESDE 03/05) 🚩`;
 
-                    let minNodesReqHist = Math.max(2, Math.floor(totalDeGuerras * 0.25));
+                    let minNodesReqHist = Math.max(2, Math.floor(totalDeGuerrasGlobal * 0.25));
 
                     let consistenciaMap = {};
                     let historicoNotasMap = {}; 
@@ -476,7 +493,7 @@
             const query = document.getElementById('player-search').value.toLowerCase().trim();
             if (!query) return;
 
-            const { rankAtaque, rankSuporte, players, allColumns, nameCol, colNodes, listaEvolucao, listaConsistencia, listaKdrTotal, listaKdrMedio, listaVeteranos } = window.cacheRankings;
+            const { rankAtaque, rankSuporte, players, allColumns, nameCol, colNodes, listaEvolucao, listaConsistencia, listaKdrTotal, listaVeteranos } = window.cacheRankings;
             
             let player = players.find(p => p.nome.toLowerCase() === query);
             if (!player) player = players.find(p => p.nome.toLowerCase().includes(query));
@@ -528,11 +545,6 @@
             let valKdrTot = objKdrTot ? objKdrTot.visual : "0";
             let posKdrTot = objKdrTot ? listaKdrTotal.findIndex(f => f.nome === player.nome) + 1 : "N/A";
             statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">☠️ KDR TOTAL</span><div><span class="result-value" style="color:#ffd700;">${valKdrTot}</span><span class="result-rank">${posKdrTot !== "N/A" ? posKdrTot + 'º' : 'N/A'}</span></div></div>`;
-
-            let objKdrMed = listaKdrMedio.find(f => f.nome === player.nome);
-            let valKdrMed = objKdrMed ? objKdrMed.visual : "0";
-            let posKdrMed = objKdrMed ? listaKdrMedio.findIndex(f => f.nome === player.nome) + 1 : "N/A";
-            statsHtml += `<div class="result-item" style="background: rgba(255, 215, 0, 0.1);"><span class="result-label">⚖️ KDR MÉDIO</span><div><span class="result-value" style="color:#ffd700;">${valKdrMed}</span><span class="result-rank">${posKdrMed !== "N/A" ? posKdrMed + 'º' : 'N/A'}</span></div></div>`;
 
             let objEv = listaEvolucao.find(f => f.nome === player.nome);
             let valEv = objEv ? objEv.visual : "0 pts (Não Superou a Média)";
