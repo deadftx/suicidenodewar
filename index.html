@@ -256,7 +256,12 @@
             });
             
             // Usando a variável contada globalmente da aba RESULTADO NODES
-            let minNodesReqGeral = Math.max(2, Math.floor(totalDeGuerrasGlobal * 0.25));
+            let minNodesReqGeral = 1; // Se tiver 1 ou 2 guerras no mês, a régua é só 1 presença.
+            if (totalDeGuerrasGlobal >= 3) {
+                // A partir da 3ª guerra, liga a regra de 25% (exigindo no mínimo 2 presenças)
+                minNodesReqGeral = Math.max(2, Math.floor(totalDeGuerrasGlobal * 0.25));
+            }
+            
             document.getElementById('player-search').placeholder = `Pesquisar (Corte: min. ${minNodesReqGeral} de ${totalDeGuerrasGlobal} guerras)...`;
 
             let players = [];
